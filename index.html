@@ -134,6 +134,28 @@
     letter-spacing: 0.2em; text-transform: uppercase;
     cursor: pointer; transition: all 0.3s;
   }
+
+  .auth-error {
+    background: rgba(201, 117, 96, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    text-align: center;
+    border-radius: 2px;
+    animation: errorShake 0.4s ease;
+  }
+  @keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .auth-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+    letter-spacing: 0.2em;
+  }
   .auth-btn:hover { background: var(--beige-2); letter-spacing: 0.24em; }
 
   .auth-close {
@@ -560,16 +582,17 @@
     <div class="auth-divider"><span>або</span></div>
 
     <div class="auth-form">
-      <div class="auth-input-group">
-        <label>Логін</label>
-        <input type="text" class="auth-input" placeholder="admin" autocomplete="username">
-      </div>
-      <div class="auth-input-group">
-        <label>Пароль</label>
-        <input type="password" class="auth-input" placeholder="••••••••" autocomplete="current-password" value="demo1234">
-      </div>
-      <button class="auth-btn" onclick="passLogin()">Увійти</button>
-    </div>
+  <div class="auth-input-group">
+    <label>Логін</label>
+    <input type="text" class="auth-input" id="loginUsername" placeholder="admin" autocomplete="username">
+  </div>
+  <div class="auth-input-group">
+    <label>Пароль</label>
+    <input type="password" class="auth-input" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <div class="auth-error" id="authError" style="display:none;"></div>
+  <button class="auth-btn" id="loginBtn" onclick="passLogin()">Увійти</button>
+</div>
 
     <div class="auth-close" onclick="closeAuth()">Закрити</div>
   </div>
@@ -1617,9 +1640,68 @@
     }, 1400);
   }
 
-  function passLogin() {
-    enterAdmin();
-  }
+  async function passLogin() {
+    const usernameEl = document.getElementById('loginUsername');
+    const passwordEl = document.getElementById('loginPassword');
+    const errorEl = document.getElementById('authError');
+    const btnEl = document.getElementById('loginBtn');
+
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value;
+
+    // Базова валідація на стороні клієнта
+    if (!username || !password) {
+        showAuthError('Введіть логін та пароль');
+        return;
+    }
+
+    // Сховати попередню помилку, заблокувати кнопку
+    errorEl.style.display = 'none';
+    btnEl.disabled = true;
+    const originalBtnText = btnEl.textContent;
+    btnEl.textContent = 'Перевірка...';
+
+    try {
+        // Запит до API логіну
+        const response = await fetch('/api/admin/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            // Сервер відповів з помилкою
+            showAuthError(data.error || 'Помилка входу');
+            passwordEl.value = ''; // очистити пароль
+            passwordEl.focus();
+            return;
+        }
+
+        // Успіх! Заходимо в адмінку
+        enterAdmin();
+
+    } catch (err) {
+        // Помилка мережі (інтернет пропав, сервер не відповідає тощо)
+        showAuthError('Помилка мережі. Перевірте підключення.');
+        console.error('Login error:', err);
+    } finally {
+        // Розблокувати кнопку в будь-якому випадку
+        btnEl.disabled = false;
+        btnEl.textContent = originalBtnText;
+    }
+}
+
+function showAuthError(message) {
+    const errorEl = document.getElementById('authError');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    // ще раз перезапустити анімацію shake
+    errorEl.style.animation = 'none';
+    setTimeout(() => { errorEl.style.animation = ''; }, 10);
+}
 
   function enterAdmin() {
     closeAuth();
@@ -1635,11 +1717,29 @@
     }, 500);
   }
 
-  function logout() {
+  async function logout() {
+    try {
+        await fetch('/api/admin/logout.php', {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (err) {
+        // Не страшно навіть якщо сервер не відповів —
+        // все одно виходимо локально
+        console.error('Logout error:', err);
+    }
+    
+    // Закрити сесію локально
     document.getElementById('clientWrap').classList.remove('hide');
     document.getElementById('adminWrap').classList.remove('show');
     window.scrollTo({ top: 0 });
-  }
+    
+    // Очистити поля логіну
+    const u = document.getElementById('loginUsername');
+    const p = document.getElementById('loginPassword');
+    if (u) u.value = '';
+    if (p) p.value = '';
+}
 
   function setAdminSection(name, el) {
     document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
@@ -1647,6 +1747,31 @@
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('ad-' + name).classList.add('active');
   }
+
+  // При завантаженні сторінки — перевіряємо чи залогінені
+async function checkSession() {
+    try {
+        const response = await fetch('/api/admin/me.php', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Так, залогінений — відкриваємо адмінку
+            document.getElementById('clientWrap').classList.add('hide');
+            document.getElementById('adminWrap').classList.add('show');
+            console.log('Залогінений як:', data.admin.username);
+        } else {
+            // Не залогінений — нічого не робимо, показуємо клієнтську частину
+            console.log('Не залогінений (це нормально для відвідувачів)');
+        }
+    } catch (err) {
+        // Сервер не відповідає або немає інтернету — показуємо клієнтську частину
+        console.error('Не вдалося перевірити сесію:', err);
+    }
+}
+
+// Викликаємо одразу після завантаження сторінки
 </script>
 
 </body>
