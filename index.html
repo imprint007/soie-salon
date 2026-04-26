@@ -677,6 +677,91 @@
     font-size: 9px; letter-spacing: 0.18em;
     color: var(--ink-dim); text-transform: uppercase;
   }
+
+/* Image uploader widget */
+  .img-uploader {
+    border: 1px dashed var(--line-2);
+    padding: 14px;
+    background: var(--bg-2);
+    transition: border-color 0.3s;
+  }
+  .img-uploader:hover { border-color: var(--beige); }
+  .img-uploader.dragging { border-color: var(--beige); background: rgba(224,201,168,0.05); }
+  
+  .img-up-row {
+    display: flex; gap: 12px; align-items: center;
+  }
+  
+  .img-up-preview {
+    width: 70px; height: 70px;
+    background: var(--bg-3); border: 1px solid var(--line);
+    background-size: cover; background-position: center;
+    flex-shrink: 0; position: relative;
+  }
+  .img-up-preview.empty::after {
+    content: '🖼'; font-size: 24px; opacity: 0.3;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .img-up-controls { flex: 1; min-width: 0; }
+  
+  .img-up-buttons {
+    display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .img-up-btn {
+    background: transparent; border: 1px solid var(--line-2);
+    color: var(--ink); padding: 6px 12px;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; font-family: inherit; transition: all 0.3s;
+  }
+  .img-up-btn:hover { border-color: var(--beige); color: var(--beige); }
+  .img-up-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .img-up-btn:disabled { opacity: 0.5; cursor: wait; }
+  
+  .img-up-url {
+    width: 100%; padding: 7px 10px;
+    background: var(--bg-1); border: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .img-up-url:focus { outline: none; border-color: var(--beige); color: var(--ink); }
+  
+  .img-up-progress {
+    height: 2px; background: var(--bg-3); margin-top: 8px;
+    overflow: hidden; display: none;
+  }
+  .img-up-progress.show { display: block; }
+  .img-up-progress-bar {
+    height: 100%; background: var(--beige);
+    width: 0%; transition: width 0.2s;
+  }
+  
+  .img-up-error {
+    color: var(--danger); font-size: 11px; margin-top: 6px;
+  }
+  
+  /* Компактна версія для рядків опцій */
+  .img-up-compact {
+    border: none; padding: 0; background: transparent;
+  }
+  .img-up-compact .img-up-row {
+    flex-direction: row; gap: 6px;
+  }
+  .img-up-compact .img-up-preview {
+    width: 32px; height: 32px;
+  }
+  .img-up-compact .img-up-preview.empty::after {
+    font-size: 14px;
+  }
+  .img-up-compact .img-up-buttons {
+    margin: 0;
+  }
+  .img-up-compact .img-up-btn {
+    padding: 4px 8px; font-size: 10px;
+  }
+  .img-up-compact .img-up-url { display: none; }
+
 </style>
 </head>
 <body>
@@ -1369,9 +1454,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>URL фото послуги</label>
-                <input type="text" id="svcImage" placeholder="https://...">
-                <div id="svcImagePreview" style="margin-top:10px;"></div>
+                <label>Фото послуги</label>
+                <div id="svcImageUploader"></div>
             </div>
             <div class="form-group">
                 <label class="checkbox-label">
@@ -1592,6 +1676,9 @@
 </div>
 
 <script>
+  // ============================================
+  // КЛИЕНТСКАЯ ЧАСТЬ — состояние брони
+  // ============================================
   let state = {
     length: 1800, lengthTime: 90, lengthName: 'Короткі',
     curl: 0, curlTime: 0,
@@ -1678,6 +1765,7 @@
 
   function buildCalendar() {
     const grid = document.getElementById('calGrid');
+    if (!grid) return;
     const disabled = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
     const days = [];
     days.push({num:30,other:true}); days.push({num:31,other:true});
@@ -1730,7 +1818,9 @@
     el.classList.add('selected');
   }
 
-  // ===== Hidden admin access =====
+  // ============================================
+  // АВТОРИЗАЦИЯ — вход в админку
+  // ============================================
   let tapCount = 0;
   let tapTimer = null;
 
@@ -1773,59 +1863,50 @@
     const username = usernameEl.value.trim();
     const password = passwordEl.value;
 
-    // Базова валідація на стороні клієнта
     if (!username || !password) {
-        showAuthError('Введіть логін та пароль');
-        return;
+      showAuthError('Введіть логін та пароль');
+      return;
     }
 
-    // Сховати попередню помилку, заблокувати кнопку
     errorEl.style.display = 'none';
     btnEl.disabled = true;
     const originalBtnText = btnEl.textContent;
     btnEl.textContent = 'Перевірка...';
 
     try {
-        // Запит до API логіну
-        const response = await fetch('/api/admin/login.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ username, password })
-        });
+      const response = await fetch('/api/admin/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok || !data.success) {
-            // Сервер відповів з помилкою
-            showAuthError(data.error || 'Помилка входу');
-            passwordEl.value = ''; // очистити пароль
-            passwordEl.focus();
-            return;
-        }
+      if (!response.ok || !data.success) {
+        showAuthError(data.error || 'Помилка входу');
+        passwordEl.value = '';
+        passwordEl.focus();
+        return;
+      }
 
-        // Успіх! Заходимо в адмінку
-        enterAdmin();
-
+      enterAdmin();
     } catch (err) {
-        // Помилка мережі (інтернет пропав, сервер не відповідає тощо)
-        showAuthError('Помилка мережі. Перевірте підключення.');
-        console.error('Login error:', err);
+      showAuthError('Помилка мережі. Перевірте підключення.');
+      console.error('Login error:', err);
     } finally {
-        // Розблокувати кнопку в будь-якому випадку
-        btnEl.disabled = false;
-        btnEl.textContent = originalBtnText;
+      btnEl.disabled = false;
+      btnEl.textContent = originalBtnText;
     }
-}
+  }
 
-function showAuthError(message) {
+  function showAuthError(message) {
     const errorEl = document.getElementById('authError');
     errorEl.textContent = message;
     errorEl.style.display = 'block';
-    // ще раз перезапустити анімацію shake
     errorEl.style.animation = 'none';
     setTimeout(() => { errorEl.style.animation = ''; }, 10);
-}
+  }
 
   function enterAdmin() {
     closeAuth();
@@ -1833,7 +1914,6 @@ function showAuthError(message) {
     document.getElementById('adminWrap').classList.add('show');
     window.scrollTo({ top: 0 });
     loadServices();
-    // reset bio state
     setTimeout(() => {
       const circle = document.getElementById('authBio').querySelector('.bio-circle');
       const label = document.getElementById('authBio').querySelector('.bio-label');
@@ -1844,27 +1924,23 @@ function showAuthError(message) {
 
   async function logout() {
     try {
-        await fetch('/api/admin/logout.php', {
-            method: 'POST',
-            credentials: 'include'
-        });
+      await fetch('/api/admin/logout.php', {
+        method: 'POST',
+        credentials: 'include'
+      });
     } catch (err) {
-        // Не страшно навіть якщо сервер не відповів —
-        // все одно виходимо локально
-        console.error('Logout error:', err);
+      console.error('Logout error:', err);
     }
-    
-    // Закрити сесію локально
+
     document.getElementById('clientWrap').classList.remove('hide');
     document.getElementById('adminWrap').classList.remove('show');
     window.scrollTo({ top: 0 });
-    
-    // Очистити поля логіну
+
     const u = document.getElementById('loginUsername');
     const p = document.getElementById('loginPassword');
     if (u) u.value = '';
     if (p) p.value = '';
-}
+  }
 
   function setAdminSection(name, el) {
     document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
@@ -1873,229 +1949,401 @@ function showAuthError(message) {
     document.getElementById('ad-' + name).classList.add('active');
   }
 
- // ===== Перевірка сесії при завантаженні =====
-async function checkSession() {
+  async function checkSession() {
     try {
-        const response = await fetch('/api/admin/me.php', {
-            credentials: 'include'
-        });
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            document.getElementById('clientWrap').classList.add('hide');
-            document.getElementById('adminWrap').classList.add('show');
-            if (typeof loadServices === 'function') loadServices();
-            console.log('Залогінений як:', data.admin.username);
-        } else {
-            console.log('Не залогінений (нормально для відвідувачів)');
-        }
-    } catch (err) {
-        console.error('Не вдалося перевірити сесію:', err);
-    }
-}
+      const response = await fetch('/api/admin/me.php', {
+        credentials: 'include'
+      });
+      const data = await response.json();
 
-if (document.readyState === 'loading') {
+      if (response.ok && data.success) {
+        document.getElementById('clientWrap').classList.add('hide');
+        document.getElementById('adminWrap').classList.add('show');
+        if (typeof loadServices === 'function') loadServices();
+        console.log('Залогінений як:', data.admin.username);
+      } else {
+        console.log('Не залогінений (нормально для відвідувачів)');
+      }
+    } catch (err) {
+      console.error('Не вдалося перевірити сесію:', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkSession);
-} else {
+  } else {
     checkSession();
-}
+  }
 
-// ===== Services Admin =====
-let currentServices = [];
+  // ============================================
+  // УНИВЕРСАЛЬНЫЙ ЗАГРУЗЧИК КАРТИНОК
+  // ============================================
+  // Использование: createImageUploader({ container, folder, currentUrl, onChange, compact })
 
-async function loadServices() {
-    const rows = document.getElementById('servicesRows');
-    rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
-    
-    try {
-        const res = await fetch('/api/admin/services-list.php', { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        currentServices = data.data;
-        renderServices();
-    } catch (err) {
-        rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--danger);">Помилка: ' + err.message + '</div>';
+  function createImageUploader({ container, folder = 'general', currentUrl = '', onChange = () => {}, compact = false }) {
+    container.classList.add('img-uploader');
+    if (compact) container.classList.add('img-up-compact');
+
+    container.innerHTML = `
+      <div class="img-up-row">
+        <div class="img-up-preview ${currentUrl ? '' : 'empty'}" style="background-image:url('${escapeHtml(currentUrl)}')"></div>
+        <div class="img-up-controls">
+          <div class="img-up-buttons">
+            <button type="button" class="img-up-btn up-upload">📤 Завантажити</button>
+            <button type="button" class="img-up-btn up-url-toggle">🔗 URL</button>
+            <button type="button" class="img-up-btn danger up-clear" ${currentUrl ? '' : 'style="display:none;"'}>✕ Очистити</button>
+          </div>
+          <input type="text" class="img-up-url" placeholder="Або вставте URL картинки" value="${escapeHtml(currentUrl)}">
+          <div class="img-up-progress"><div class="img-up-progress-bar"></div></div>
+          <div class="img-up-error" style="display:none;"></div>
+        </div>
+      </div>
+      <input type="file" class="up-file-input" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" style="display:none;">
+    `;
+
+    const preview = container.querySelector('.img-up-preview');
+    const uploadBtn = container.querySelector('.up-upload');
+    const urlToggleBtn = container.querySelector('.up-url-toggle');
+    const clearBtn = container.querySelector('.up-clear');
+    const urlInput = container.querySelector('.img-up-url');
+    const fileInput = container.querySelector('.up-file-input');
+    const progress = container.querySelector('.img-up-progress');
+    const progressBar = container.querySelector('.img-up-progress-bar');
+    const errorEl = container.querySelector('.img-up-error');
+
+    let currentValue = currentUrl;
+
+    function setUrl(url) {
+      currentValue = url;
+      urlInput.value = url;
+      if (url) {
+        preview.style.backgroundImage = `url('${url}')`;
+        preview.classList.remove('empty');
+        clearBtn.style.display = '';
+      } else {
+        preview.style.backgroundImage = '';
+        preview.classList.add('empty');
+        clearBtn.style.display = 'none';
+      }
+      onChange(url);
     }
-}
 
-function escapeHtml(str) {
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
+    }
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    urlToggleBtn.addEventListener('click', () => {
+      if (urlInput.style.display === 'none' || compact) {
+        urlInput.style.display = 'block';
+        urlInput.focus();
+      } else {
+        urlInput.style.display = 'none';
+      }
+    });
+
+    clearBtn.addEventListener('click', () => setUrl(''));
+
+    urlInput.addEventListener('change', () => setUrl(urlInput.value.trim()));
+
+    fileInput.addEventListener('change', async () => {
+      if (!fileInput.files || !fileInput.files[0]) return;
+      const file = fileInput.files[0];
+
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Файл більше 5 MB');
+        fileInput.value = '';
+        return;
+      }
+
+      await uploadFile(file);
+      fileInput.value = '';
+    });
+
+    container.addEventListener('dragover', e => {
+      e.preventDefault();
+      container.classList.add('dragging');
+    });
+    container.addEventListener('dragleave', () => container.classList.remove('dragging'));
+    container.addEventListener('drop', async e => {
+      e.preventDefault();
+      container.classList.remove('dragging');
+      const file = e.dataTransfer.files[0];
+      if (!file || !file.type.startsWith('image/')) {
+        showError('Перетягніть картинку');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Файл більше 5 MB');
+        return;
+      }
+      await uploadFile(file);
+    });
+
+    async function uploadFile(file) {
+      uploadBtn.disabled = true;
+      progress.classList.add('show');
+      progressBar.style.width = '0%';
+      errorEl.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
+
+      try {
+        const result = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+              progressBar.style.width = (e.loaded / e.total * 100) + '%';
+            }
+          });
+          xhr.addEventListener('load', () => {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+                resolve(data);
+              } else {
+                reject(new Error(data.error || 'Помилка ' + xhr.status));
+              }
+            } catch (err) {
+              reject(new Error('Невірна відповідь сервера'));
+            }
+          });
+          xhr.addEventListener('error', () => reject(new Error('Помилка мережі')));
+          xhr.open('POST', '/api/admin/upload.php');
+          xhr.withCredentials = true;
+          xhr.send(formData);
+        });
+
+        setUrl(result.url);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        uploadBtn.disabled = false;
+        setTimeout(() => progress.classList.remove('show'), 500);
+      }
+    }
+
+    return {
+      getValue: () => currentValue,
+      setValue: setUrl
+    };
+  }
+
+  // ============================================
+  // АДМИНКА — управление услугами
+  // ============================================
+  let currentServices = [];
+  let svcImageUploader = null;
+
+  async function loadServices() {
+    const rows = document.getElementById('servicesRows');
+    if (!rows) return;
+    rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+
+    try {
+      const res = await fetch('/api/admin/services-list.php', { credentials: 'include' });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      currentServices = data.data;
+      renderServices();
+    } catch (err) {
+      rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--danger);">Помилка: ' + err.message + '</div>';
+    }
+  }
+
+  function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
+  }
 
-function closeServiceModal() {
+  function closeServiceModal() {
     document.getElementById('serviceModal').classList.remove('show');
-}
+  }
 
-function showSvcError(msg) {
+  function showSvcError(msg) {
     const el = document.getElementById('svcError');
     el.textContent = msg;
     el.style.display = 'block';
-}
+  }
 
-function renderServices() {
+  function renderServices() {
     const rows = document.getElementById('servicesRows');
     if (currentServices.length === 0) {
-        rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Немає послуг. Натисніть "+ Послуга"</div>';
-        return;
+      rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Немає послуг. Натисніть "+ Послуга"</div>';
+      return;
     }
-    
+
     rows.innerHTML = currentServices.map(s => {
-        const optCount = (s.option_groups || []).reduce((sum, g) => sum + (g.options?.length || 0), 0);
-        const groupCount = (s.option_groups || []).length;
-        const optInfo = groupCount > 0 ? `${groupCount} груп · ${optCount} опцій` : 'без опцій';
-        return `
+      const optCount = (s.option_groups || []).reduce((sum, g) => sum + (g.options?.length || 0), 0);
+      const groupCount = (s.option_groups || []).length;
+      const optInfo = groupCount > 0 ? `${groupCount} груп · ${optCount} опцій` : 'без опцій';
+      return `
         <div class="svc-row" onclick='editService(${s.id})' style="cursor:pointer;">
-            <div class="s-img" style="background-image:url('${s.image_url || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80'}');"></div>
-            <div>
-                <div class="s-name">${escapeHtml(s.name)}</div>
-                <div class="s-opts" style="margin-top:3px;">${escapeHtml(s.description || '').slice(0, 60)}${s.description && s.description.length > 60 ? '…' : ''}</div>
-            </div>
-            <div class="s-opts">${optInfo}</div>
-            <div class="s-price">${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
-            <div class="s-time">${s.duration_min} хв</div>
-            <div class="s-action"><div class="toggle ${s.is_active == 1 ? 'on' : ''}"></div></div>
+          <div class="s-img" style="background-image:url('${s.image_url || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80'}');"></div>
+          <div>
+            <div class="s-name">${escapeHtml(s.name)}</div>
+            <div class="s-opts" style="margin-top:3px;">${escapeHtml(s.description || '').slice(0, 60)}${s.description && s.description.length > 60 ? '…' : ''}</div>
+          </div>
+          <div class="s-opts">${optInfo}</div>
+          <div class="s-price">${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
+          <div class="s-time">${s.duration_min} хв</div>
+          <div class="s-action"><div class="toggle ${s.is_active == 1 ? 'on' : ''}"></div></div>
         </div>`;
     }).join('');
-}
+  }
 
-function openServiceModal() {
+  function openServiceModal() {
     document.getElementById('serviceModalTitle').textContent = 'Нова послуга';
     document.getElementById('svcId').value = '';
     document.getElementById('svcName').value = '';
     document.getElementById('svcDescription').value = '';
     document.getElementById('svcPrice').value = '';
     document.getElementById('svcDuration').value = '';
-    document.getElementById('svcImage').value = '';
-    document.getElementById('svcImagePreview').innerHTML = '';
     document.getElementById('svcActive').checked = true;
     document.getElementById('svcError').style.display = 'none';
     document.getElementById('svcDeleteBtn').style.display = 'none';
     document.getElementById('optionGroupsList').innerHTML = '';
-    document.getElementById('serviceModal').classList.add('show');
-}
 
-function editService(id) {
+    const uploaderContainer = document.getElementById('svcImageUploader');
+    uploaderContainer.className = '';
+    svcImageUploader = createImageUploader({
+      container: uploaderContainer,
+      folder: 'services',
+      currentUrl: ''
+    });
+
+    document.getElementById('serviceModal').classList.add('show');
+  }
+
+  function editService(id) {
     const s = currentServices.find(x => x.id == id);
     if (!s) return;
-    
+
     document.getElementById('serviceModalTitle').textContent = 'Редагувати: ' + s.name;
     document.getElementById('svcId').value = s.id;
     document.getElementById('svcName').value = s.name;
     document.getElementById('svcDescription').value = s.description || '';
     document.getElementById('svcPrice').value = s.base_price;
     document.getElementById('svcDuration').value = s.duration_min;
-    document.getElementById('svcImage').value = s.image_url || '';
-    updateImagePreview(s.image_url);
     document.getElementById('svcActive').checked = s.is_active == 1;
     document.getElementById('svcError').style.display = 'none';
     document.getElementById('svcDeleteBtn').style.display = 'inline-block';
-    
+
+    const uploaderContainer = document.getElementById('svcImageUploader');
+    uploaderContainer.className = '';
+    svcImageUploader = createImageUploader({
+      container: uploaderContainer,
+      folder: 'services',
+      currentUrl: s.image_url || ''
+    });
+
     document.getElementById('optionGroupsList').innerHTML = '';
     (s.option_groups || []).forEach(g => addOptionGroup(g));
-    
+
     document.getElementById('serviceModal').classList.add('show');
-}
+  }
 
-function updateImagePreview(url) {
-    const preview = document.getElementById('svcImagePreview');
-    preview.innerHTML = url ? `<img src="${escapeHtml(url)}" onerror="this.style.display='none'">` : '';
-}
-
-function addOptionGroup(data = {}) {
+  function addOptionGroup(data = {}) {
     const list = document.getElementById('optionGroupsList');
     const groupEl = document.createElement('div');
     groupEl.className = 'opt-group';
     groupEl.innerHTML = `
-        <div class="opt-group-head">
-            <input type="text" class="og-name" placeholder="Назва групи (Довжина волосся)" value="${escapeHtml(data.name || '')}">
-            <button type="button" class="opt-group-remove" onclick="this.closest('.opt-group').remove()">Видалити групу</button>
-        </div>
-        <div class="opt-group-flags">
-            <label><input type="checkbox" class="og-required" ${data.is_required == 1 ? 'checked' : ''}> Обовʼязково обрати</label>
-            <label><input type="checkbox" class="og-multiple" ${data.is_multiple == 1 ? 'checked' : ''}> Можна обрати декілька</label>
-        </div>
-        <div class="opt-row-header">
-            <div></div><div>Назва опції</div><div>URL іконки/фото</div><div>+₴</div><div>+хв</div><div></div>
-        </div>
-        <div class="opt-rows"></div>
-        <button type="button" class="opt-add-row" onclick="addOption(this)">+ Додати опцію</button>
+      <div class="opt-group-head">
+        <input type="text" class="og-name" placeholder="Назва групи (Довжина волосся)" value="${escapeHtml(data.name || '')}">
+        <button type="button" class="opt-group-remove" onclick="this.closest('.opt-group').remove()">Видалити групу</button>
+      </div>
+      <div class="opt-group-flags">
+        <label><input type="checkbox" class="og-required" ${data.is_required == 1 ? 'checked' : ''}> Обовʼязково обрати</label>
+        <label><input type="checkbox" class="og-multiple" ${data.is_multiple == 1 ? 'checked' : ''}> Можна обрати декілька</label>
+      </div>
+      <div class="opt-row-header">
+        <div>Іконка</div><div>Назва опції</div><div></div><div>+₴</div><div>+хв</div><div></div>
+      </div>
+      <div class="opt-rows"></div>
+      <button type="button" class="opt-add-row" onclick="addOption(this)">+ Додати опцію</button>
     `;
     list.appendChild(groupEl);
-    
+
     const rowsContainer = groupEl.querySelector('.opt-rows');
     const opts = data.options || [];
     if (opts.length > 0) {
-        opts.forEach(opt => addOptionRow(rowsContainer, opt));
+      opts.forEach(opt => addOptionRow(rowsContainer, opt));
     } else {
-        addOptionRow(rowsContainer, {});
+      addOptionRow(rowsContainer, {});
     }
-}
+  }
 
-function addOption(btn) {
+  function addOption(btn) {
     addOptionRow(btn.closest('.opt-group').querySelector('.opt-rows'), {});
-}
+  }
 
-function addOptionRow(container, data) {
+  function addOptionRow(container, data) {
     const row = document.createElement('div');
     row.className = 'opt-row';
-    const iconUrl = data.icon_url || '';
     row.innerHTML = `
-        <div class="opt-icon-preview" style="background-image:url('${escapeHtml(iconUrl)}')"></div>
-        <input type="text" class="opt-name" placeholder="Короткі" value="${escapeHtml(data.option_name || '')}">
-        <input type="text" class="opt-icon-url" placeholder="URL іконки/фото" value="${escapeHtml(iconUrl)}">
-        <input type="number" class="opt-price" placeholder="0" value="${data.price_modifier || 0}">
-        <input type="number" class="opt-duration" placeholder="0" value="${data.duration_modifier || 0}">
-        <button type="button" class="opt-row-remove" onclick="this.closest('.opt-row').remove()">×</button>
+      <div class="opt-icon-uploader"></div>
+      <input type="text" class="opt-name" placeholder="Короткі" value="${escapeHtml(data.option_name || '')}">
+      <div></div>
+      <input type="number" class="opt-price" placeholder="0" value="${data.price_modifier || 0}">
+      <input type="number" class="opt-duration" placeholder="0" value="${data.duration_modifier || 0}">
+      <button type="button" class="opt-row-remove" onclick="this.closest('.opt-row').remove()">×</button>
     `;
     container.appendChild(row);
-    
-    const iconInput = row.querySelector('.opt-icon-url');
-    const iconPreview = row.querySelector('.opt-icon-preview');
-    iconInput.addEventListener('input', e => {
-        iconPreview.style.backgroundImage = `url('${e.target.value}')`;
-    });
-}
 
-async function saveService() {
+    const uploaderContainer = row.querySelector('.opt-icon-uploader');
+    row._imgUploader = createImageUploader({
+      container: uploaderContainer,
+      folder: 'options',
+      currentUrl: data.icon_url || '',
+      compact: true
+    });
+  }
+
+  async function saveService() {
     const errorEl = document.getElementById('svcError');
     const btn = document.getElementById('svcSaveBtn');
     errorEl.style.display = 'none';
 
     const option_groups = [];
     document.querySelectorAll('#optionGroupsList .opt-group').forEach(groupEl => {
-        const groupName = groupEl.querySelector('.og-name').value.trim();
-        if (!groupName) return;
-        
-        const options = [];
-        groupEl.querySelectorAll('.opt-row').forEach(rowEl => {
-            const optName = rowEl.querySelector('.opt-name').value.trim();
-            if (!optName) return;
-            options.push({
-                name: optName,
-                icon_url: rowEl.querySelector('.opt-icon-url').value.trim(),
-                price_modifier: parseInt(rowEl.querySelector('.opt-price').value) || 0,
-                duration_modifier: parseInt(rowEl.querySelector('.opt-duration').value) || 0
-            });
+      const groupName = groupEl.querySelector('.og-name').value.trim();
+      if (!groupName) return;
+
+      const options = [];
+      groupEl.querySelectorAll('.opt-row').forEach(rowEl => {
+        const optName = rowEl.querySelector('.opt-name').value.trim();
+        if (!optName) return;
+        const uploader = rowEl._imgUploader;
+        options.push({
+          name: optName,
+          icon_url: uploader ? uploader.getValue() : '',
+          price_modifier: parseInt(rowEl.querySelector('.opt-price').value) || 0,
+          duration_modifier: parseInt(rowEl.querySelector('.opt-duration').value) || 0
         });
-        
-        option_groups.push({
-            name: groupName,
-            is_required: groupEl.querySelector('.og-required').checked,
-            is_multiple: groupEl.querySelector('.og-multiple').checked,
-            options
-        });
+      });
+
+      option_groups.push({
+        name: groupName,
+        is_required: groupEl.querySelector('.og-required').checked,
+        is_multiple: groupEl.querySelector('.og-multiple').checked,
+        options
+      });
     });
 
     const payload = {
-        id: parseInt(document.getElementById('svcId').value) || 0,
-        name: document.getElementById('svcName').value.trim(),
-        description: document.getElementById('svcDescription').value.trim(),
-        base_price: parseInt(document.getElementById('svcPrice').value) || 0,
-        duration_min: parseInt(document.getElementById('svcDuration').value) || 0,
-        image_url: document.getElementById('svcImage').value.trim(),
-        is_active: document.getElementById('svcActive').checked ? 1 : 0,
-        option_groups
+      id: parseInt(document.getElementById('svcId').value) || 0,
+      name: document.getElementById('svcName').value.trim(),
+      description: document.getElementById('svcDescription').value.trim(),
+      base_price: parseInt(document.getElementById('svcPrice').value) || 0,
+      duration_min: parseInt(document.getElementById('svcDuration').value) || 0,
+      image_url: svcImageUploader ? svcImageUploader.getValue() : '',
+      is_active: document.getElementById('svcActive').checked ? 1 : 0,
+      option_groups
     };
 
     if (!payload.name) { showSvcError('Введіть назву'); return; }
@@ -2106,25 +2354,25 @@ async function saveService() {
     btn.textContent = 'Збереження...';
 
     try {
-        const res = await fetch('/api/admin/services-save.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        closeServiceModal();
-        await loadServices();
+      const res = await fetch('/api/admin/services-save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      closeServiceModal();
+      await loadServices();
     } catch (err) {
-        showSvcError(err.message);
+      showSvcError(err.message);
     } finally {
-        btn.disabled = false;
-        btn.textContent = 'Зберегти';
+      btn.disabled = false;
+      btn.textContent = 'Зберегти';
     }
-}
+  }
 
-async function deleteService() {
+  async function deleteService() {
     const id = parseInt(document.getElementById('svcId').value);
     if (!id) return;
     if (!confirm('Видалити послугу? Це не можна скасувати.')) return;
@@ -2134,30 +2382,23 @@ async function deleteService() {
     btn.textContent = 'Видалення...';
 
     try {
-        const res = await fetch('/api/admin/services-delete.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ id })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        closeServiceModal();
-        await loadServices();
+      const res = await fetch('/api/admin/services-delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      closeServiceModal();
+      await loadServices();
     } catch (err) {
-        showSvcError(err.message);
+      showSvcError(err.message);
     } finally {
-        btn.disabled = false;
-        btn.textContent = 'Видалити';
+      btn.disabled = false;
+      btn.textContent = 'Видалити';
     }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const imgInput = document.getElementById('svcImage');
-    if (imgInput) imgInput.addEventListener('input', e => updateImagePreview(e.target.value));
-});
-
-// Викликаємо одразу після завантаження сторінки
+  }
 </script>
 
 </body>
