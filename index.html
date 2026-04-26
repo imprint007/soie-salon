@@ -652,7 +652,7 @@
   .opt-row.opt-row-compact {
     display: grid;
     grid-template-columns: 90px 1fr 80px 80px 32px;
-    gap: 8px;
+    gap: 20px;
     align-items: center;
   }
   .opt-row-header.opt-row-header-compact {
@@ -796,6 +796,56 @@
     padding: 4px 8px; font-size: 10px;
   }
   .img-up-compact .img-up-url { display: none; }
+
+  /* Список послуг з чекбоксами в модалці майстра */
+  .services-checklist {
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .services-checklist .svc-check-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .services-checklist .svc-check-row:last-child { border-bottom: none; }
+  .services-checklist .svc-check-row:hover { background: var(--bg-3); }
+  .services-checklist .svc-check-row input[type=checkbox] {
+    width: 16px; height: 16px; cursor: pointer; flex-shrink: 0;
+  }
+  .services-checklist .svc-check-thumb {
+    width: 32px; height: 32px;
+    background-size: cover; background-position: center;
+    background-color: var(--bg-3); border: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .services-checklist .svc-check-info { flex: 1; min-width: 0; }
+  .services-checklist .svc-check-name {
+    font-family: 'Fraunces', serif; font-size: 14px;
+    color: var(--ink);
+  }
+  .services-checklist .svc-check-meta {
+    font-size: 11px; color: var(--ink-mute); margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .services-checklist .empty {
+    padding: 14px; text-align: center;
+    color: var(--ink-mute); font-size: 12px;
+  }
+
+  /* Карточка майстра — невелике покращення */
+  .master-card .mc-services-count {
+    font-size: 10px; letter-spacing: 0.14em;
+    color: var(--ink-mute); text-transform: uppercase;
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  .master-card .mc-services-count strong {
+    color: var(--beige); font-family: 'JetBrains Mono', monospace;
+  }
 
 </style>
 </head>
@@ -1395,51 +1445,89 @@
   </div>
 
   <!-- MASTERS -->
-  <div class="admin-section" id="ad-masters">
+<div class="admin-section" id="ad-masters">
     <div class="admin-head">
-      <h1>Майстри <em>салону</em></h1>
-      <div class="head-meta"><button class="admin-cta">+ Додати майстра</button></div>
+        <h1>Майстри <em>салону</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta" onclick="openMasterModal()">+ Додати майстра</button>
+        </div>
     </div>
 
-    <div class="cards-grid">
-      <div class="master-card">
-        <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80');"></div>
-        <div class="mc-info">
-          <div class="mc-name">Анна Воронова</div>
-          <div class="mc-role">Senior · Колорист</div>
-          <div class="mc-stats"><span><strong>1240</strong> клієнтів</span><span><strong>8</strong> років</span></div>
-        </div>
-      </div>
-      <div class="master-card">
-        <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80');"></div>
-        <div class="mc-info">
-          <div class="mc-name">Марія Бєлова</div>
-          <div class="mc-role">Senior · Колорист</div>
-          <div class="mc-stats"><span><strong>892</strong> клієнтів</span><span><strong>6</strong> років</span></div>
-        </div>
-      </div>
-      <div class="master-card">
-        <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80');"></div>
-        <div class="mc-info">
-          <div class="mc-name">Дарія Соколова</div>
-          <div class="mc-role">Middle · Стрижки</div>
-          <div class="mc-stats"><span><strong>645</strong> клієнтів</span><span><strong>4</strong> роки</span></div>
-        </div>
-      </div>
-      <div class="master-card">
-        <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&q=80');"></div>
-        <div class="mc-info">
-          <div class="mc-name">Олена Петрова</div>
-          <div class="mc-role">Junior · Універсал</div>
-          <div class="mc-stats"><span><strong>214</strong> клієнтів</span><span><strong>1.5</strong> року</span></div>
-        </div>
-      </div>
-      <div class="master-card add">
-        <div class="plus">+</div>
-        <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;">Додати майстра</div>
-      </div>
+    <div id="mastersGrid" class="cards-grid">
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
     </div>
-  </div>
+</div>
+
+<!-- Master Modal -->
+<div class="modal-overlay" id="masterModal" onclick="if(event.target===this) closeMasterModal()">
+    <div class="modal-card" style="max-width: 580px;">
+        <div class="modal-head">
+            <h2 id="masterModalTitle">Новий майстер</h2>
+            <button class="modal-close" onclick="closeMasterModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="mstId" value="">
+
+            <div class="form-group">
+                <label>Фото майстра</label>
+                <div id="mstPhotoUploader"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Імʼя та прізвище</label>
+                <input type="text" id="mstName" placeholder="Анна Воронова">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Посада / роль</label>
+                    <input type="text" id="mstRole" placeholder="Senior · Колорист">
+                </div>
+                <div class="form-group">
+                    <label>Стаж (років)</label>
+                    <input type="number" id="mstExperience" placeholder="5">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" id="mstPhone" placeholder="+380 (67) 123-45-67">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="mstEmail" placeholder="anna@example.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Біографія / опис</label>
+                <textarea id="mstBio" rows="3" placeholder="Коротко про майстра"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Які послуги виконує</label>
+                <div id="mstServicesList" class="services-checklist">
+                    <div style="padding:14px;color:var(--ink-mute);font-size:12px;">Завантаження послуг...</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="mstActive" checked>
+                    <span>Активний (доступний для запису)</span>
+                </label>
+            </div>
+
+            <div id="mstError" class="auth-error" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeMasterModal()">Скасувати</button>
+            <button class="admin-cta" id="mstSaveBtn" onclick="saveMaster()">Зберегти</button>
+            <button class="admin-cta danger" id="mstDeleteBtn" onclick="deleteMaster()" style="display:none;">Видалити</button>
+        </div>
+    </div>
+</div>
 
   <!-- SERVICES -->
 <div class="admin-section" id="ad-services">
@@ -1982,7 +2070,11 @@
     el.classList.add('active');
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('ad-' + name).classList.add('active');
-  }
+    
+    // Загружаем данные при переходе в раздел
+    if (name === 'services') loadServices();
+    if (name === 'masters') loadMasters();
+}
 
   async function checkSession() {
     try {
@@ -2451,6 +2543,233 @@ container.innerHTML = `
       btn.textContent = 'Видалити';
     }
   }
+
+// ============================================
+// АДМИНКА — управление мастерами
+// ============================================
+let currentMasters = [];
+let mstPhotoUploader = null;
+
+async function loadMasters() {
+    const grid = document.getElementById('mastersGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+
+    try {
+        const res = await fetch('/api/admin/masters-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        currentMasters = data.data;
+        renderMasters();
+    } catch (err) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--danger);">Помилка: ' + err.message + '</div>';
+    }
+}
+
+function renderMasters() {
+    const grid = document.getElementById('mastersGrid');
+    
+    const cards = currentMasters.map(m => {
+        const serviceCount = (m.service_ids || []).length;
+        return `
+        <div class="master-card" onclick='editMaster(${m.id})' style="cursor:pointer;">
+            <div class="mc-avatar" style="background-image:url('${m.photo_url || ''}');background-color:var(--bg-3);"></div>
+            <div class="mc-info">
+                <div class="mc-name">${escapeHtml(m.name)}</div>
+                <div class="mc-role">${escapeHtml(m.role || '—')}</div>
+                <div class="mc-stats">
+                    ${m.experience_years ? `<span><strong>${m.experience_years}</strong> р. досвіду</span>` : ''}
+                    ${m.is_active == 0 ? '<span style="color:var(--danger);">⏸ неактивний</span>' : ''}
+                </div>
+                <div class="mc-services-count"><strong>${serviceCount}</strong> послуг</div>
+            </div>
+        </div>`;
+    }).join('');
+    
+    grid.innerHTML = cards + `
+        <div class="master-card add" onclick="openMasterModal()">
+            <div class="plus">+</div>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;">Додати майстра</div>
+        </div>
+    `;
+}
+
+function showMstError(msg) {
+    const el = document.getElementById('mstError');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function closeMasterModal() {
+    document.getElementById('masterModal').classList.remove('show');
+}
+
+async function openMasterModal() {
+    document.getElementById('masterModalTitle').textContent = 'Новий майстер';
+    document.getElementById('mstId').value = '';
+    document.getElementById('mstName').value = '';
+    document.getElementById('mstRole').value = '';
+    document.getElementById('mstPhone').value = '';
+    document.getElementById('mstEmail').value = '';
+    document.getElementById('mstBio').value = '';
+    document.getElementById('mstExperience').value = '';
+    document.getElementById('mstActive').checked = true;
+    document.getElementById('mstError').style.display = 'none';
+    document.getElementById('mstDeleteBtn').style.display = 'none';
+
+    // Аплоадер фото
+    const uploaderContainer = document.getElementById('mstPhotoUploader');
+    uploaderContainer.className = '';
+    mstPhotoUploader = createImageUploader({
+        container: uploaderContainer,
+        folder: 'masters',
+        currentUrl: ''
+    });
+
+    // Список послуг із порожніми чекбоксами
+    await renderMasterServicesList([]);
+
+    document.getElementById('masterModal').classList.add('show');
+}
+
+async function editMaster(id) {
+    const m = currentMasters.find(x => x.id == id);
+    if (!m) return;
+
+    document.getElementById('masterModalTitle').textContent = 'Редагувати: ' + m.name;
+    document.getElementById('mstId').value = m.id;
+    document.getElementById('mstName').value = m.name || '';
+    document.getElementById('mstRole').value = m.role || '';
+    document.getElementById('mstPhone').value = m.phone || '';
+    document.getElementById('mstEmail').value = m.email || '';
+    document.getElementById('mstBio').value = m.bio || '';
+    document.getElementById('mstExperience').value = m.experience_years || '';
+    document.getElementById('mstActive').checked = m.is_active == 1;
+    document.getElementById('mstError').style.display = 'none';
+    document.getElementById('mstDeleteBtn').style.display = 'inline-block';
+
+    const uploaderContainer = document.getElementById('mstPhotoUploader');
+    uploaderContainer.className = '';
+    mstPhotoUploader = createImageUploader({
+        container: uploaderContainer,
+        folder: 'masters',
+        currentUrl: m.photo_url || ''
+    });
+
+    await renderMasterServicesList(m.service_ids || []);
+
+    document.getElementById('masterModal').classList.add('show');
+}
+
+async function renderMasterServicesList(selectedIds) {
+    const list = document.getElementById('mstServicesList');
+    
+    // Подгружаем услуги если ещё не подгружены
+    if (currentServices.length === 0) {
+        try {
+            const res = await fetch('/api/admin/services-list.php', { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) currentServices = data.data;
+        } catch (err) {
+            list.innerHTML = '<div class="empty">Не вдалося завантажити послуги</div>';
+            return;
+        }
+    }
+    
+    if (currentServices.length === 0) {
+        list.innerHTML = '<div class="empty">Спочатку створіть послуги в розділі «Послуги»</div>';
+        return;
+    }
+    
+    const selectedSet = new Set((selectedIds || []).map(Number));
+    
+    list.innerHTML = currentServices.map(s => `
+        <label class="svc-check-row">
+            <input type="checkbox" class="mst-svc-cb" data-svc-id="${s.id}" ${selectedSet.has(Number(s.id)) ? 'checked' : ''}>
+            <div class="svc-check-thumb" style="background-image:url('${s.image_url || ''}')"></div>
+            <div class="svc-check-info">
+                <div class="svc-check-name">${escapeHtml(s.name)}</div>
+                <div class="svc-check-meta">${Number(s.base_price).toLocaleString('uk-UA')} ₴ · ${s.duration_min} хв</div>
+            </div>
+        </label>
+    `).join('');
+}
+
+async function saveMaster() {
+    const errorEl = document.getElementById('mstError');
+    const btn = document.getElementById('mstSaveBtn');
+    errorEl.style.display = 'none';
+
+    const service_ids = [];
+    document.querySelectorAll('.mst-svc-cb:checked').forEach(cb => {
+        service_ids.push(parseInt(cb.dataset.svcId));
+    });
+
+    const payload = {
+        id: parseInt(document.getElementById('mstId').value) || 0,
+        name: document.getElementById('mstName').value.trim(),
+        role: document.getElementById('mstRole').value.trim(),
+        phone: document.getElementById('mstPhone').value.trim(),
+        email: document.getElementById('mstEmail').value.trim(),
+        bio: document.getElementById('mstBio').value.trim(),
+        photo_url: mstPhotoUploader ? mstPhotoUploader.getValue() : '',
+        experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
+        is_active: document.getElementById('mstActive').checked ? 1 : 0,
+        service_ids
+    };
+
+    if (!payload.name) { showMstError('Введіть імʼя'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Збереження...';
+
+    try {
+        const res = await fetch('/api/admin/masters-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeMasterModal();
+        await loadMasters();
+    } catch (err) {
+        showMstError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зберегти';
+    }
+}
+
+async function deleteMaster() {
+    const id = parseInt(document.getElementById('mstId').value);
+    if (!id) return;
+    if (!confirm('Видалити майстра? Це не можна скасувати.')) return;
+
+    const btn = document.getElementById('mstDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Видалення...';
+
+    try {
+        const res = await fetch('/api/admin/masters-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeMasterModal();
+        await loadMasters();
+    } catch (err) {
+        showMstError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Видалити';
+    }
+}
+
 </script>
 
 </body>
