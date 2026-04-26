@@ -3,9 +3,12 @@
  * Допоміжні функції для всіх admin API
  */
 
-// Тимчасово для відладки
+// Тимчасово для відладки — пишемо помилки в файл
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/../php-errors.log');
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 
 function setupAdminApi() {
     header('Access-Control-Allow-Origin: *');
