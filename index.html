@@ -599,6 +599,84 @@
     .auth-card { padding: 28px 22px 24px; }
     .bio-circle { width: 70px; height: 70px; }
   }
+
+  .options-section { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .options-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .options-header h3 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; }
+  .options-hint { font-size: 11px; color: var(--ink-mute); margin-bottom: 16px; line-height: 1.5; }
+  .admin-cta.small { padding: 6px 12px; font-size: 10px; }
+  
+  .opt-group {
+    background: var(--bg-2); border: 1px solid var(--line);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .opt-group-head { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .opt-group-head input[type=text] {
+    flex: 1; background: var(--bg-1); border: 1px solid var(--line-2);
+    color: var(--ink); padding: 8px 12px; font-size: 13px;
+    font-family: 'Fraunces', serif;
+  }
+  .opt-group-head input:focus { outline: none; border-color: var(--beige); }
+  
+  .opt-group-flags {
+    display: flex; gap: 14px; padding: 8px 0;
+    font-size: 11px; color: var(--ink-mute);
+  }
+  .opt-group-flags label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  
+  .opt-row {
+    display: grid;
+    grid-template-columns: 32px 1.4fr 1.2fr 70px 70px 32px;
+    gap: 8px; align-items: center;
+    padding: 6px 0; border-top: 1px dashed var(--line);
+  }
+  .opt-row input[type=text], .opt-row input[type=number] {
+    background: var(--bg-1); border: 1px solid var(--line);
+    color: var(--ink); padding: 7px 10px; font-size: 12px; width: 100%;
+  }
+  .opt-row input:focus { outline: none; border-color: var(--beige); }
+  .opt-row .opt-icon-preview {
+    width: 28px; height: 28px;
+    background-size: cover; background-position: center;
+    background-color: var(--bg-3); border: 1px solid var(--line);
+  }
+  .opt-row-remove {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-mute); cursor: pointer;
+    width: 28px; height: 28px; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .opt-row-remove:hover { color: var(--danger); border-color: var(--danger); }
+  
+  .opt-add-row {
+    margin-top: 8px;
+    background: transparent; border: 1px dashed var(--line-2);
+    color: var(--ink-mute); cursor: pointer;
+    width: 100%; padding: 8px;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-family: inherit;
+  }
+  .opt-add-row:hover { border-color: var(--beige); color: var(--beige); }
+  
+  .opt-group-remove {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-mute); cursor: pointer; padding: 6px 12px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .opt-group-remove:hover { color: var(--danger); border-color: var(--danger); }
+  
+  #svcImagePreview img {
+    max-width: 120px; max-height: 80px; object-fit: cover;
+    border: 1px solid var(--line); display: block;
+  }
+  
+  .opt-row-header {
+    display: grid;
+    grid-template-columns: 32px 1.4fr 1.2fr 70px 70px 32px;
+    gap: 8px; padding: 8px 0 4px;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--ink-dim); text-transform: uppercase;
+  }
 </style>
 </head>
 <body>
@@ -1264,15 +1342,16 @@
 
 <!-- Service Modal -->
 <div class="modal-overlay" id="serviceModal" onclick="if(event.target===this) closeServiceModal()">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 720px;">
         <div class="modal-head">
             <h2 id="serviceModalTitle">Нова послуга</h2>
             <button class="modal-close" onclick="closeServiceModal()">×</button>
         </div>
         <div class="modal-body">
             <input type="hidden" id="svcId" value="">
+            
             <div class="form-group">
-                <label>Назва</label>
+                <label>Назва послуги</label>
                 <input type="text" id="svcName" placeholder="Біозавивка">
             </div>
             <div class="form-group">
@@ -1281,7 +1360,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Ціна (₴)</label>
+                    <label>Базова ціна (₴)</label>
                     <input type="number" id="svcPrice" placeholder="1800">
                 </div>
                 <div class="form-group">
@@ -1290,17 +1369,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Категорія</label>
-                <select id="svcCategory">
-                    <option value="hair">Завивка</option>
-                    <option value="cut">Стрижка</option>
-                    <option value="color">Фарбування</option>
-                    <option value="care">Догляд</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>URL зображення (опціонально)</label>
+                <label>URL фото послуги</label>
                 <input type="text" id="svcImage" placeholder="https://...">
+                <div id="svcImagePreview" style="margin-top:10px;"></div>
             </div>
             <div class="form-group">
                 <label class="checkbox-label">
@@ -1308,6 +1379,16 @@
                     <span>Активна (показується клієнтам)</span>
                 </label>
             </div>
+            
+            <div class="options-section">
+                <div class="options-header">
+                    <h3>Опції послуги</h3>
+                    <button type="button" class="admin-cta ghost small" onclick="addOptionGroup()">+ Група опцій</button>
+                </div>
+                <div class="options-hint">Наприклад: «Довжина волосся» з варіантами «Короткі / Середні / Довгі». Ціна опції додається до базової ціни послуги.</div>
+                <div id="optionGroupsList"></div>
+            </div>
+            
             <div id="svcError" class="auth-error" style="display:none;"></div>
         </div>
         <div class="modal-footer">
@@ -1837,6 +1918,21 @@ async function loadServices() {
     }
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function closeServiceModal() {
+    document.getElementById('serviceModal').classList.remove('show');
+}
+
+function showSvcError(msg) {
+    const el = document.getElementById('svcError');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
 function renderServices() {
     const rows = document.getElementById('servicesRows');
     if (currentServices.length === 0) {
@@ -1844,26 +1940,23 @@ function renderServices() {
         return;
     }
     
-    const categoryNames = { hair: 'Завивка', cut: 'Стрижка', color: 'Фарбування', care: 'Догляд' };
-    
-    rows.innerHTML = currentServices.map(s => `
+    rows.innerHTML = currentServices.map(s => {
+        const optCount = (s.option_groups || []).reduce((sum, g) => sum + (g.options?.length || 0), 0);
+        const groupCount = (s.option_groups || []).length;
+        const optInfo = groupCount > 0 ? `${groupCount} груп · ${optCount} опцій` : 'без опцій';
+        return `
         <div class="svc-row" onclick='editService(${s.id})' style="cursor:pointer;">
             <div class="s-img" style="background-image:url('${s.image_url || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80'}');"></div>
             <div>
                 <div class="s-name">${escapeHtml(s.name)}</div>
                 <div class="s-opts" style="margin-top:3px;">${escapeHtml(s.description || '').slice(0, 60)}${s.description && s.description.length > 60 ? '…' : ''}</div>
             </div>
-            <div class="s-opts">${categoryNames[s.category] || s.category || '—'}</div>
+            <div class="s-opts">${optInfo}</div>
             <div class="s-price">${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
             <div class="s-time">${s.duration_min} хв</div>
             <div class="s-action"><div class="toggle ${s.is_active == 1 ? 'on' : ''}"></div></div>
-        </div>
-    `).join('');
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        </div>`;
+    }).join('');
 }
 
 function openServiceModal() {
@@ -1873,33 +1966,95 @@ function openServiceModal() {
     document.getElementById('svcDescription').value = '';
     document.getElementById('svcPrice').value = '';
     document.getElementById('svcDuration').value = '';
-    document.getElementById('svcCategory').value = 'hair';
     document.getElementById('svcImage').value = '';
+    document.getElementById('svcImagePreview').innerHTML = '';
     document.getElementById('svcActive').checked = true;
     document.getElementById('svcError').style.display = 'none';
     document.getElementById('svcDeleteBtn').style.display = 'none';
+    document.getElementById('optionGroupsList').innerHTML = '';
     document.getElementById('serviceModal').classList.add('show');
 }
 
 function editService(id) {
     const s = currentServices.find(x => x.id == id);
     if (!s) return;
+    
     document.getElementById('serviceModalTitle').textContent = 'Редагувати: ' + s.name;
     document.getElementById('svcId').value = s.id;
     document.getElementById('svcName').value = s.name;
     document.getElementById('svcDescription').value = s.description || '';
     document.getElementById('svcPrice').value = s.base_price;
     document.getElementById('svcDuration').value = s.duration_min;
-    document.getElementById('svcCategory').value = s.category || 'hair';
     document.getElementById('svcImage').value = s.image_url || '';
+    updateImagePreview(s.image_url);
     document.getElementById('svcActive').checked = s.is_active == 1;
     document.getElementById('svcError').style.display = 'none';
     document.getElementById('svcDeleteBtn').style.display = 'inline-block';
+    
+    document.getElementById('optionGroupsList').innerHTML = '';
+    (s.option_groups || []).forEach(g => addOptionGroup(g));
+    
     document.getElementById('serviceModal').classList.add('show');
 }
 
-function closeServiceModal() {
-    document.getElementById('serviceModal').classList.remove('show');
+function updateImagePreview(url) {
+    const preview = document.getElementById('svcImagePreview');
+    preview.innerHTML = url ? `<img src="${escapeHtml(url)}" onerror="this.style.display='none'">` : '';
+}
+
+function addOptionGroup(data = {}) {
+    const list = document.getElementById('optionGroupsList');
+    const groupEl = document.createElement('div');
+    groupEl.className = 'opt-group';
+    groupEl.innerHTML = `
+        <div class="opt-group-head">
+            <input type="text" class="og-name" placeholder="Назва групи (Довжина волосся)" value="${escapeHtml(data.name || '')}">
+            <button type="button" class="opt-group-remove" onclick="this.closest('.opt-group').remove()">Видалити групу</button>
+        </div>
+        <div class="opt-group-flags">
+            <label><input type="checkbox" class="og-required" ${data.is_required == 1 ? 'checked' : ''}> Обовʼязково обрати</label>
+            <label><input type="checkbox" class="og-multiple" ${data.is_multiple == 1 ? 'checked' : ''}> Можна обрати декілька</label>
+        </div>
+        <div class="opt-row-header">
+            <div></div><div>Назва опції</div><div>URL іконки/фото</div><div>+₴</div><div>+хв</div><div></div>
+        </div>
+        <div class="opt-rows"></div>
+        <button type="button" class="opt-add-row" onclick="addOption(this)">+ Додати опцію</button>
+    `;
+    list.appendChild(groupEl);
+    
+    const rowsContainer = groupEl.querySelector('.opt-rows');
+    const opts = data.options || [];
+    if (opts.length > 0) {
+        opts.forEach(opt => addOptionRow(rowsContainer, opt));
+    } else {
+        addOptionRow(rowsContainer, {});
+    }
+}
+
+function addOption(btn) {
+    addOptionRow(btn.closest('.opt-group').querySelector('.opt-rows'), {});
+}
+
+function addOptionRow(container, data) {
+    const row = document.createElement('div');
+    row.className = 'opt-row';
+    const iconUrl = data.icon_url || '';
+    row.innerHTML = `
+        <div class="opt-icon-preview" style="background-image:url('${escapeHtml(iconUrl)}')"></div>
+        <input type="text" class="opt-name" placeholder="Короткі" value="${escapeHtml(data.option_name || '')}">
+        <input type="text" class="opt-icon-url" placeholder="URL іконки/фото" value="${escapeHtml(iconUrl)}">
+        <input type="number" class="opt-price" placeholder="0" value="${data.price_modifier || 0}">
+        <input type="number" class="opt-duration" placeholder="0" value="${data.duration_modifier || 0}">
+        <button type="button" class="opt-row-remove" onclick="this.closest('.opt-row').remove()">×</button>
+    `;
+    container.appendChild(row);
+    
+    const iconInput = row.querySelector('.opt-icon-url');
+    const iconPreview = row.querySelector('.opt-icon-preview');
+    iconInput.addEventListener('input', e => {
+        iconPreview.style.backgroundImage = `url('${e.target.value}')`;
+    });
 }
 
 async function saveService() {
@@ -1907,15 +2062,40 @@ async function saveService() {
     const btn = document.getElementById('svcSaveBtn');
     errorEl.style.display = 'none';
 
+    const option_groups = [];
+    document.querySelectorAll('#optionGroupsList .opt-group').forEach(groupEl => {
+        const groupName = groupEl.querySelector('.og-name').value.trim();
+        if (!groupName) return;
+        
+        const options = [];
+        groupEl.querySelectorAll('.opt-row').forEach(rowEl => {
+            const optName = rowEl.querySelector('.opt-name').value.trim();
+            if (!optName) return;
+            options.push({
+                name: optName,
+                icon_url: rowEl.querySelector('.opt-icon-url').value.trim(),
+                price_modifier: parseInt(rowEl.querySelector('.opt-price').value) || 0,
+                duration_modifier: parseInt(rowEl.querySelector('.opt-duration').value) || 0
+            });
+        });
+        
+        option_groups.push({
+            name: groupName,
+            is_required: groupEl.querySelector('.og-required').checked,
+            is_multiple: groupEl.querySelector('.og-multiple').checked,
+            options
+        });
+    });
+
     const payload = {
         id: parseInt(document.getElementById('svcId').value) || 0,
         name: document.getElementById('svcName').value.trim(),
         description: document.getElementById('svcDescription').value.trim(),
         base_price: parseInt(document.getElementById('svcPrice').value) || 0,
         duration_min: parseInt(document.getElementById('svcDuration').value) || 0,
-        category: document.getElementById('svcCategory').value,
         image_url: document.getElementById('svcImage').value.trim(),
-        is_active: document.getElementById('svcActive').checked ? 1 : 0
+        is_active: document.getElementById('svcActive').checked ? 1 : 0,
+        option_groups
     };
 
     if (!payload.name) { showSvcError('Введіть назву'); return; }
@@ -1972,11 +2152,10 @@ async function deleteService() {
     }
 }
 
-function showSvcError(msg) {
-    const el = document.getElementById('svcError');
-    el.textContent = msg;
-    el.style.display = 'block';
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const imgInput = document.getElementById('svcImage');
+    if (imgInput) imgInput.addEventListener('input', e => updateImagePreview(e.target.value));
+});
 
 // Викликаємо одразу після завантаження сторінки
 </script>
