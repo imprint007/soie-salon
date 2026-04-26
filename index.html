@@ -449,6 +449,48 @@
   .admin-section { display: none; }
   .admin-section.active { display: block; animation: fadeUp 0.4s ease; }
 
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 3000;
+    background: rgba(13, 12, 11, 0.85);
+    backdrop-filter: blur(12px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: 100%; max-width: 520px;
+    background: var(--bg-1);
+    border: 1px solid var(--line-2);
+    max-height: 90vh; overflow: auto;
+    animation: authUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-head {
+    padding: 20px 24px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-head h2 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 300; }
+  .modal-close { background: transparent; border: none; color: var(--ink-mute); font-size: 28px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { color: var(--beige); }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 10px; letter-spacing: 0.24em; color: var(--beige); text-transform: uppercase; margin-bottom: 8px; }
+  .form-group input[type=text], .form-group input[type=number], .form-group textarea, .form-group select {
+    width: 100%; padding: 11px 14px;
+    background: var(--bg-2); border: 1px solid var(--line-2); color: var(--ink);
+    font-family: 'Inter', sans-serif; font-size: 14px;
+    transition: border-color 0.3s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--beige); }
+  .form-group textarea { resize: vertical; font-family: 'Inter', sans-serif; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: none; letter-spacing: normal; color: var(--ink); }
+  .checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+  .admin-cta.danger { background: var(--danger); color: var(--bg-0); }
+  .admin-cta.danger:hover { background: #d88a7c; }
+
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
   .stat-card { padding: 22px; background: var(--bg-1); border: 1px solid var(--line); position: relative; overflow: hidden; }
   .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 40px; height: 2px; background: var(--beige); }
@@ -1202,78 +1244,79 @@
   </div>
 
   <!-- SERVICES -->
-  <div class="admin-section" id="ad-services">
+<div class="admin-section" id="ad-services">
     <div class="admin-head">
-      <h1>Послуги <em>та ціни</em></h1>
-      <div class="head-meta">
-        <button class="admin-cta ghost">+ Пакет</button>
-        <button class="admin-cta">+ Послуга</button>
-      </div>
+        <h1>Послуги <em>та ціни</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta" onclick="openServiceModal()">+ Послуга</button>
+        </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-chip active">Усі · 12</button>
-      <button class="filter-chip">Стрижки</button>
-      <button class="filter-chip">Фарбування</button>
-      <button class="filter-chip">Завивка</button>
-      <button class="filter-chip">Догляд</button>
-      <button class="filter-chip">Пакети</button>
+    <div id="servicesList" class="table-card">
+        <div class="svc-row head">
+            <div>Фото</div><div>Назва</div><div>Категорія</div><div>Ціна</div><div>Час</div><div>Статус</div>
+        </div>
+        <div id="servicesRows">
+            <div style="padding: 40px; text-align: center; color: var(--ink-mute);">Завантаження...</div>
+        </div>
     </div>
+</div>
 
-    <div class="table-card">
-      <div class="svc-row head">
-        <div>Фото</div><div>Назва</div><div>Опції</div><div>Ціна від</div><div>Час</div><div>Статус</div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1560869713-7d0a29430803?w=200&q=80');"></div>
-        <div><div class="s-name">Біозавивка</div><div class="s-opts" style="margin-top:3px;">3 опції довжини · 3 типи завитка</div></div>
-        <div class="s-opts">+ 3 дод. послуги</div>
-        <div class="s-price">1 800 ₴</div>
-        <div class="s-time">90–150 хв</div>
-        <div class="s-action"><div class="toggle on"></div></div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1562322140-8baeececf3df?w=200&q=80');"></div>
-        <div><div class="s-name">Фарбування в 1 тон</div><div class="s-opts" style="margin-top:3px;">4 довжини · тип барвника</div></div>
-        <div class="s-opts">+ 5 дод. послуг</div>
-        <div class="s-price">2 300 ₴</div>
-        <div class="s-time">120–180 хв</div>
-        <div class="s-action"><div class="toggle on"></div></div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80');"></div>
-        <div><div class="s-name">Авторська стрижка</div><div class="s-opts" style="margin-top:3px;">3 довжини · з укладкою/без</div></div>
-        <div class="s-opts">+ 2 дод. послуги</div>
-        <div class="s-price">1 300 ₴</div>
-        <div class="s-time">45–90 хв</div>
-        <div class="s-action"><div class="toggle on"></div></div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=200&q=80');"></div>
-        <div><div class="s-name">Ботокс для волосся</div><div class="s-opts" style="margin-top:3px;">3 довжини</div></div>
-        <div class="s-opts">+ 2 дод. послуги</div>
-        <div class="s-price">1 150 ₴</div>
-        <div class="s-time">60–90 хв</div>
-        <div class="s-action"><div class="toggle on"></div></div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1595475207225-428b62bda831?w=200&q=80');"></div>
-        <div><div class="s-name">Балаяж / Омбре</div><div class="s-opts" style="margin-top:3px;">4 довжини · 2 техніки</div></div>
-        <div class="s-opts">+ 4 дод. послуги</div>
-        <div class="s-price">3 560 ₴</div>
-        <div class="s-time">180–240 хв</div>
-        <div class="s-action"><div class="toggle on"></div></div>
-      </div>
-      <div class="svc-row">
-        <div class="s-img" style="background-image:url('https://images.unsplash.com/photo-1605980776566-0486c3ac7617?w=200&q=80');"></div>
-        <div><div class="s-name">Ламінування</div><div class="s-opts" style="margin-top:3px;">3 довжини</div></div>
-        <div class="s-opts">+ 1 дод. послуга</div>
-        <div class="s-price">1 360 ₴</div>
-        <div class="s-time">60–75 хв</div>
-        <div class="s-action"><div class="toggle"></div></div>
-      </div>
+<!-- Service Modal -->
+<div class="modal-overlay" id="serviceModal" onclick="if(event.target===this) closeServiceModal()">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h2 id="serviceModalTitle">Нова послуга</h2>
+            <button class="modal-close" onclick="closeServiceModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="svcId" value="">
+            <div class="form-group">
+                <label>Назва</label>
+                <input type="text" id="svcName" placeholder="Біозавивка">
+            </div>
+            <div class="form-group">
+                <label>Опис</label>
+                <textarea id="svcDescription" rows="3" placeholder="Короткий опис послуги"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ціна (₴)</label>
+                    <input type="number" id="svcPrice" placeholder="1800">
+                </div>
+                <div class="form-group">
+                    <label>Тривалість (хв)</label>
+                    <input type="number" id="svcDuration" placeholder="90">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Категорія</label>
+                <select id="svcCategory">
+                    <option value="hair">Завивка</option>
+                    <option value="cut">Стрижка</option>
+                    <option value="color">Фарбування</option>
+                    <option value="care">Догляд</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>URL зображення (опціонально)</label>
+                <input type="text" id="svcImage" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="svcActive" checked>
+                    <span>Активна (показується клієнтам)</span>
+                </label>
+            </div>
+            <div id="svcError" class="auth-error" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeServiceModal()">Скасувати</button>
+            <button class="admin-cta" id="svcSaveBtn" onclick="saveService()">Зберегти</button>
+            <button class="admin-cta danger" id="svcDeleteBtn" onclick="deleteService()" style="display:none;">Видалити</button>
+        </div>
     </div>
-  </div>
+</div>
 
   <!-- REPORTS -->
   <div class="admin-section" id="ad-reports">
@@ -1708,6 +1751,7 @@ function showAuthError(message) {
     document.getElementById('clientWrap').classList.add('hide');
     document.getElementById('adminWrap').classList.add('show');
     window.scrollTo({ top: 0 });
+    loadServices();
     // reset bio state
     setTimeout(() => {
       const circle = document.getElementById('authBio').querySelector('.bio-circle');
@@ -1773,6 +1817,165 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkSession);
 } else {
     checkSession();
+}
+
+// ===== Services Admin =====
+let currentServices = [];
+
+async function loadServices() {
+    const rows = document.getElementById('servicesRows');
+    rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/services-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        currentServices = data.data;
+        renderServices();
+    } catch (err) {
+        rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--danger);">Помилка: ' + err.message + '</div>';
+    }
+}
+
+function renderServices() {
+    const rows = document.getElementById('servicesRows');
+    if (currentServices.length === 0) {
+        rows.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Немає послуг. Натисніть "+ Послуга"</div>';
+        return;
+    }
+    
+    const categoryNames = { hair: 'Завивка', cut: 'Стрижка', color: 'Фарбування', care: 'Догляд' };
+    
+    rows.innerHTML = currentServices.map(s => `
+        <div class="svc-row" onclick='editService(${s.id})' style="cursor:pointer;">
+            <div class="s-img" style="background-image:url('${s.image_url || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80'}');"></div>
+            <div>
+                <div class="s-name">${escapeHtml(s.name)}</div>
+                <div class="s-opts" style="margin-top:3px;">${escapeHtml(s.description || '').slice(0, 60)}${s.description && s.description.length > 60 ? '…' : ''}</div>
+            </div>
+            <div class="s-opts">${categoryNames[s.category] || s.category || '—'}</div>
+            <div class="s-price">${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
+            <div class="s-time">${s.duration_min} хв</div>
+            <div class="s-action"><div class="toggle ${s.is_active == 1 ? 'on' : ''}"></div></div>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openServiceModal() {
+    document.getElementById('serviceModalTitle').textContent = 'Нова послуга';
+    document.getElementById('svcId').value = '';
+    document.getElementById('svcName').value = '';
+    document.getElementById('svcDescription').value = '';
+    document.getElementById('svcPrice').value = '';
+    document.getElementById('svcDuration').value = '';
+    document.getElementById('svcCategory').value = 'hair';
+    document.getElementById('svcImage').value = '';
+    document.getElementById('svcActive').checked = true;
+    document.getElementById('svcError').style.display = 'none';
+    document.getElementById('svcDeleteBtn').style.display = 'none';
+    document.getElementById('serviceModal').classList.add('show');
+}
+
+function editService(id) {
+    const s = currentServices.find(x => x.id == id);
+    if (!s) return;
+    document.getElementById('serviceModalTitle').textContent = 'Редагувати: ' + s.name;
+    document.getElementById('svcId').value = s.id;
+    document.getElementById('svcName').value = s.name;
+    document.getElementById('svcDescription').value = s.description || '';
+    document.getElementById('svcPrice').value = s.base_price;
+    document.getElementById('svcDuration').value = s.duration_min;
+    document.getElementById('svcCategory').value = s.category || 'hair';
+    document.getElementById('svcImage').value = s.image_url || '';
+    document.getElementById('svcActive').checked = s.is_active == 1;
+    document.getElementById('svcError').style.display = 'none';
+    document.getElementById('svcDeleteBtn').style.display = 'inline-block';
+    document.getElementById('serviceModal').classList.add('show');
+}
+
+function closeServiceModal() {
+    document.getElementById('serviceModal').classList.remove('show');
+}
+
+async function saveService() {
+    const errorEl = document.getElementById('svcError');
+    const btn = document.getElementById('svcSaveBtn');
+    errorEl.style.display = 'none';
+
+    const payload = {
+        id: parseInt(document.getElementById('svcId').value) || 0,
+        name: document.getElementById('svcName').value.trim(),
+        description: document.getElementById('svcDescription').value.trim(),
+        base_price: parseInt(document.getElementById('svcPrice').value) || 0,
+        duration_min: parseInt(document.getElementById('svcDuration').value) || 0,
+        category: document.getElementById('svcCategory').value,
+        image_url: document.getElementById('svcImage').value.trim(),
+        is_active: document.getElementById('svcActive').checked ? 1 : 0
+    };
+
+    if (!payload.name) { showSvcError('Введіть назву'); return; }
+    if (payload.base_price <= 0) { showSvcError('Невірна ціна'); return; }
+    if (payload.duration_min <= 0) { showSvcError('Невірна тривалість'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Збереження...';
+
+    try {
+        const res = await fetch('/api/admin/services-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeServiceModal();
+        await loadServices();
+    } catch (err) {
+        showSvcError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зберегти';
+    }
+}
+
+async function deleteService() {
+    const id = parseInt(document.getElementById('svcId').value);
+    if (!id) return;
+    if (!confirm('Видалити послугу? Це не можна скасувати.')) return;
+
+    const btn = document.getElementById('svcDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Видалення...';
+
+    try {
+        const res = await fetch('/api/admin/services-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeServiceModal();
+        await loadServices();
+    } catch (err) {
+        showSvcError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Видалити';
+    }
+}
+
+function showSvcError(msg) {
+    const el = document.getElementById('svcError');
+    el.textContent = msg;
+    el.style.display = 'block';
 }
 
 // Викликаємо одразу після завантаження сторінки
