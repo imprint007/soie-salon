@@ -648,6 +648,41 @@
   }
   .opt-row-remove:hover { color: var(--danger); border-color: var(--danger); }
   
+/* Компактна сітка опцій (іконка + назва + ціна + час + видалити) */
+  .opt-row.opt-row-compact {
+    display: grid;
+    grid-template-columns: 90px 1fr 80px 80px 32px;
+    gap: 8px;
+    align-items: center;
+  }
+  .opt-row-header.opt-row-header-compact {
+    display: grid;
+    grid-template-columns: 90px 1fr 80px 80px 32px;
+    gap: 8px;
+  }
+
+  /* Кнопки-іконки в компактному аплоадері */
+  .img-up-compact .img-up-btn {
+    padding: 6px 8px;
+    min-width: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-up-compact .img-up-btn svg { display: block; }
+  .img-up-compact .img-up-buttons { gap: 4px; flex-wrap: nowrap; }
+  
+  /* В компактному режимі прев'ю поряд з кнопками */
+  .img-up-compact .img-up-row {
+    align-items: center;
+  }
+  .img-up-compact .img-up-preview {
+    width: 36px; height: 36px;
+  }
+  .img-up-compact .img-up-controls {
+    flex: 0 0 auto;
+  }
+
   .opt-add-row {
     margin-top: 8px;
     background: transparent; border: 1px dashed var(--line-2);
@@ -1984,22 +2019,38 @@
     container.classList.add('img-uploader');
     if (compact) container.classList.add('img-up-compact');
 
-    container.innerHTML = `
-      <div class="img-up-row">
-        <div class="img-up-preview ${currentUrl ? '' : 'empty'}" style="background-image:url('${escapeHtml(currentUrl)}')"></div>
-        <div class="img-up-controls">
-          <div class="img-up-buttons">
-            <button type="button" class="img-up-btn up-upload">📤 Завантажити</button>
-            <button type="button" class="img-up-btn up-url-toggle">🔗 URL</button>
-            <button type="button" class="img-up-btn danger up-clear" ${currentUrl ? '' : 'style="display:none;"'}>✕ Очистити</button>
-          </div>
-          <input type="text" class="img-up-url" placeholder="Або вставте URL картинки" value="${escapeHtml(currentUrl)}">
-          <div class="img-up-progress"><div class="img-up-progress-bar"></div></div>
-          <div class="img-up-error" style="display:none;"></div>
-        </div>
+    const btnUpload = compact
+  ? `<button type="button" class="img-up-btn up-upload" title="Завантажити">
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+     </button>`
+  : `<button type="button" class="img-up-btn up-upload">📤 Завантажити</button>`;
+
+const btnClear = compact
+  ? `<button type="button" class="img-up-btn danger up-clear" title="Очистити" ${currentUrl ? '' : 'style="display:none;"'}>
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+     </button>`
+  : `<button type="button" class="img-up-btn danger up-clear" ${currentUrl ? '' : 'style="display:none;"'}>✕ Очистити</button>`;
+
+const btnUrlToggle = compact
+  ? '' // у компактному режимі URL-поле не потрібне
+  : `<button type="button" class="img-up-btn up-url-toggle">🔗 URL</button>`;
+
+container.innerHTML = `
+  <div class="img-up-row">
+    <div class="img-up-preview ${currentUrl ? '' : 'empty'}" style="background-image:url('${escapeHtml(currentUrl)}')"></div>
+    <div class="img-up-controls">
+      <div class="img-up-buttons">
+        ${btnUpload}
+        ${btnUrlToggle}
+        ${btnClear}
       </div>
-      <input type="file" class="up-file-input" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" style="display:none;">
-    `;
+      <input type="text" class="img-up-url" placeholder="Або вставте URL картинки" value="${escapeHtml(currentUrl)}" ${compact ? 'style="display:none;"' : ''}>
+      <div class="img-up-progress"><div class="img-up-progress-bar"></div></div>
+      <div class="img-up-error" style="display:none;"></div>
+    </div>
+  </div>
+  <input type="file" class="up-file-input" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" style="display:none;">
+`;
 
     const preview = container.querySelector('.img-up-preview');
     const uploadBtn = container.querySelector('.up-upload');
@@ -2036,14 +2087,16 @@
 
     uploadBtn.addEventListener('click', () => fileInput.click());
 
-    urlToggleBtn.addEventListener('click', () => {
-      if (urlInput.style.display === 'none' || compact) {
-        urlInput.style.display = 'block';
-        urlInput.focus();
-      } else {
-        urlInput.style.display = 'none';
-      }
-    });
+    if (urlToggleBtn) {
+  urlToggleBtn.addEventListener('click', () => {
+    if (urlInput.style.display === 'none') {
+      urlInput.style.display = 'block';
+      urlInput.focus();
+    } else {
+      urlInput.style.display = 'none';
+    }
+  });
+}
 
     clearBtn.addEventListener('click', () => setUrl(''));
 
@@ -2249,60 +2302,59 @@
   }
 
   function addOptionGroup(data = {}) {
-    const list = document.getElementById('optionGroupsList');
-    const groupEl = document.createElement('div');
-    groupEl.className = 'opt-group';
-    groupEl.innerHTML = `
-      <div class="opt-group-head">
-        <input type="text" class="og-name" placeholder="Назва групи (Довжина волосся)" value="${escapeHtml(data.name || '')}">
-        <button type="button" class="opt-group-remove" onclick="this.closest('.opt-group').remove()">Видалити групу</button>
-      </div>
-      <div class="opt-group-flags">
-        <label><input type="checkbox" class="og-required" ${data.is_required == 1 ? 'checked' : ''}> Обовʼязково обрати</label>
-        <label><input type="checkbox" class="og-multiple" ${data.is_multiple == 1 ? 'checked' : ''}> Можна обрати декілька</label>
-      </div>
-      <div class="opt-row-header">
-        <div>Іконка</div><div>Назва опції</div><div></div><div>+₴</div><div>+хв</div><div></div>
-      </div>
-      <div class="opt-rows"></div>
-      <button type="button" class="opt-add-row" onclick="addOption(this)">+ Додати опцію</button>
-    `;
-    list.appendChild(groupEl);
+  const list = document.getElementById('optionGroupsList');
+  const groupEl = document.createElement('div');
+  groupEl.className = 'opt-group';
+  groupEl.innerHTML = `
+    <div class="opt-group-head">
+      <input type="text" class="og-name" placeholder="Назва групи (Довжина волосся)" value="${escapeHtml(data.name || '')}">
+      <button type="button" class="opt-group-remove" onclick="this.closest('.opt-group').remove()">Видалити групу</button>
+    </div>
+    <div class="opt-group-flags">
+      <label><input type="checkbox" class="og-required" ${data.is_required == 1 ? 'checked' : ''}> Обовʼязково обрати</label>
+      <label><input type="checkbox" class="og-multiple" ${data.is_multiple == 1 ? 'checked' : ''}> Можна обрати декілька</label>
+    </div>
+    <div class="opt-row-header opt-row-header-compact">
+      <div>Фото</div><div>Назва</div><div>+₴</div><div>+хв</div><div></div>
+    </div>
+    <div class="opt-rows"></div>
+    <button type="button" class="opt-add-row" onclick="addOption(this)">+ Додати опцію</button>
+  `;
+  list.appendChild(groupEl);
 
-    const rowsContainer = groupEl.querySelector('.opt-rows');
-    const opts = data.options || [];
-    if (opts.length > 0) {
-      opts.forEach(opt => addOptionRow(rowsContainer, opt));
-    } else {
-      addOptionRow(rowsContainer, {});
-    }
+  const rowsContainer = groupEl.querySelector('.opt-rows');
+  const opts = data.options || [];
+  if (opts.length > 0) {
+    opts.forEach(opt => addOptionRow(rowsContainer, opt));
+  } else {
+    addOptionRow(rowsContainer, {});
   }
+}
 
   function addOption(btn) {
     addOptionRow(btn.closest('.opt-group').querySelector('.opt-rows'), {});
   }
 
   function addOptionRow(container, data) {
-    const row = document.createElement('div');
-    row.className = 'opt-row';
-    row.innerHTML = `
-      <div class="opt-icon-uploader"></div>
-      <input type="text" class="opt-name" placeholder="Короткі" value="${escapeHtml(data.option_name || '')}">
-      <div></div>
-      <input type="number" class="opt-price" placeholder="0" value="${data.price_modifier || 0}">
-      <input type="number" class="opt-duration" placeholder="0" value="${data.duration_modifier || 0}">
-      <button type="button" class="opt-row-remove" onclick="this.closest('.opt-row').remove()">×</button>
-    `;
-    container.appendChild(row);
+  const row = document.createElement('div');
+  row.className = 'opt-row opt-row-compact';
+  row.innerHTML = `
+    <div class="opt-icon-uploader"></div>
+    <input type="text" class="opt-name" placeholder="Короткі" value="${escapeHtml(data.option_name || '')}">
+    <input type="number" class="opt-price" placeholder="0" value="${data.price_modifier || 0}">
+    <input type="number" class="opt-duration" placeholder="0" value="${data.duration_modifier || 0}">
+    <button type="button" class="opt-row-remove" onclick="this.closest('.opt-row').remove()">×</button>
+  `;
+  container.appendChild(row);
 
-    const uploaderContainer = row.querySelector('.opt-icon-uploader');
-    row._imgUploader = createImageUploader({
-      container: uploaderContainer,
-      folder: 'options',
-      currentUrl: data.icon_url || '',
-      compact: true
-    });
-  }
+  const uploaderContainer = row.querySelector('.opt-icon-uploader');
+  row._imgUploader = createImageUploader({
+    container: uploaderContainer,
+    folder: 'options',
+    currentUrl: data.icon_url || '',
+    compact: true
+  });
+}
 
   async function saveService() {
     const errorEl = document.getElementById('svcError');
