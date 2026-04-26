@@ -847,6 +847,174 @@
     color: var(--beige); font-family: 'JetBrains Mono', monospace;
   }
 
+/* Статистика мастеров */
+  .masters-stats {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .master-stat-row {
+    display: grid;
+    grid-template-columns: 56px 1.5fr 100px 100px 100px;
+    gap: 14px; align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .master-stat-row:last-child { border-bottom: none; }
+  .master-stat-row .ms-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background-size: cover; background-position: center;
+    background-color: var(--bg-3); border: 1px solid var(--line-2);
+  }
+  .master-stat-row .ms-info .ms-name {
+    font-family: 'Fraunces', serif; font-size: 16px;
+  }
+  .master-stat-row .ms-info .ms-role {
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--beige); text-transform: uppercase; margin-top: 2px;
+  }
+  .master-stat-row .ms-info .ms-bar {
+    height: 3px; background: var(--bg-3); margin-top: 8px;
+    overflow: hidden;
+  }
+  .master-stat-row .ms-info .ms-bar-fill {
+    height: 100%; background: var(--beige);
+    transition: width 0.6s;
+  }
+  .master-stat-row .ms-metric {
+    text-align: right;
+  }
+  .master-stat-row .ms-metric .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; color: var(--beige);
+  }
+  .master-stat-row .ms-metric .l {
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--ink-mute); text-transform: uppercase; margin-top: 2px;
+  }
+  
+  /* Послуги по майстрам */
+  .ms-services-block {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ms-services-block:last-child { border-bottom: none; }
+  .ms-services-block .ms-block-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ms-services-block .ms-block-head .ms-name {
+    font-family: 'Fraunces', serif; font-size: 17px;
+  }
+  .ms-services-block .ms-block-head .ms-total {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .ms-services-grid {
+    display: grid; grid-template-columns: 1fr 80px 100px;
+    gap: 8px; padding-left: 16px;
+  }
+  .ms-services-grid .row {
+    display: contents;
+  }
+  .ms-services-grid .row > * {
+    padding: 6px 0; font-size: 13px;
+    border-bottom: 1px solid var(--line);
+  }
+  .ms-services-grid .row .v {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ms-services-grid .row .v.rev { color: var(--beige); }
+  
+  /* Список товарів/послуг (для топу) */
+  .top-list { display: flex; flex-direction: column; gap: 12px; }
+  .top-row {
+    display: grid; grid-template-columns: 32px 1fr auto auto;
+    gap: 10px; align-items: center;
+  }
+  .top-row .tr-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-dim); text-align: center;
+  }
+  .top-row .tr-name {
+    font-family: 'Fraunces', serif; font-size: 14px;
+  }
+  .top-row .tr-bar {
+    width: 80px; height: 3px; background: var(--bg-3);
+    position: relative;
+  }
+  .top-row .tr-bar .tr-bar-fill {
+    height: 100%; background: var(--beige);
+  }
+  .top-row .tr-value {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--beige); min-width: 50px; text-align: right;
+  }
+  
+  /* Timeline (мини-график) */
+  .timeline-bars {
+    display: flex; gap: 4px; align-items: flex-end;
+    height: 200px; padding: 10px 0;
+  }
+  .timeline-bar {
+    flex: 1; background: var(--beige);
+    min-width: 8px;
+    position: relative;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .timeline-bar:hover { opacity: 1; }
+  .timeline-bar .tb-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px); left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-3); border: 1px solid var(--line-2);
+    color: var(--ink); padding: 4px 8px;
+    font-size: 10px; white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+    display: none; pointer-events: none;
+    z-index: 10;
+  }
+  .timeline-bar:hover .tb-tooltip { display: block; }
+  .timeline-labels {
+    display: flex; gap: 4px;
+    font-size: 9px; color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 4px;
+  }
+  .timeline-labels span {
+    flex: 1; text-align: center; min-width: 8px;
+  }
+  
+  /* Booking modal details */
+  .booking-detail-row {
+    display: flex; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .booking-detail-row:last-child { border-bottom: none; }
+  .booking-detail-row .k {
+    color: var(--ink-mute); letter-spacing: 0.06em;
+  }
+  .booking-detail-row .v {
+    text-align: right;
+  }
+  .booking-status-buttons {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin: 14px 0 4px;
+  }
+  .booking-status-buttons .admin-cta.small {
+    padding: 6px 10px; font-size: 10px;
+  }
+  
+  @media (max-width: 720px) {
+    .master-stat-row { 
+      grid-template-columns: 40px 1fr; 
+      grid-template-areas: 'avatar info' 'metric1 metric2' 'metric3 metric3';
+    }
+    .ms-services-grid { grid-template-columns: 1fr 60px 80px; }
+  }
+
 </style>
 </head>
 <body>
@@ -1287,162 +1455,103 @@
 <main class="admin-main">
 
   <!-- DASHBOARD -->
-  <div class="admin-section active" id="ad-dashboard">
+<div class="admin-section active" id="ad-dashboard">
     <div class="admin-head">
-      <h1>Огляд <em>салону</em></h1>
-      <div class="head-meta">
-        <button class="admin-cta ghost">PDF</button>
-        <button class="admin-cta ghost">Excel</button>
-        <button class="admin-cta">+ Нова заявка</button>
-      </div>
+        <h1>Огляд <em>салону</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta ghost" onclick="exportDashboard('pdf')">PDF</button>
+            <button class="admin-cta ghost" onclick="exportDashboard('csv')">CSV</button>
+        </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-chip">Сьогодні</button>
-      <button class="filter-chip active">Місяць</button>
-      <button class="filter-chip">3 місяці</button>
-      <button class="filter-chip">Півроку</button>
-      <button class="filter-chip">Рік</button>
+    <div class="filter-bar" id="dashFilters">
+        <button class="filter-chip" data-period="today">Сьогодні</button>
+        <button class="filter-chip active" data-period="month">Місяць</button>
+        <button class="filter-chip" data-period="3months">3 місяці</button>
+        <button class="filter-chip" data-period="6months">Півроку</button>
+        <button class="filter-chip" data-period="year">Рік</button>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">338 880 <span style="font-size:18px;color:var(--ink-mute);">₴</span></div><div class="stat-delta">↗ +12.4% до попер.</div></div>
-      <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">186</div><div class="stat-delta">↗ +8 нових сьогодні</div></div>
-      <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-value">1 822 <span style="font-size:18px;color:var(--ink-mute);">₴</span></div><div class="stat-delta">↗ +3.1%</div></div>
-      <div class="stat-card"><div class="stat-label">Скасування</div><div class="stat-value">11</div><div class="stat-delta down">↘ 5.9% від усіх</div></div>
+    <div id="dashStats" class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">—</div></div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-card-head">
-        <h3>Виручка · Квітень</h3>
-        <div class="exports">
-          <button class="exp-btn">PDF</button>
-          <button class="exp-btn">XLSX</button>
-          <button class="exp-btn">CSV</button>
+        <div class="chart-card-head">
+            <h3>Динаміка</h3>
         </div>
-      </div>
-      <svg class="chart-svg" viewBox="0 0 800 220" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#e0c9a8" stop-opacity="0.4"/>
-            <stop offset="100%" stop-color="#e0c9a8" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <g stroke="rgba(224,201,168,0.06)" stroke-width="1">
-          <line x1="0" y1="40" x2="800" y2="40"/>
-          <line x1="0" y1="90" x2="800" y2="90"/>
-          <line x1="0" y1="140" x2="800" y2="140"/>
-          <line x1="0" y1="190" x2="800" y2="190"/>
-        </g>
-        <path d="M 0 160 L 50 140 L 100 150 L 150 110 L 200 125 L 250 80 L 300 95 L 350 60 L 400 75 L 450 55 L 500 70 L 550 40 L 600 55 L 650 30 L 700 45 L 750 25 L 800 35 L 800 220 L 0 220 Z" fill="url(#chartGrad)"/>
-        <path d="M 0 160 L 50 140 L 100 150 L 150 110 L 200 125 L 250 80 L 300 95 L 350 60 L 400 75 L 450 55 L 500 70 L 550 40 L 600 55 L 650 30 L 700 45 L 750 25 L 800 35" fill="none" stroke="#e0c9a8" stroke-width="2"/>
-        <g fill="#e0c9a8">
-          <circle cx="350" cy="60" r="3"/>
-          <circle cx="550" cy="40" r="3"/>
-          <circle cx="750" cy="25" r="3"/>
-        </g>
-        <g fill="#5a554d" font-family="JetBrains Mono" font-size="10">
-          <text x="0" y="215">1 кв</text>
-          <text x="250" y="215">10</text>
-          <text x="500" y="215">20</text>
-          <text x="760" y="215">30</text>
-        </g>
-      </svg>
+        <div id="dashTimeline" style="min-height:220px;"></div>
     </div>
 
     <div class="two-col">
-      <div class="table-card">
-        <div class="table-head">
-          <h3>Сьогоднішні заявки</h3>
-          <button class="exp-btn">Усі →</button>
+        <div class="chart-card" style="margin-bottom:0;">
+            <div class="chart-card-head"><h3>Топ майстрів</h3></div>
+            <div id="dashTopMasters"></div>
         </div>
-        <table class="a-table">
-          <thead><tr><th>Час</th><th>Клієнт</th><th class="hide-mobile">Послуга</th><th class="hide-mobile">Майстер</th><th>Статус</th></tr></thead>
-          <tbody>
-            <tr><td class="mono">10:00</td><td>Аліна К.</td><td class="hide-mobile">Фарбування</td><td class="hide-mobile">Марія</td><td><span class="status done">Виконано</span></td></tr>
-            <tr><td class="mono">11:30</td><td>Катерина В.</td><td class="hide-mobile">Біозавивка · Сер.</td><td class="hide-mobile">Анна</td><td><span class="status confirmed">Активна</span></td></tr>
-            <tr><td class="mono">13:30</td><td>Ольга Р.</td><td class="hide-mobile">Стрижка + догляд</td><td class="hide-mobile">Дарія</td><td><span class="status confirmed">Активна</span></td></tr>
-            <tr><td class="mono">15:00</td><td>Марія С.</td><td class="hide-mobile">Фарбування</td><td class="hide-mobile">Марія</td><td><span class="status pending">Депозит</span></td></tr>
-            <tr><td class="mono">17:00</td><td>Наталя П.</td><td class="hide-mobile">Ботокс</td><td class="hide-mobile">Дарія</td><td><span class="status confirmed">Активна</span></td></tr>
-            <tr><td class="mono">18:30</td><td>Ірина М.</td><td class="hide-mobile">Завивка + стрижка</td><td class="hide-mobile">Анна</td><td><span class="status cancelled">Скасовано</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="chart-card" style="margin-bottom:0;">
-        <div class="chart-card-head"><h3>Топ майстрів</h3></div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80');"></div>
-            <div style="flex:1;">
-              <div style="font-family:'Fraunces',serif;font-size:15px;">Анна Воронова</div>
-              <div style="height:4px;background:var(--bg-3);margin-top:6px;position:relative;overflow:hidden;"><div style="width:88%;height:100%;background:var(--beige);"></div></div>
-            </div>
-            <div class="mono" style="color:var(--beige);font-size:13px;">124k ₴</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80');"></div>
-            <div style="flex:1;">
-              <div style="font-family:'Fraunces',serif;font-size:15px;">Марія Бєлова</div>
-              <div style="height:4px;background:var(--bg-3);margin-top:6px;position:relative;overflow:hidden;"><div style="width:72%;height:100%;background:var(--beige);"></div></div>
-            </div>
-            <div class="mono" style="color:var(--beige);font-size:13px;">103k ₴</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80');"></div>
-            <div style="flex:1;">
-              <div style="font-family:'Fraunces',serif;font-size:15px;">Дарія Соколова</div>
-              <div style="height:4px;background:var(--bg-3);margin-top:6px;position:relative;overflow:hidden;"><div style="width:64%;height:100%;background:var(--beige);"></div></div>
-            </div>
-            <div class="mono" style="color:var(--beige);font-size:13px;">85k ₴</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="mc-avatar" style="background-image:url('https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&q=80');"></div>
-            <div style="flex:1;">
-              <div style="font-family:'Fraunces',serif;font-size:15px;">Олена Петрова</div>
-              <div style="height:4px;background:var(--bg-3);margin-top:6px;position:relative;overflow:hidden;"><div style="width:36%;height:100%;background:var(--beige);"></div></div>
-            </div>
-            <div class="mono" style="color:var(--beige);font-size:13px;">47k ₴</div>
-          </div>
+        <div class="chart-card" style="margin-bottom:0;">
+            <div class="chart-card-head"><h3>Топ послуг</h3></div>
+            <div id="dashTopServices"></div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- BOOKINGS -->
-  <div class="admin-section" id="ad-bookings">
+
+<!-- BOOKINGS -->
+<div class="admin-section" id="ad-bookings">
     <div class="admin-head">
-      <h1>Усі <em>заявки</em></h1>
-      <div class="head-meta">
-        <button class="admin-cta ghost">Фільтр</button>
-        <button class="admin-cta ghost">Експорт</button>
-        <button class="admin-cta">+ Заявка</button>
-      </div>
+        <h1>Усі <em>заявки</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta ghost" onclick="exportBookings()">Експорт CSV</button>
+        </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-chip active">Усі · 186</button>
-      <button class="filter-chip">Активні · 42</button>
-      <button class="filter-chip">Виконано · 133</button>
-      <button class="filter-chip">Скасовано · 11</button>
+    <div class="filter-bar" id="bookingsFilters">
+        <button class="filter-chip active" data-status="all">Усі</button>
+        <button class="filter-chip" data-status="pending">Очікують</button>
+        <button class="filter-chip" data-status="confirmed">Активні</button>
+        <button class="filter-chip" data-status="done">Виконано</button>
+        <button class="filter-chip" data-status="cancelled">Скасовано</button>
     </div>
 
     <div class="table-card">
-      <table class="a-table">
-        <thead><tr><th>Код</th><th>Клієнт</th><th class="hide-mobile">Послуга</th><th class="hide-mobile">Майстер</th><th>Дата</th><th class="hide-mobile">Сума</th><th>Статус</th></tr></thead>
-        <tbody>
-          <tr><td class="mono">0428</td><td>Катерина В.</td><td class="hide-mobile">Біозавивка · Середні + маска</td><td class="hide-mobile">Анна Воронова</td><td class="mono">25.04 · 13:30</td><td class="hide-mobile mono" style="color:var(--beige);">2 680 ₴</td><td><span class="status confirmed">Активна</span></td></tr>
-          <tr><td class="mono">0427</td><td>Аліна К.</td><td class="hide-mobile">Фарбування 1 тон + укладка</td><td class="hide-mobile">Марія Бєлова</td><td class="mono">25.04 · 10:00</td><td class="hide-mobile mono" style="color:var(--beige);">2 880 ₴</td><td><span class="status done">Виконано</span></td></tr>
-          <tr><td class="mono">0426</td><td>Ольга Р.</td><td class="hide-mobile">Пакет: Стрижка + догляд</td><td class="hide-mobile">Дарія Соколова</td><td class="mono">25.04 · 13:30</td><td class="hide-mobile mono" style="color:var(--beige);">2 160 ₴</td><td><span class="status confirmed">Активна</span></td></tr>
-          <tr><td class="mono">0425</td><td>Марія С.</td><td class="hide-mobile">Балаяж + тонування</td><td class="hide-mobile">Марія Бєлова</td><td class="mono">25.04 · 15:00</td><td class="hide-mobile mono" style="color:var(--beige);">5 120 ₴</td><td><span class="status pending">Депозит</span></td></tr>
-          <tr><td class="mono">0424</td><td>Наталя П.</td><td class="hide-mobile">Ботокс для волосся</td><td class="hide-mobile">Дарія Соколова</td><td class="mono">25.04 · 17:00</td><td class="hide-mobile mono" style="color:var(--beige);">1 960 ₴</td><td><span class="status confirmed">Активна</span></td></tr>
-          <tr><td class="mono">0423</td><td>Ірина М.</td><td class="hide-mobile">Завивка + стрижка</td><td class="hide-mobile">Анна Воронова</td><td class="mono">25.04 · 18:30</td><td class="hide-mobile mono" style="color:var(--beige);">3 160 ₴</td><td><span class="status cancelled">Скасовано</span></td></tr>
-          <tr><td class="mono">0422</td><td>Світлана Т.</td><td class="hide-mobile">Фарбування коренів</td><td class="hide-mobile">Олена Петрова</td><td class="mono">24.04 · 11:00</td><td class="hide-mobile mono" style="color:var(--beige);">1 520 ₴</td><td><span class="status done">Виконано</span></td></tr>
-          <tr><td class="mono">0421</td><td>Анна Л.</td><td class="hide-mobile">Авторська стрижка</td><td class="hide-mobile">Дарія Соколова</td><td class="mono">24.04 · 16:30</td><td class="hide-mobile mono" style="color:var(--beige);">1 280 ₴</td><td><span class="status done">Виконано</span></td></tr>
-        </tbody>
-      </table>
+        <table class="a-table">
+            <thead>
+                <tr>
+                    <th>Код</th>
+                    <th>Клієнт</th>
+                    <th class="hide-mobile">Послуга</th>
+                    <th class="hide-mobile">Майстер</th>
+                    <th>Дата</th>
+                    <th class="hide-mobile">Сума</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody id="bookingsRows">
+                <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>
+            </tbody>
+        </table>
     </div>
-  </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal-overlay" id="bookingModal" onclick="if(event.target===this) closeBookingModal()">
+    <div class="modal-card" style="max-width: 560px;">
+        <div class="modal-head">
+            <h2 id="bookingModalTitle">Заявка</h2>
+            <button class="modal-close" onclick="closeBookingModal()">×</button>
+        </div>
+        <div class="modal-body" id="bookingModalBody">
+            <!-- заполняется JS -->
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeBookingModal()">Закрити</button>
+            <button class="admin-cta danger" id="bkDeleteBtn" onclick="deleteBooking()">Видалити</button>
+        </div>
+    </div>
+</div>
 
   <!-- MASTERS -->
 <div class="admin-section" id="ad-masters">
@@ -1607,189 +1716,146 @@
 </div>
 
   <!-- REPORTS -->
-  <div class="admin-section" id="ad-reports">
+<div class="admin-section" id="ad-reports">
     <div class="admin-head">
-      <h1>Звітність <em>за період</em></h1>
-      <div class="head-meta">
-        <button class="admin-cta ghost">PDF</button>
-        <button class="admin-cta ghost">Excel</button>
-      </div>
+        <h1>Звітність <em>за період</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta ghost" onclick="exportReports()">CSV</button>
+            <button class="admin-cta ghost" onclick="window.print()">Друк / PDF</button>
+        </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-chip">Місяць</button>
-      <button class="filter-chip">3 місяці</button>
-      <button class="filter-chip active">Півроку</button>
-      <button class="filter-chip">Рік</button>
+    <div class="filter-bar" id="reportsFilters">
+        <button class="filter-chip" data-period="month">Місяць</button>
+        <button class="filter-chip" data-period="3months">3 місяці</button>
+        <button class="filter-chip active" data-period="6months">Півроку</button>
+        <button class="filter-chip" data-period="year">Рік</button>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">1.71 <span style="font-size:18px;color:var(--ink-mute);">M₴</span></div><div class="stat-delta">↗ +18% до попер.</div></div>
-      <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">1 042</div><div class="stat-delta">↗ +142</div></div>
-      <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">58</div><div class="stat-delta">5.6% від усіх</div></div>
-      <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">1.17 <span style="font-size:18px;color:var(--ink-mute);">M₴</span></div><div class="stat-delta">68.7% маржа</div></div>
+    <div id="reportsStats" class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">—</div></div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-card-head">
-        <h3>Динаміка · Листопад — Квітень</h3>
-        <div class="exports"><button class="exp-btn">PDF</button><button class="exp-btn">XLSX</button></div>
-      </div>
-      <svg class="chart-svg" viewBox="0 0 800 220" preserveAspectRatio="none">
-        <g stroke="rgba(224,201,168,0.06)" stroke-width="1">
-          <line x1="0" y1="50" x2="800" y2="50"/>
-          <line x1="0" y1="100" x2="800" y2="100"/>
-          <line x1="0" y1="150" x2="800" y2="150"/>
-        </g>
-        <g fill="#e0c9a8">
-          <rect x="30" y="120" width="70" height="80" opacity="0.7"/>
-          <rect x="160" y="100" width="70" height="100" opacity="0.75"/>
-          <rect x="290" y="80" width="70" height="120" opacity="0.8"/>
-          <rect x="420" y="110" width="70" height="90" opacity="0.75"/>
-          <rect x="550" y="70" width="70" height="130" opacity="0.85"/>
-          <rect x="680" y="40" width="70" height="160" opacity="1"/>
-        </g>
-        <g fill="#5a554d" font-family="JetBrains Mono" font-size="10">
-          <text x="50" y="218">Лис</text><text x="180" y="218">Гру</text><text x="310" y="218">Січ</text>
-          <text x="440" y="218">Лют</text><text x="570" y="218">Бер</text><text x="700" y="218">Кві</text>
-        </g>
-      </svg>
+        <div class="chart-card-head"><h3>Динаміка</h3></div>
+        <div id="reportsTimeline" style="min-height:220px;"></div>
+    </div>
+
+    <!-- Главная фича — статистика по мастерам -->
+    <div class="chart-card">
+        <div class="chart-card-head">
+            <h3>Статистика майстрів</h3>
+            <span style="font-size:11px;color:var(--ink-mute);">Кількість робіт та виручка</span>
+        </div>
+        <div id="reportsMasters" class="masters-stats"></div>
+    </div>
+
+    <!-- Какие услуги делал каждый мастер -->
+    <div class="chart-card">
+        <div class="chart-card-head"><h3>Послуги майстрів</h3></div>
+        <div id="reportsMasterServices"></div>
     </div>
 
     <div class="two-col">
-      <div class="chart-card" style="margin-bottom:0;">
-        <div class="chart-card-head"><h3>Популярні послуги</h3></div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Фарбування</span><span class="mono" style="color:var(--beige);">312</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:90%;height:100%;background:var(--beige);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Стрижки</span><span class="mono" style="color:var(--beige);">248</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:72%;height:100%;background:var(--beige);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Біозавивка</span><span class="mono" style="color:var(--beige);">186</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:54%;height:100%;background:var(--beige);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Догляд/Ботокс</span><span class="mono" style="color:var(--beige);">164</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:48%;height:100%;background:var(--beige);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Балаяж</span><span class="mono" style="color:var(--beige);">132</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:38%;height:100%;background:var(--beige);"></div></div></div>
+        <div class="chart-card" style="margin-bottom:0;">
+            <div class="chart-card-head"><h3>Популярні послуги</h3></div>
+            <div id="reportsTopServices"></div>
         </div>
-      </div>
-
-      <div class="chart-card" style="margin-bottom:0;">
-        <div class="chart-card-head"><h3>Скасування · причини</h3></div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Перенесення</span><span class="mono" style="color:var(--danger);">28</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:48%;height:100%;background:var(--danger);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Клієнт не прийшов</span><span class="mono" style="color:var(--danger);">16</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:28%;height:100%;background:var(--danger);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Скасування клієнтом</span><span class="mono" style="color:var(--danger);">10</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:17%;height:100%;background:var(--danger);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'Fraunces',serif;">Хвороба майстра</span><span class="mono" style="color:var(--danger);">4</span></div><div style="height:3px;background:var(--bg-3);"><div style="width:7%;height:100%;background:var(--danger);"></div></div></div>
+        <div class="chart-card" style="margin-bottom:0;">
+            <div class="chart-card-head"><h3>Скасування</h3></div>
+            <div id="reportsCancellations"></div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
   <!-- EXPENSES -->
-  <div class="admin-section" id="ad-expenses">
+<div class="admin-section" id="ad-expenses">
     <div class="admin-head">
-      <h1>Витрати <em>салону</em></h1>
-      <div class="head-meta">
-        <button class="admin-cta ghost">Excel</button>
-        <button class="admin-cta">+ Витрата</button>
-      </div>
+        <h1>Витрати <em>салону</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta ghost" onclick="exportExpenses()">CSV</button>
+            <button class="admin-cta" onclick="openExpenseModal()">+ Витрата</button>
+        </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-chip active">Квітень</button>
-      <button class="filter-chip">3 місяці</button>
-      <button class="filter-chip">Рік</button>
+    <div class="filter-bar" id="expensesFilters">
+        <button class="filter-chip active" data-period="month">Місяць</button>
+        <button class="filter-chip" data-period="3months">3 місяці</button>
+        <button class="filter-chip" data-period="year">Рік</button>
     </div>
 
-    <div class="expenses-summary">
-      <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">105 920 <span style="font-size:18px;color:var(--ink-mute);">₴</span></div><div class="stat-delta down">↗ +4.2%</div></div>
-      <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">232 960 <span style="font-size:18px;color:var(--ink-mute);">₴</span></div><div class="stat-delta">68.7% маржа</div></div>
-      <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">8</div><div class="stat-delta">42 операції</div></div>
+    <div id="expensesSummary" class="expenses-summary">
+        <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">—</div></div>
+        <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">—</div></div>
     </div>
 
     <div class="table-card">
-      <div class="table-head"><h3>Операції · Квітень 2026</h3><button class="exp-btn">Експорт</button></div>
-      <table class="a-table">
-        <thead><tr><th>Дата</th><th>Категорія</th><th class="hide-mobile">Опис</th><th>Сума</th></tr></thead>
-        <tbody>
-          <tr><td class="mono">22.04</td><td>Оренда</td><td class="hide-mobile">Оренда приміщення · квітень</td><td class="mono" style="color:var(--danger);">— 38 000 ₴</td></tr>
-          <tr><td class="mono">20.04</td><td>Витратні</td><td class="hide-mobile">Фарба Wella Koleston · 12 шт</td><td class="mono" style="color:var(--danger);">— 11 360 ₴</td></tr>
-          <tr><td class="mono">18.04</td><td>Витратні</td><td class="hide-mobile">Засоби для завивки · набір</td><td class="mono" style="color:var(--danger);">— 5 680 ₴</td></tr>
-          <tr><td class="mono">15.04</td><td>Зарплата</td><td class="hide-mobile">Аванс майстрам · квітень</td><td class="mono" style="color:var(--danger);">— 27 200 ₴</td></tr>
-          <tr><td class="mono">12.04</td><td>Комунальні</td><td class="hide-mobile">Електрика, вода</td><td class="mono" style="color:var(--danger);">— 3 360 ₴</td></tr>
-          <tr><td class="mono">10.04</td><td>Маркетинг</td><td class="hide-mobile">Таргет Instagram · квітень</td><td class="mono" style="color:var(--danger);">— 9 600 ₴</td></tr>
-          <tr><td class="mono">08.04</td><td>Витратні</td><td class="hide-mobile">Доглядові маски · 20 шт</td><td class="mono" style="color:var(--danger);">— 5 120 ₴</td></tr>
-          <tr><td class="mono">05.04</td><td>Обладнання</td><td class="hide-mobile">Новий стерилізатор</td><td class="mono" style="color:var(--danger);">— 5 600 ₴</td></tr>
-        </tbody>
-      </table>
+        <div class="table-head">
+            <h3>Операції</h3>
+        </div>
+        <table class="a-table">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Категорія</th>
+                    <th class="hide-mobile">Опис</th>
+                    <th>Сума</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="expensesRows">
+                <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>
+            </tbody>
+        </table>
     </div>
-  </div>
+</div>
 
-  <!-- SETTINGS -->
-  <div class="admin-section" id="ad-settings">
-    <div class="admin-head">
-      <h1>Налаштування <em>бронювання</em></h1>
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expenseModal" onclick="if(event.target===this) closeExpenseModal()">
+    <div class="modal-card" style="max-width: 480px;">
+        <div class="modal-head">
+            <h2 id="expenseModalTitle">Нова витрата</h2>
+            <button class="modal-close" onclick="closeExpenseModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="expId" value="">
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" id="expDate">
+            </div>
+            <div class="form-group">
+                <label>Категорія</label>
+                <select id="expCategory">
+                    <option value="Оренда">Оренда</option>
+                    <option value="Зарплата">Зарплата</option>
+                    <option value="Витратні">Витратні матеріали</option>
+                    <option value="Комунальні">Комунальні</option>
+                    <option value="Маркетинг">Маркетинг</option>
+                    <option value="Обладнання">Обладнання</option>
+                    <option value="Інше">Інше</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Опис</label>
+                <input type="text" id="expDescription" placeholder="Деталі витрати">
+            </div>
+            <div class="form-group">
+                <label>Сума (₴)</label>
+                <input type="number" id="expAmount" placeholder="0">
+            </div>
+            <div id="expError" class="auth-error" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeExpenseModal()">Скасувати</button>
+            <button class="admin-cta" id="expSaveBtn" onclick="saveExpense()">Зберегти</button>
+            <button class="admin-cta danger" id="expDeleteBtn" onclick="deleteExpense()" style="display:none;">Видалити</button>
+        </div>
     </div>
-
-    <div class="chart-card">
-      <div class="chart-card-head"><h3>Депозит та оплата</h3></div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Розмір депозиту</div><div class="s-hint">Сума, яка утримується для підтвердження бронювання. Залишок клієнт сплачує в салоні.</div></div>
-        <div class="setting-control"><input type="number" value="600" style="width:140px;"> <span style="color:var(--ink-mute);">₴</span></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Платіжний провайдер</div><div class="s-hint">Де приймаються платежі. Підключається окремо після реєстрації в системі.</div></div>
-        <div class="setting-control"><select><option>Не підключено</option><option>LiqPay</option><option>Fondy</option><option>WayForPay</option><option>Monobank Acquiring</option><option>Portmone</option></select></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Повернення депозиту при своєчасному скасуванні</div><div class="s-hint">Якщо клієнт скасував заздалегідь — депозит повертається автоматично.</div></div>
-        <div class="setting-control"><div class="toggle on"></div></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-head"><h3>Скасування та перенесення</h3></div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Скасування дозволено за</div><div class="s-hint">За скільки годин до візиту клієнт може скасувати безкоштовно.</div></div>
-        <div class="setting-control"><input type="number" value="24" style="width:90px;"> <span style="color:var(--ink-mute);">год</span></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Перенесення дозволено за</div><div class="s-hint">За скільки годин клієнт може перенести бронювання.</div></div>
-        <div class="setting-control"><input type="number" value="12" style="width:90px;"> <span style="color:var(--ink-mute);">год</span></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Максимум перенесень</div><div class="s-hint">Скільки разів клієнт може перенести одне бронювання.</div></div>
-        <div class="setting-control"><input type="number" value="2" style="width:90px;"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-head"><h3>Інтеграції</h3></div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Google Calendar</div><div class="s-hint">Заявки автоматично створюють події в календарі салону.</div></div>
-        <div class="setting-control" style="display:flex;gap:12px;align-items:center;"><span style="font-size:11px;color:var(--success);letter-spacing:0.14em;text-transform:uppercase;">Підключено</span><div class="toggle on"></div></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Telegram-бот</div><div class="s-hint">Сповіщення про нові бронювання надходять у загальний чат або майстрам особисто.</div></div>
-        <div class="setting-control" style="display:flex;gap:12px;align-items:center;"><span style="font-size:11px;color:var(--success);letter-spacing:0.14em;text-transform:uppercase;">@soie_bot</span><div class="toggle on"></div></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Email-сповіщення</div><div class="s-hint">Клієнт отримує лист з деталями бронювання та посиланням на керування.</div></div>
-        <div class="setting-control"><div class="toggle on"></div></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">AI-приміряння зачісок</div><div class="s-hint">Ліміт генерацій на одного клієнта на місяць.</div></div>
-        <div class="setting-control"><input type="number" value="5" style="width:90px;"></div>
-      </div>
-    </div>
-
-    <div class="chart-card" style="margin-bottom:0;">
-      <div class="chart-card-head"><h3>Безпека</h3></div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Вхід в адмінку за біометрією</div><div class="s-hint">Face ID / Touch ID на мобільних пристроях. Пароль зберігається у зв'язці ключів.</div></div>
-        <div class="setting-control"><div class="toggle on"></div></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info"><div class="s-name">Двофакторна автентифікація</div><div class="s-hint">Код підтвердження при вході з нового пристрою.</div></div>
-        <div class="setting-control"><div class="toggle on"></div></div>
-      </div>
-    </div>
-  </div>
+</div>
 
 </main>
 
@@ -2036,7 +2102,7 @@
     document.getElementById('clientWrap').classList.add('hide');
     document.getElementById('adminWrap').classList.add('show');
     window.scrollTo({ top: 0 });
-    loadServices();
+    loadDashboard();
     setTimeout(() => {
       const circle = document.getElementById('authBio').querySelector('.bio-circle');
       const label = document.getElementById('authBio').querySelector('.bio-label');
@@ -2071,9 +2137,12 @@
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('ad-' + name).classList.add('active');
     
-    // Загружаем данные при переходе в раздел
     if (name === 'services') loadServices();
     if (name === 'masters') loadMasters();
+    if (name === 'bookings') loadBookings();
+    if (name === 'expenses') loadExpenses();
+    if (name === 'reports') loadReports();
+    if (name === 'dashboard') loadDashboard();
 }
 
   async function checkSession() {
@@ -2086,7 +2155,7 @@
       if (response.ok && data.success) {
         document.getElementById('clientWrap').classList.add('hide');
         document.getElementById('adminWrap').classList.add('show');
-        if (typeof loadServices === 'function') loadServices();
+        if (typeof loadDashboard === 'function') loadDashboard();
         console.log('Залогінений як:', data.admin.username);
       } else {
         console.log('Не залогінений (нормально для відвідувачів)');
@@ -2768,6 +2837,614 @@ async function deleteMaster() {
         btn.disabled = false;
         btn.textContent = 'Видалити';
     }
+}
+
+// ============================================
+// АНАЛИТИКА И ОТЧЁТЫ — общие функции
+// ============================================
+function fmtMoney(n) {
+    return Number(n || 0).toLocaleString('uk-UA') + ' ₴';
+}
+function fmtMoneyShort(n) {
+    n = Number(n || 0);
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+    if (n >= 1000) return Math.round(n / 1000) + 'k';
+    return n.toString();
+}
+function fmtDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function fmtDateShort(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+}
+
+function renderStatCard(grid, label, value, hint = '') {
+    const cards = grid.querySelectorAll('.stat-card');
+    // Просто перерисуем — гридовые карточки одинаковы
+    return { label, value, hint };
+}
+
+function renderTimeline(container, timeline, valueKey = 'revenue') {
+    if (!timeline || timeline.length === 0) {
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
+        return;
+    }
+    const max = Math.max(...timeline.map(t => Number(t[valueKey]) || 0)) || 1;
+    
+    const barsHtml = timeline.map(t => {
+        const v = Number(t[valueKey]) || 0;
+        const h = max > 0 ? (v / max * 100) : 0;
+        const tooltip = valueKey === 'revenue' ? fmtMoney(v) : `${v} заявок`;
+        return `<div class="timeline-bar" style="height:${h}%;">
+            <div class="tb-tooltip">${fmtDateShort(t.period)}<br>${tooltip}</div>
+        </div>`;
+    }).join('');
+    
+    const labelsHtml = timeline.map(t => `<span>${fmtDateShort(t.period)}</span>`).join('');
+    
+    container.innerHTML = `
+        <div class="timeline-bars">${barsHtml}</div>
+        <div class="timeline-labels">${labelsHtml}</div>
+    `;
+}
+
+function renderTopList(container, items, valueLabel = 'грн') {
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
+    }
+    const max = Math.max(...items.map(i => Number(i.bookings_count) || 0)) || 1;
+    
+    container.innerHTML = '<div class="top-list">' + items.slice(0, 10).map((item, i) => {
+        const cnt = Number(item.bookings_count) || 0;
+        const w = (cnt / max * 100);
+        const value = item.revenue !== undefined 
+            ? fmtMoneyShort(item.revenue) + ' ₴' 
+            : cnt + ' разів';
+        return `
+            <div class="top-row">
+                <div class="tr-num">${String(i + 1).padStart(2, '0')}</div>
+                <div class="tr-name">${escapeHtml(item.name || item.master_name || '—')}</div>
+                <div class="tr-bar"><div class="tr-bar-fill" style="width:${w}%"></div></div>
+                <div class="tr-value">${value}</div>
+            </div>`;
+    }).join('') + '</div>';
+}
+
+// ============================================
+// ОБЗОР (Dashboard)
+// ============================================
+let dashCurrentPeriod = 'month';
+let lastDashData = null;
+
+async function loadDashboard() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + dashCurrentPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        lastDashData = data;
+        renderDashboard(data);
+    } catch (err) {
+        console.error('Dashboard load:', err);
+    }
+}
+
+function renderDashboard(d) {
+    // Stats cards
+    const grid = document.getElementById('dashStats');
+    const s = d.summary;
+    grid.innerHTML = `
+        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">${fmtMoney(s.revenue)}</div><div class="stat-delta">${s.done_count} виконано</div></div>
+        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">${s.total_bookings}</div><div class="stat-delta">${s.confirmed_count} активних</div></div>
+        <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-value">${fmtMoney(s.avg_check)}</div></div>
+        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">${s.cancelled_count}</div><div class="stat-delta down">${s.cancellation_rate}% від усіх</div></div>
+    `;
+    
+    // Timeline
+    renderTimeline(document.getElementById('dashTimeline'), d.timeline, 'revenue');
+    
+    // Top masters
+    renderTopList(document.getElementById('dashTopMasters'), d.top_masters);
+    
+    // Top services
+    renderTopList(document.getElementById('dashTopServices'), d.top_services);
+}
+
+// Кликаем по фильтрам периода
+document.addEventListener('click', e => {
+    if (e.target.matches('#dashFilters .filter-chip')) {
+        document.querySelectorAll('#dashFilters .filter-chip').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        dashCurrentPeriod = e.target.dataset.period;
+        loadDashboard();
+    }
+});
+
+// ============================================
+// ЗАЯВКИ (Bookings)
+// ============================================
+let currentBookings = [];
+let bookingsFilterStatus = 'all';
+
+async function loadBookings() {
+    const tbody = document.getElementById('bookingsRows');
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>';
+    
+    try {
+        const res = await fetch('/api/admin/bookings-list.php?status=' + bookingsFilterStatus, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        currentBookings = data.data;
+        renderBookings();
+        renderBookingsFilters(data.counts);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--danger);">Помилка: ${err.message}</td></tr>`;
+    }
+}
+
+function renderBookingsFilters(counts) {
+    const labels = {
+        all: 'Усі',
+        pending: 'Очікують',
+        confirmed: 'Активні',
+        done: 'Виконано',
+        cancelled: 'Скасовано'
+    };
+    document.querySelectorAll('#bookingsFilters .filter-chip').forEach(chip => {
+        const status = chip.dataset.status;
+        chip.textContent = `${labels[status]} · ${counts[status] || 0}`;
+    });
+}
+
+function statusBadge(status) {
+    const map = {
+        pending:   { cls: 'pending',   text: 'Очікує' },
+        confirmed: { cls: 'confirmed', text: 'Активна' },
+        done:      { cls: 'done',      text: 'Виконано' },
+        cancelled: { cls: 'cancelled', text: 'Скасовано' }
+    };
+    const s = map[status] || { cls: 'pending', text: status };
+    return `<span class="status ${s.cls}">${s.text}</span>`;
+}
+
+function renderBookings() {
+    const tbody = document.getElementById('bookingsRows');
+    if (currentBookings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink-mute);">Немає заявок</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = currentBookings.map(b => `
+        <tr onclick="openBookingModal(${b.id})" style="cursor:pointer;">
+            <td class="mono">${escapeHtml(b.booking_code || '')}</td>
+            <td>${escapeHtml(b.client_name)}</td>
+            <td class="hide-mobile">${escapeHtml(b.service_name || '—')}</td>
+            <td class="hide-mobile">${escapeHtml(b.master_name || '—')}</td>
+            <td class="mono">${fmtDateShort(b.booking_date)} · ${(b.booking_time || '').slice(0,5)}</td>
+            <td class="hide-mobile mono" style="color:var(--beige);">${fmtMoney(b.total_price)}</td>
+            <td>${statusBadge(b.status)}</td>
+        </tr>
+    `).join('');
+}
+
+document.addEventListener('click', e => {
+    if (e.target.matches('#bookingsFilters .filter-chip')) {
+        document.querySelectorAll('#bookingsFilters .filter-chip').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        bookingsFilterStatus = e.target.dataset.status;
+        loadBookings();
+    }
+});
+
+let currentBookingId = null;
+
+function openBookingModal(id) {
+    const b = currentBookings.find(x => x.id == id);
+    if (!b) return;
+    currentBookingId = id;
+    
+    document.getElementById('bookingModalTitle').textContent = `Заявка ${b.booking_code || '#' + b.id}`;
+    
+    const body = document.getElementById('bookingModalBody');
+    body.innerHTML = `
+        <div class="booking-detail-row"><span class="k">Клієнт</span><span class="v"><strong>${escapeHtml(b.client_name)}</strong></span></div>
+        <div class="booking-detail-row"><span class="k">Телефон</span><span class="v"><a href="tel:${escapeHtml(b.client_phone)}" style="color:var(--beige);text-decoration:none;">${escapeHtml(b.client_phone)}</a></span></div>
+        <div class="booking-detail-row"><span class="k">Email</span><span class="v"><a href="mailto:${escapeHtml(b.client_email)}" style="color:var(--beige);text-decoration:none;">${escapeHtml(b.client_email)}</a></span></div>
+        <div class="booking-detail-row"><span class="k">Послуга</span><span class="v">${escapeHtml(b.service_name || '—')}</span></div>
+        <div class="booking-detail-row"><span class="k">Майстер</span><span class="v">${escapeHtml(b.master_name || '—')}</span></div>
+        <div class="booking-detail-row"><span class="k">Дата і час</span><span class="v">${fmtDate(b.booking_date)} · ${(b.booking_time || '').slice(0,5)}</span></div>
+        <div class="booking-detail-row"><span class="k">Тривалість</span><span class="v">${b.duration_min} хв</span></div>
+        <div class="booking-detail-row"><span class="k">Сума</span><span class="v" style="color:var(--beige);font-family:'JetBrains Mono',monospace;">${fmtMoney(b.total_price)}</span></div>
+        <div class="booking-detail-row"><span class="k">Депозит</span><span class="v">${fmtMoney(b.deposit_amount)} · ${b.deposit_paid == 1 ? 'сплачено' : 'не сплачено'}</span></div>
+        ${b.client_comment ? `<div class="booking-detail-row"><span class="k">Коментар</span><span class="v">${escapeHtml(b.client_comment)}</span></div>` : ''}
+        <div class="booking-detail-row"><span class="k">Поточний статус</span><span class="v">${statusBadge(b.status)}</span></div>
+        
+        <div style="margin-top:14px;font-size:10px;letter-spacing:0.18em;color:var(--ink-mute);text-transform:uppercase;">Змінити статус:</div>
+        <div class="booking-status-buttons">
+            <button class="admin-cta ghost small" onclick="updateBookingStatus('pending')">Очікує</button>
+            <button class="admin-cta ghost small" onclick="updateBookingStatus('confirmed')">Активна</button>
+            <button class="admin-cta ghost small" onclick="updateBookingStatus('done')">Виконано</button>
+            <button class="admin-cta ghost small" onclick="updateBookingStatus('cancelled')">Скасувати</button>
+        </div>
+    `;
+    
+    document.getElementById('bookingModal').classList.add('show');
+}
+
+function closeBookingModal() {
+    document.getElementById('bookingModal').classList.remove('show');
+    currentBookingId = null;
+}
+
+async function updateBookingStatus(newStatus) {
+    if (!currentBookingId) return;
+    try {
+        const res = await fetch('/api/admin/bookings-update-status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: currentBookingId, status: newStatus })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeBookingModal();
+        await loadBookings();
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+async function deleteBooking() {
+    if (!currentBookingId) return;
+    if (!confirm('Видалити заявку повністю? Це не можна скасувати.')) return;
+    
+    try {
+        const res = await fetch('/api/admin/bookings-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: currentBookingId })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeBookingModal();
+        await loadBookings();
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+function exportBookings() {
+    if (currentBookings.length === 0) { alert('Немає даних'); return; }
+    const headers = ['Код', 'Клієнт', 'Телефон', 'Email', 'Послуга', 'Майстер', 'Дата', 'Час', 'Сума', 'Статус'];
+    const rows = currentBookings.map(b => [
+        b.booking_code, b.client_name, b.client_phone, b.client_email,
+        b.service_name || '', b.master_name || '',
+        b.booking_date, (b.booking_time || '').slice(0,5),
+        b.total_price, b.status
+    ]);
+    downloadCsv('bookings.csv', headers, rows);
+}
+
+// ============================================
+// ВИТРАТИ (Expenses)
+// ============================================
+let currentExpenses = [];
+let expensesFilterPeriod = 'month';
+
+async function loadExpenses() {
+    const tbody = document.getElementById('expensesRows');
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>';
+    
+    try {
+        const res = await fetch('/api/admin/expenses-list.php?period=' + expensesFilterPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        currentExpenses = data.data;
+        renderExpenses(data);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--danger);">Помилка: ${err.message}</td></tr>`;
+    }
+}
+
+function renderExpenses(data) {
+    // Summary
+    const summary = document.getElementById('expensesSummary');
+    summary.innerHTML = `
+        <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">${fmtMoney(data.total)}</div></div>
+        <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">${(data.by_category || []).length}</div></div>
+        <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">${currentExpenses.length}</div></div>
+    `;
+    
+    // Rows
+    const tbody = document.getElementById('expensesRows');
+    if (currentExpenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-mute);">Немає витрат за період</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = currentExpenses.map(e => `
+        <tr onclick="editExpense(${e.id})" style="cursor:pointer;">
+            <td class="mono">${fmtDateShort(e.expense_date)}</td>
+            <td>${escapeHtml(e.category)}</td>
+            <td class="hide-mobile">${escapeHtml(e.description || '')}</td>
+            <td class="mono" style="color:var(--danger);">— ${fmtMoney(e.amount)}</td>
+            <td style="color:var(--ink-mute);">→</td>
+        </tr>
+    `).join('');
+}
+
+document.addEventListener('click', e => {
+    if (e.target.matches('#expensesFilters .filter-chip')) {
+        document.querySelectorAll('#expensesFilters .filter-chip').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        expensesFilterPeriod = e.target.dataset.period;
+        loadExpenses();
+    }
+});
+
+function showExpError(msg) {
+    const el = document.getElementById('expError');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function closeExpenseModal() {
+    document.getElementById('expenseModal').classList.remove('show');
+}
+
+function openExpenseModal() {
+    document.getElementById('expenseModalTitle').textContent = 'Нова витрата';
+    document.getElementById('expId').value = '';
+    document.getElementById('expDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('expCategory').value = 'Витратні';
+    document.getElementById('expDescription').value = '';
+    document.getElementById('expAmount').value = '';
+    document.getElementById('expError').style.display = 'none';
+    document.getElementById('expDeleteBtn').style.display = 'none';
+    document.getElementById('expenseModal').classList.add('show');
+}
+
+function editExpense(id) {
+    const e = currentExpenses.find(x => x.id == id);
+    if (!e) return;
+    document.getElementById('expenseModalTitle').textContent = 'Редагувати витрату';
+    document.getElementById('expId').value = e.id;
+    document.getElementById('expDate').value = e.expense_date;
+    document.getElementById('expCategory').value = e.category;
+    document.getElementById('expDescription').value = e.description || '';
+    document.getElementById('expAmount').value = e.amount;
+    document.getElementById('expError').style.display = 'none';
+    document.getElementById('expDeleteBtn').style.display = 'inline-block';
+    document.getElementById('expenseModal').classList.add('show');
+}
+
+async function saveExpense() {
+    const errorEl = document.getElementById('expError');
+    const btn = document.getElementById('expSaveBtn');
+    errorEl.style.display = 'none';
+    
+    const payload = {
+        id: parseInt(document.getElementById('expId').value) || 0,
+        expense_date: document.getElementById('expDate').value,
+        category: document.getElementById('expCategory').value,
+        description: document.getElementById('expDescription').value.trim(),
+        amount: parseInt(document.getElementById('expAmount').value) || 0
+    };
+    
+    if (!payload.expense_date) { showExpError('Введіть дату'); return; }
+    if (payload.amount <= 0) { showExpError('Невірна сума'); return; }
+    
+    btn.disabled = true;
+    btn.textContent = 'Збереження...';
+    
+    try {
+        const res = await fetch('/api/admin/expenses-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeExpenseModal();
+        await loadExpenses();
+    } catch (err) {
+        showExpError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зберегти';
+    }
+}
+
+async function deleteExpense() {
+    const id = parseInt(document.getElementById('expId').value);
+    if (!id) return;
+    if (!confirm('Видалити витрату?')) return;
+    
+    try {
+        const res = await fetch('/api/admin/expenses-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closeExpenseModal();
+        await loadExpenses();
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+function exportExpenses() {
+    if (currentExpenses.length === 0) { alert('Немає даних'); return; }
+    const headers = ['Дата', 'Категорія', 'Опис', 'Сума'];
+    const rows = currentExpenses.map(e => [e.expense_date, e.category, e.description || '', e.amount]);
+    downloadCsv('expenses.csv', headers, rows);
+}
+
+// ============================================
+// ЗВІТИ (Reports) — главное по запросу
+// ============================================
+let reportsCurrentPeriod = '6months';
+let lastReportsData = null;
+
+async function loadReports() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + reportsCurrentPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        lastReportsData = data;
+        renderReports(data);
+    } catch (err) {
+        console.error('Reports load:', err);
+    }
+}
+
+function renderReports(d) {
+    const s = d.summary;
+    
+    // Stats
+    document.getElementById('reportsStats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">${fmtMoney(s.revenue)}</div><div class="stat-delta">${s.done_count} виконано</div></div>
+        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">${s.total_bookings}</div></div>
+        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">${s.cancelled_count}</div><div class="stat-delta down">${s.cancellation_rate}% від усіх</div></div>
+        <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">${fmtMoney(s.profit)}</div><div class="stat-delta">${s.margin}% маржа</div></div>
+    `;
+    
+    // Timeline
+    renderTimeline(document.getElementById('reportsTimeline'), d.timeline, 'revenue');
+    
+    // Master statistics — главная фича
+    const mastersEl = document.getElementById('reportsMasters');
+    if (!d.top_masters || d.top_masters.length === 0) {
+        mastersEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
+    } else {
+        const maxRevenue = Math.max(...d.top_masters.map(m => Number(m.revenue) || 0)) || 1;
+        mastersEl.innerHTML = d.top_masters.map(m => {
+            const revenue = Number(m.revenue) || 0;
+            const w = revenue / maxRevenue * 100;
+            return `
+                <div class="master-stat-row">
+                    <div class="ms-avatar" style="background-image:url('${m.photo_url || ''}')"></div>
+                    <div class="ms-info">
+                        <div class="ms-name">${escapeHtml(m.name)}</div>
+                        <div class="ms-role">${escapeHtml(m.role || '—')}</div>
+                        <div class="ms-bar"><div class="ms-bar-fill" style="width:${w}%"></div></div>
+                    </div>
+                    <div class="ms-metric"><div class="v">${m.bookings_count}</div><div class="l">робіт</div></div>
+                    <div class="ms-metric"><div class="v">${m.done_count}</div><div class="l">виконано</div></div>
+                    <div class="ms-metric"><div class="v">${fmtMoneyShort(revenue)} ₴</div><div class="l">виручка</div></div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Master services breakdown
+    const msEl = document.getElementById('reportsMasterServices');
+    if (!d.master_services || d.master_services.length === 0) {
+        msEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
+    } else {
+        msEl.innerHTML = d.master_services.map(m => {
+            const totalRevenue = m.services.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+            const totalCount = m.services.reduce((sum, s) => sum + Number(s.times_done || 0), 0);
+            return `
+                <div class="ms-services-block">
+                    <div class="ms-block-head">
+                        <div class="ms-name">${escapeHtml(m.master_name)}</div>
+                        <div class="ms-total">${totalCount} робіт · ${fmtMoney(totalRevenue)}</div>
+                    </div>
+                    <div class="ms-services-grid">
+                        ${m.services.map(s => `
+                            <div class="row">
+                                <div>${escapeHtml(s.service_name)}</div>
+                                <div class="v">${s.times_done}×</div>
+                                <div class="v rev">${fmtMoney(s.revenue)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Top services
+    renderTopList(document.getElementById('reportsTopServices'), d.top_services);
+    
+    // Cancellations
+    const cancelEl = document.getElementById('reportsCancellations');
+    if (!d.cancellations || d.cancellations.length === 0) {
+        cancelEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Скасувань немає</div>';
+    } else {
+        const maxCancel = Math.max(...d.cancellations.map(c => Number(c.cnt) || 0)) || 1;
+        cancelEl.innerHTML = '<div class="top-list">' + d.cancellations.map(c => `
+            <div class="top-row">
+                <div class="tr-num"></div>
+                <div class="tr-name">${c.month}</div>
+                <div class="tr-bar"><div class="tr-bar-fill" style="width:${c.cnt / maxCancel * 100}%; background:var(--danger);"></div></div>
+                <div class="tr-value" style="color:var(--danger);">${c.cnt}</div>
+            </div>
+        `).join('') + '</div>';
+    }
+}
+
+document.addEventListener('click', e => {
+    if (e.target.matches('#reportsFilters .filter-chip')) {
+        document.querySelectorAll('#reportsFilters .filter-chip').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        reportsCurrentPeriod = e.target.dataset.period;
+        loadReports();
+    }
+});
+
+function exportReports() {
+    if (!lastReportsData) { alert('Немає даних'); return; }
+    const d = lastReportsData;
+    const headers = ['Майстер', 'Робіт', 'Виконано', 'Скасовано', 'Виручка', 'Середній чек'];
+    const rows = (d.top_masters || []).map(m => [
+        m.name, m.bookings_count, m.done_count, m.cancelled_count, m.revenue, m.avg_check || 0
+    ]);
+    downloadCsv('reports-masters.csv', headers, rows);
+}
+
+function exportDashboard(format) {
+    if (!lastDashData) { alert('Немає даних'); return; }
+    const headers = ['Майстер', 'Робіт', 'Виручка'];
+    const rows = (lastDashData.top_masters || []).map(m => [m.name, m.bookings_count, m.revenue]);
+    downloadCsv('dashboard.csv', headers, rows);
+}
+
+// ============================================
+// CSV Export Helper
+// ============================================
+function downloadCsv(filename, headers, rows) {
+    const escape = v => {
+        if (v === null || v === undefined) return '';
+        const s = String(v);
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+            return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+    };
+    const csv = [
+        headers.map(escape).join(','),
+        ...rows.map(r => r.map(escape).join(','))
+    ].join('\n');
+    
+    // BOM для Excel чтобы понимал UTF-8
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 </script>
