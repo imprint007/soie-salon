@@ -1749,7 +1749,10 @@ function showAuthError(message) {
   }
 
   // При завантаженні сторінки — перевіряємо чи залогінені
-async function checkSession() {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkSession);
+} else {
+    checkSession();
     try {
         const response = await fetch('/api/admin/me.php', {
             credentials: 'include'
