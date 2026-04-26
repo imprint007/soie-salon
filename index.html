@@ -1748,11 +1748,8 @@ function showAuthError(message) {
     document.getElementById('ad-' + name).classList.add('active');
   }
 
-  // При завантаженні сторінки — перевіряємо чи залогінені
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkSession);
-} else {
-    checkSession();
+ // ===== Перевірка сесії при завантаженні =====
+async function checkSession() {
     try {
         const response = await fetch('/api/admin/me.php', {
             credentials: 'include'
@@ -1760,18 +1757,22 @@ if (document.readyState === 'loading') {
         const data = await response.json();
         
         if (response.ok && data.success) {
-            // Так, залогінений — відкриваємо адмінку
             document.getElementById('clientWrap').classList.add('hide');
             document.getElementById('adminWrap').classList.add('show');
+            if (typeof loadServices === 'function') loadServices();
             console.log('Залогінений як:', data.admin.username);
         } else {
-            // Не залогінений — нічого не робимо, показуємо клієнтську частину
-            console.log('Не залогінений (це нормально для відвідувачів)');
+            console.log('Не залогінений (нормально для відвідувачів)');
         }
     } catch (err) {
-        // Сервер не відповідає або немає інтернету — показуємо клієнтську частину
         console.error('Не вдалося перевірити сесію:', err);
     }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkSession);
+} else {
+    checkSession();
 }
 
 // Викликаємо одразу після завантаження сторінки
