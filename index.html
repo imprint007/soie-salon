@@ -1015,6 +1015,219 @@
     .ms-services-grid { grid-template-columns: 1fr 60px 80px; }
   }
 
+  /* Settings tabs */
+  .settings-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .settings-tabs::-webkit-scrollbar { display: none; }
+  .settings-tab {
+    background: transparent;
+    border: none;
+    color: var(--ink-mute);
+    padding: 12px 18px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .settings-tab:hover { color: var(--ink); }
+  .settings-tab.active {
+    color: var(--beige);
+    border-bottom-color: var(--beige);
+  }
+
+  /* Settings panel */
+  .settings-panel { display: none; }
+  .settings-panel.active { display: block; animation: fadeUp 0.3s ease; }
+
+  .settings-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .settings-card-head {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .settings-card-head h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 4px;
+  }
+  .settings-card-head p {
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .settings-grid.full { grid-template-columns: 1fr; }
+
+  .settings-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row-info { flex: 1; min-width: 0; }
+  .settings-row-info .sr-name { font-size: 14px; margin-bottom: 4px; }
+  .settings-row-info .sr-hint {
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+    max-width: 480px;
+  }
+  .settings-row-control {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* Working hours grid */
+  .hours-grid {
+    display: grid;
+    gap: 8px;
+  }
+  .hours-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px 110px 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .hours-row:last-child { border-bottom: none; }
+  .hours-row .hr-day {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+  }
+  .hours-row input[type=time] {
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    color: var(--ink);
+    padding: 7px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .hours-row input[type=time]:focus { outline: none; border-color: var(--beige); }
+  .hours-row.closed input[type=time] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .hours-closed-label {
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Color picker custom */
+  .color-input-group {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .color-input-group input[type=color] {
+    width: 40px;
+    height: 32px;
+    padding: 2px;
+    border: 1px solid var(--line-2);
+    background: var(--bg-2);
+    cursor: pointer;
+  }
+  .color-input-group input[type=text] {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    color: var(--ink);
+    padding: 7px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    width: 110px;
+    text-transform: uppercase;
+  }
+
+  /* Status notification */
+  .settings-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 14px 20px;
+    font-size: 13px;
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s;
+    pointer-events: none;
+  }
+  .settings-status.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .settings-status.error {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* Inline image preview for logo etc */
+  .settings-card .img-uploader {
+    margin-top: 8px;
+  }
+  
+  .form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+  }
+  .form-group select:focus { outline: none; border-color: var(--beige); }
+
+  /* Password input with show toggle */
+  .password-wrap {
+    position: relative;
+  }
+  .password-wrap input {
+    padding-right: 40px;
+  }
+  .password-wrap .pw-toggle {
+    position: absolute;
+    right: 6px; top: 50%;
+    transform: translateY(-50%);
+    background: transparent; border: none;
+    color: var(--ink-mute); cursor: pointer;
+    font-size: 14px; padding: 4px 8px;
+  }
+  .password-wrap .pw-toggle:hover { color: var(--beige); }
+
+  @media (max-width: 720px) {
+    .settings-grid { grid-template-columns: 1fr; }
+    .hours-row {
+      grid-template-columns: 100px 1fr 90px 90px;
+    }
+    .hours-row .hr-spacer { display: none; }
+  }
+
 </style>
 </head>
 <body>
@@ -1857,6 +2070,33 @@
     </div>
 </div>
 
+<!-- SETTINGS -->
+<div class="admin-section" id="ad-settings">
+    <div class="admin-head">
+        <h1>Налаштування</h1>
+        <div class="head-meta">
+            <button class="admin-cta" id="settingsSaveBtn" onclick="saveSettings()">Зберегти все</button>
+        </div>
+    </div>
+
+    <div class="settings-tabs" id="settingsTabs">
+        <button class="settings-tab active" data-tab="brand">Бренд</button>
+        <button class="settings-tab" data-tab="contacts">Контакти</button>
+        <button class="settings-tab" data-tab="hours">Час роботи</button>
+        <button class="settings-tab" data-tab="booking">Бронювання</button>
+        <button class="settings-tab" data-tab="appearance">Зовнішній вигляд</button>
+        <button class="settings-tab" data-tab="email">Email</button>
+        <button class="settings-tab" data-tab="telegram">Telegram</button>
+        <button class="settings-tab" data-tab="integrations">Інтеграції</button>
+    </div>
+
+    <div id="settingsContent">
+        <div style="padding:60px;text-align:center;color:var(--ink-mute);">Завантаження налаштувань...</div>
+    </div>
+
+    <div id="settingsStatus" class="settings-status"></div>
+</div>
+
 </main>
 
 </div>
@@ -2143,6 +2383,7 @@
     if (name === 'expenses') loadExpenses();
     if (name === 'reports') loadReports();
     if (name === 'dashboard') loadDashboard();
+    if (name === 'settings') loadSettings();
 }
 
   async function checkSession() {
@@ -3445,6 +3686,817 @@ function downloadCsv(filename, headers, rows) {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// ============================================
+// НАСТРОЙКИ САЛОНА
+// ============================================
+let allSettings = {};
+let currentSettingsTab = 'brand';
+let logoUploader = null;
+let faviconUploader = null;
+let ogImageUploader = null;
+let heroImageUploader = null;
+
+async function loadSettings() {
+    try {
+        const res = await fetch('/api/admin/settings-get.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        allSettings = data.data;
+        renderSettingsTab(currentSettingsTab);
+    } catch (err) {
+        document.getElementById('settingsContent').innerHTML = 
+            `<div style="padding:40px;text-align:center;color:var(--danger);">Помилка: ${err.message}</div>`;
+    }
+}
+
+function s(key, defaultVal = '') {
+    return allSettings[key] !== undefined && allSettings[key] !== null ? allSettings[key] : defaultVal;
+}
+
+function renderSettingsTab(tab) {
+    currentSettingsTab = tab;
+    document.querySelectorAll('.settings-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    
+    const renderers = {
+        brand: renderBrandSettings,
+        contacts: renderContactsSettings,
+        hours: renderHoursSettings,
+        booking: renderBookingSettings,
+        appearance: renderAppearanceSettings,
+        email: renderEmailSettings,
+        telegram: renderTelegramSettings,
+        integrations: renderIntegrationsSettings,
+    };
+    
+    const renderer = renderers[tab];
+    if (renderer) renderer();
+}
+
+document.addEventListener('click', e => {
+    if (e.target.matches('.settings-tab')) {
+        renderSettingsTab(e.target.dataset.tab);
+    }
+});
+
+// ====== БРЕНД ======
+function renderBrandSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Назва та опис</h3>
+                    <p>Базова інформація салону, яка показується клієнтам</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Назва салону</label>
+                        <input type="text" id="set-site_name" value="${escapeHtml(s('site_name'))}" placeholder="Unique Curls">
+                    </div>
+                    <div class="form-group">
+                        <label>Слоган / теглайн</label>
+                        <input type="text" id="set-site_tagline" value="${escapeHtml(s('site_tagline'))}" placeholder="Авторський салон краси">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Короткий опис</label>
+                    <textarea id="set-site_description" rows="2" placeholder="Опис салону для клієнтів">${escapeHtml(s('site_description'))}</textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Логотип та зображення</h3>
+                    <p>Логотип буде показано в шапці сайта та в листах. Розмір рекомендовано від 400×400 px з прозорим фоном.</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Логотип</label>
+                        <div id="logoUploaderContainer"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Favicon (іконка вкладки)</label>
+                        <div id="faviconUploaderContainer"></div>
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Hero-зображення (фон головної)</label>
+                        <div id="heroImageUploaderContainer"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>OG-зображення (для соцмереж)</label>
+                        <div id="ogImageUploaderContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>SEO</h3>
+                    <p>Метатеги для пошукових систем</p>
+                </div>
+                <div class="form-group">
+                    <label>Title (заголовок вкладки)</label>
+                    <input type="text" id="set-seo_title" value="${escapeHtml(s('seo_title'))}" placeholder="Unique Curls — Салон краси">
+                </div>
+                <div class="form-group">
+                    <label>Meta Description</label>
+                    <textarea id="set-seo_description" rows="2">${escapeHtml(s('seo_description'))}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ключові слова (через кому)</label>
+                    <input type="text" id="set-seo_keywords" value="${escapeHtml(s('seo_keywords'))}">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Инициализируем аплоадеры
+    logoUploader = createImageUploader({
+        container: document.getElementById('logoUploaderContainer'),
+        folder: 'brand',
+        currentUrl: s('logo_url')
+    });
+    faviconUploader = createImageUploader({
+        container: document.getElementById('faviconUploaderContainer'),
+        folder: 'brand',
+        currentUrl: s('favicon_url')
+    });
+    heroImageUploader = createImageUploader({
+        container: document.getElementById('heroImageUploaderContainer'),
+        folder: 'brand',
+        currentUrl: s('hero_image_url')
+    });
+    ogImageUploader = createImageUploader({
+        container: document.getElementById('ogImageUploaderContainer'),
+        folder: 'brand',
+        currentUrl: s('og_image_url')
+    });
+}
+
+// ====== КОНТАКТИ ======
+function renderContactsSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Контактні дані</h3>
+                    <p>Куди клієнти можуть звернутись</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Телефон (для дзвінка)</label>
+                        <input type="tel" id="set-phone" value="${escapeHtml(s('phone'))}" placeholder="+380671234567">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон (для відображення)</label>
+                        <input type="text" id="set-phone_display" value="${escapeHtml(s('phone_display'))}" placeholder="+380 (67) 123-45-67">
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Email салону</label>
+                        <input type="email" id="set-email" value="${escapeHtml(s('email'))}" placeholder="info@salon.ua">
+                    </div>
+                    <div class="form-group">
+                        <label>Місто</label>
+                        <input type="text" id="set-city" value="${escapeHtml(s('city'))}" placeholder="Київ">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Адреса</label>
+                    <input type="text" id="set-address" value="${escapeHtml(s('address'))}" placeholder="вул. Хрещатик, 1">
+                </div>
+                <div class="form-group">
+                    <label>Посилання на Google Maps</label>
+                    <input type="text" id="set-google_maps_url" value="${escapeHtml(s('google_maps_url'))}" placeholder="https://maps.google.com/...">
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Соціальні мережі</h3>
+                    <p>Повні URL до профілів</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Instagram</label>
+                        <input type="url" id="set-instagram_url" value="${escapeHtml(s('instagram_url'))}" placeholder="https://instagram.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Telegram</label>
+                        <input type="url" id="set-telegram_url" value="${escapeHtml(s('telegram_url'))}" placeholder="https://t.me/...">
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>TikTok</label>
+                        <input type="url" id="set-tiktok_url" value="${escapeHtml(s('tiktok_url'))}" placeholder="https://tiktok.com/@...">
+                    </div>
+                    <div class="form-group">
+                        <label>Facebook</label>
+                        <input type="url" id="set-facebook_url" value="${escapeHtml(s('facebook_url'))}" placeholder="https://facebook.com/...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Юридичне</h3>
+                    <p>Дані для оферти, чеків та ФОП-документів</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Юридична особа / ФОП</label>
+                        <input type="text" id="set-legal_entity" value="${escapeHtml(s('legal_entity'))}" placeholder="ФОП Іванова О.С.">
+                    </div>
+                    <div class="form-group">
+                        <label>ЄДРПОУ / РНОКПП</label>
+                        <input type="text" id="set-tax_id" value="${escapeHtml(s('tax_id'))}">
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>URL політики конфіденційності</label>
+                        <input type="text" id="set-privacy_policy_url" value="${escapeHtml(s('privacy_policy_url'))}" placeholder="/privacy">
+                    </div>
+                    <div class="form-group">
+                        <label>URL публічної оферти</label>
+                        <input type="text" id="set-terms_of_service_url" value="${escapeHtml(s('terms_of_service_url'))}" placeholder="/terms">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== ЧАС РОБОТИ ======
+function renderHoursSettings() {
+    const days = [
+        { key: 'mon', label: 'Понеділок' },
+        { key: 'tue', label: 'Вівторок' },
+        { key: 'wed', label: 'Середа' },
+        { key: 'thu', label: 'Четвер' },
+        { key: 'fri', label: 'Пʼятниця' },
+        { key: 'sat', label: 'Субота' },
+        { key: 'sun', label: 'Неділя' },
+    ];
+    
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Графік роботи салону</h3>
+                    <p>Час, коли салон відкритий для прийому клієнтів. Вимикайте день для вихідного.</p>
+                </div>
+                <div class="hours-grid" id="hoursGrid">
+                    ${days.map(d => {
+                        let hr = { open: '10:00', close: '21:00', closed: false };
+                        try {
+                            const stored = s('working_hours_' + d.key);
+                            if (stored) hr = { ...hr, ...JSON.parse(stored) };
+                        } catch (e) {}
+                        return `
+                        <div class="hours-row ${hr.closed ? 'closed' : ''}" data-day="${d.key}">
+                            <div class="hr-day">${d.label}</div>
+                            <div class="hr-spacer"></div>
+                            <input type="time" class="hr-open" value="${hr.open}">
+                            <input type="time" class="hr-close" value="${hr.close}">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="hr-closed" ${hr.closed ? 'checked' : ''}>
+                                <span style="font-size:11px;">Вихідний</span>
+                            </label>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Часовий пояс</h3>
+                </div>
+                <div class="form-group">
+                    <label>Часовий пояс</label>
+                    <select id="set-timezone">
+                        <option value="Europe/Kyiv" ${s('timezone') === 'Europe/Kyiv' ? 'selected' : ''}>Europe/Kyiv (Київ, UTC+2/+3)</option>
+                        <option value="Europe/Warsaw" ${s('timezone') === 'Europe/Warsaw' ? 'selected' : ''}>Europe/Warsaw (Варшава)</option>
+                        <option value="Europe/Berlin" ${s('timezone') === 'Europe/Berlin' ? 'selected' : ''}>Europe/Berlin (Берлін)</option>
+                        <option value="Europe/London" ${s('timezone') === 'Europe/London' ? 'selected' : ''}>Europe/London (Лондон)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Обработчик чекбокса "вихідний"
+    document.querySelectorAll('.hr-closed').forEach(cb => {
+        cb.addEventListener('change', e => {
+            e.target.closest('.hours-row').classList.toggle('closed', e.target.checked);
+        });
+    });
+}
+
+// ====== БРОНЮВАННЯ ======
+function renderBookingSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Депозит</h3>
+                    <p>Сума, яка утримується під час бронювання. Залишок клієнт сплачує в салоні.</p>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Чи потрібен депозит</div>
+                        <div class="sr-hint">Якщо вимкнути — клієнти бронюють без передоплати</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <div class="toggle ${s('deposit_required') == '1' ? 'on' : ''}" id="toggle-deposit_required" onclick="toggleSetting(this, 'deposit_required')"></div>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Розмір депозиту</div>
+                        <div class="sr-hint">Сума у гривнях</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-deposit_amount" value="${s('deposit_amount', '600')}" style="width:120px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                        <span style="color:var(--ink-mute);">₴</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Скасування та перенесення</h3>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Скасування дозволено за</div>
+                        <div class="sr-hint">За скільки годин до візиту клієнт може скасувати безкоштовно</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-cancel_hours_before" value="${s('cancel_hours_before', '24')}" style="width:90px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                        <span style="color:var(--ink-mute);">год</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Перенесення дозволено за</div>
+                        <div class="sr-hint">За скільки годин клієнт може змінити дату/час</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-reschedule_hours_before" value="${s('reschedule_hours_before', '12')}" style="width:90px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                        <span style="color:var(--ink-mute);">год</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Максимум перенесень</div>
+                        <div class="sr-hint">Скільки разів можна перенести одне бронювання</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-max_reschedules" value="${s('max_reschedules', '2')}" style="width:90px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Календар та слоти</h3>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">На скільки днів вперед можна бронювати</div>
+                        <div class="sr-hint">Обмеження діапазону у календарі</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-booking_advance_days" value="${s('booking_advance_days', '60')}" style="width:90px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                        <span style="color:var(--ink-mute);">днів</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Мінімум часу до візиту</div>
+                        <div class="sr-hint">Не дозволяти бронювати ближче ніж за N годин</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <input type="number" id="set-booking_min_hours" value="${s('booking_min_hours', '3')}" style="width:90px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+                        <span style="color:var(--ink-mute);">год</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Крок часових слотів</div>
+                        <div class="sr-hint">Через скільки хвилин показувати слоти у календарі</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <select id="set-time_slot_minutes" style="width:120px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);padding:8px 10px;">
+                            <option value="15" ${s('time_slot_minutes') === '15' ? 'selected' : ''}>15 хвилин</option>
+                            <option value="30" ${s('time_slot_minutes') === '30' ? 'selected' : ''}>30 хвилин</option>
+                            <option value="60" ${s('time_slot_minutes') === '60' ? 'selected' : ''}>60 хвилин</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Інше</h3>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Префікс коду брони</label>
+                        <input type="text" id="set-booking_code_prefix" value="${escapeHtml(s('booking_code_prefix', 'UC'))}" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label>Символ валюти</label>
+                        <input type="text" id="set-currency_symbol" value="${escapeHtml(s('currency_symbol', '₴'))}" maxlength="3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== ЗОВНІШНІЙ ВИГЛЯД ======
+function renderAppearanceSettings() {
+    const colorRow = (key, label, hint) => `
+        <div class="settings-row">
+            <div class="settings-row-info">
+                <div class="sr-name">${label}</div>
+                <div class="sr-hint">${hint}</div>
+            </div>
+            <div class="settings-row-control">
+                <div class="color-input-group">
+                    <input type="color" value="${s(key)}" oninput="this.nextElementSibling.value=this.value.toUpperCase()">
+                    <input type="text" id="set-${key}" value="${s(key)}" oninput="this.previousElementSibling.value=this.value">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const popularFonts = ['Inter','Fraunces','Playfair Display','Cormorant Garamond','Lora','Merriweather','Roboto','Montserrat','Poppins','Manrope','Nunito','Open Sans','DM Serif Display','EB Garamond','Crimson Pro','Libre Baskerville','Source Sans 3'];
+    
+    const fontOptions = (current) => popularFonts.map(f => 
+        `<option value="${f}" ${current === f ? 'selected' : ''}>${f}</option>`
+    ).join('');
+    
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Кольори</h3>
+                    <p>Кольорова палітра сайту. Зміни автоматично застосуються на клієнтській частині після збереження.</p>
+                </div>
+                ${colorRow('color_primary', 'Основний акцент', 'Колір кнопок, заголовків, виділень')}
+                ${colorRow('color_primary_2', 'Світлий акцент', 'Освітлений варіант основного кольору')}
+                ${colorRow('color_background', 'Фон сайту', 'Базовий фон')}
+                ${colorRow('color_surface', 'Фон карточок', 'Колір блоків і карточок')}
+                ${colorRow('color_text', 'Колір тексту', 'Основний колір тексту')}
+                ${colorRow('color_text_mute', 'Приглушений текст', 'Для дрібних підказок')}
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Шрифти</h3>
+                    <p>Google Fonts — будуть автоматично підвантажені на сайт</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Шрифт заголовків</label>
+                        <select id="set-font_heading">${fontOptions(s('font_heading'))}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>Шрифт основного тексту</label>
+                        <select id="set-font_body">${fontOptions(s('font_body'))}</select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Тема</h3>
+                </div>
+                <div class="form-group">
+                    <label>Режим</label>
+                    <select id="set-theme_mode">
+                        <option value="dark" ${s('theme_mode') === 'dark' ? 'selected' : ''}>Темна</option>
+                        <option value="light" ${s('theme_mode') === 'light' ? 'selected' : ''}>Світла</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== EMAIL ======
+function renderEmailSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>SMTP-сервер</h3>
+                    <p>Налаштування для відправки листів. Використовуйте Gmail (smtp.gmail.com), Brevo (sendinblue), Mailtrap або власний SMTP.</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>SMTP Host</label>
+                        <input type="text" id="set-smtp_host" value="${escapeHtml(s('smtp_host'))}" placeholder="smtp.gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Port</label>
+                        <input type="number" id="set-smtp_port" value="${s('smtp_port', '587')}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Шифрування</label>
+                    <select id="set-smtp_encryption">
+                        <option value="tls" ${s('smtp_encryption') === 'tls' ? 'selected' : ''}>TLS (порт 587)</option>
+                        <option value="ssl" ${s('smtp_encryption') === 'ssl' ? 'selected' : ''}>SSL (порт 465)</option>
+                        <option value="none" ${s('smtp_encryption') === 'none' ? 'selected' : ''}>Без шифрування</option>
+                    </select>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>SMTP Логін</label>
+                        <input type="text" id="set-smtp_user" value="${escapeHtml(s('smtp_user'))}" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Пароль</label>
+                        <div class="password-wrap">
+                            <input type="password" id="set-smtp_password" value="${escapeHtml(s('smtp_password'))}">
+                            <button type="button" class="pw-toggle" onclick="togglePw('set-smtp_password', this)">👁</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Адреса відправника</h3>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Email відправника (From)</label>
+                        <input type="email" id="set-smtp_from_email" value="${escapeHtml(s('smtp_from_email'))}" placeholder="info@salon.ua">
+                    </div>
+                    <div class="form-group">
+                        <label>Імʼя відправника</label>
+                        <input type="text" id="set-smtp_from_name" value="${escapeHtml(s('smtp_from_name'))}" placeholder="Unique Curls">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email для отримання заявок (адміна)</label>
+                    <input type="email" id="set-email_for_notifications" value="${escapeHtml(s('email_for_notifications'))}" placeholder="admin@salon.ua">
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Шаблони листів</h3>
+                    <p>Підтримуються змінні: <code>{code}</code>, <code>{name}</code>, <code>{date}</code>, <code>{time}</code>, <code>{service}</code>, <code>{master}</code></p>
+                </div>
+                <div class="form-group">
+                    <label>Тема листа клієнту</label>
+                    <input type="text" id="set-email_template_client_subject" value="${escapeHtml(s('email_template_client_subject'))}">
+                </div>
+                <div class="form-group">
+                    <label>Тема листа адміну</label>
+                    <input type="text" id="set-email_template_admin_subject" value="${escapeHtml(s('email_template_admin_subject'))}">
+                </div>
+                <div class="form-group">
+                    <label>Підпис листа</label>
+                    <textarea id="set-email_signature" rows="3" placeholder="З повагою, команда салону">${escapeHtml(s('email_signature'))}</textarea>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== TELEGRAM ======
+function renderTelegramSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Telegram-бот</h3>
+                    <p>Створіть бота через @BotFather у Telegram, скопіюйте токен сюди.</p>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Сповіщення увімкнені</div>
+                        <div class="sr-hint">Чи надсилати повідомлення про нові заявки в Telegram</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <div class="toggle ${s('telegram_notifications_enabled') == '1' ? 'on' : ''}" id="toggle-telegram_notifications_enabled" onclick="toggleSetting(this, 'telegram_notifications_enabled')"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bot Token</label>
+                    <div class="password-wrap">
+                        <input type="password" id="set-telegram_bot_token" value="${escapeHtml(s('telegram_bot_token'))}" placeholder="1234567890:ABCdef...">
+                        <button type="button" class="pw-toggle" onclick="togglePw('set-telegram_bot_token', this)">👁</button>
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Username бота (без @)</label>
+                        <input type="text" id="set-telegram_bot_username" value="${escapeHtml(s('telegram_bot_username'))}" placeholder="uniquecurls_bot">
+                    </div>
+                    <div class="form-group">
+                        <label>Chat ID для сповіщень</label>
+                        <input type="text" id="set-telegram_admin_chat_id" value="${escapeHtml(s('telegram_admin_chat_id'))}" placeholder="-1001234567890">
+                    </div>
+                </div>
+                <div style="background:var(--bg-2);padding:14px;border-left:2px solid var(--beige);font-size:12px;color:var(--ink-mute);line-height:1.6;">
+                    <strong style="color:var(--beige);">Як отримати Chat ID:</strong><br>
+                    1. Створіть бота через <code>@BotFather</code>, скопіюйте токен<br>
+                    2. Створіть Telegram-чат для команди, додайте туди бота<br>
+                    3. Напишіть будь-яке повідомлення в чат<br>
+                    4. Відкрийте: <code>https://api.telegram.org/bot[ВАШ_ТОКЕН]/getUpdates</code><br>
+                    5. Знайдіть <code>"chat":{"id":-1001234567890</code> — це і є Chat ID
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== ІНТЕГРАЦІЇ ======
+function renderIntegrationsSettings() {
+    document.getElementById('settingsContent').innerHTML = `
+        <div class="settings-panel active">
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Google Calendar</h3>
+                    <p>Інтеграція додається пізніше. Поки можна зберегти ID календаря.</p>
+                </div>
+                <div class="form-group">
+                    <label>ID календаря</label>
+                    <input type="text" id="set-google_calendar_id" value="${escapeHtml(s('google_calendar_id'))}" placeholder="example@group.calendar.google.com">
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>OAuth Client ID</label>
+                        <input type="text" id="set-google_oauth_client_id" value="${escapeHtml(s('google_oauth_client_id'))}">
+                    </div>
+                    <div class="form-group">
+                        <label>OAuth Client Secret</label>
+                        <div class="password-wrap">
+                            <input type="password" id="set-google_oauth_client_secret" value="${escapeHtml(s('google_oauth_client_secret'))}">
+                            <button type="button" class="pw-toggle" onclick="togglePw('set-google_oauth_client_secret', this)">👁</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Платежі</h3>
+                    <p>Провайдер для прийому депозитів і повної оплати</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Провайдер</label>
+                        <select id="set-payment_provider">
+                            <option value="none" ${s('payment_provider') === 'none' ? 'selected' : ''}>Без онлайн-оплати</option>
+                            <option value="liqpay" ${s('payment_provider') === 'liqpay' ? 'selected' : ''}>LiqPay</option>
+                            <option value="fondy" ${s('payment_provider') === 'fondy' ? 'selected' : ''}>Fondy</option>
+                            <option value="wayforpay" ${s('payment_provider') === 'wayforpay' ? 'selected' : ''}>WayForPay</option>
+                            <option value="monobank" ${s('payment_provider') === 'monobank' ? 'selected' : ''}>Monobank Acquiring</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Тестовий режим</label>
+                        <select id="set-payment_test_mode">
+                            <option value="1" ${s('payment_test_mode') === '1' ? 'selected' : ''}>Так — тестові платежі</option>
+                            <option value="0" ${s('payment_test_mode') === '0' ? 'selected' : ''}>Ні — реальні платежі</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>LiqPay Public Key</label>
+                        <input type="text" id="set-liqpay_public_key" value="${escapeHtml(s('liqpay_public_key'))}">
+                    </div>
+                    <div class="form-group">
+                        <label>LiqPay Private Key</label>
+                        <div class="password-wrap">
+                            <input type="password" id="set-liqpay_private_key" value="${escapeHtml(s('liqpay_private_key'))}">
+                            <button type="button" class="pw-toggle" onclick="togglePw('set-liqpay_private_key', this)">👁</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Fondy Merchant ID</label>
+                        <input type="text" id="set-fondy_merchant_id" value="${escapeHtml(s('fondy_merchant_id'))}">
+                    </div>
+                    <div class="form-group">
+                        <label>Fondy Secret Key</label>
+                        <div class="password-wrap">
+                            <input type="password" id="set-fondy_secret_key" value="${escapeHtml(s('fondy_secret_key'))}">
+                            <button type="button" class="pw-toggle" onclick="togglePw('set-fondy_secret_key', this)">👁</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ====== ХЕЛПЕРИ ======
+function toggleSetting(el, key) {
+    el.classList.toggle('on');
+    allSettings[key] = el.classList.contains('on') ? '1' : '0';
+}
+
+function togglePw(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+
+function showSettingsStatus(msg, isError = false) {
+    const el = document.getElementById('settingsStatus');
+    el.textContent = msg;
+    el.classList.toggle('error', isError);
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+async function saveSettings() {
+    const btn = document.getElementById('settingsSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Збереження...';
+    
+    // Збираємо ВСІ поля з усіх вкладок (текущей + раніше відкритих, через allSettings)
+    const updates = { ...allSettings };
+    
+    // Збираємо поля з поточного DOM
+    document.querySelectorAll('[id^="set-"]').forEach(input => {
+        const key = input.id.substring(4); // прибрати "set-"
+        if (input.type === 'checkbox') {
+            updates[key] = input.checked ? '1' : '0';
+        } else {
+            updates[key] = input.value;
+        }
+    });
+    
+    // Toggle перемикачі (deposit_required, telegram_notifications_enabled і т.д.)
+    document.querySelectorAll('[id^="toggle-"]').forEach(t => {
+        const key = t.id.substring(7);
+        updates[key] = t.classList.contains('on') ? '1' : '0';
+    });
+    
+    // Аплоадери (логотип, фавікон і т.д.) — якщо вкладка "Бренд" зараз відкрита
+    if (logoUploader) updates.logo_url = logoUploader.getValue();
+    if (faviconUploader) updates.favicon_url = faviconUploader.getValue();
+    if (heroImageUploader) updates.hero_image_url = heroImageUploader.getValue();
+    if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
+    
+    // Час роботи (JSON)
+    document.querySelectorAll('.hours-row').forEach(row => {
+        const day = row.dataset.day;
+        if (!day) return;
+        const data = {
+            open: row.querySelector('.hr-open').value,
+            close: row.querySelector('.hr-close').value,
+            closed: row.querySelector('.hr-closed').checked
+        };
+        updates['working_hours_' + day] = JSON.stringify(data);
+    });
+    
+    try {
+        const res = await fetch('/api/admin/settings-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ settings: updates })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        // Оновлюємо локальний кеш
+        allSettings = { ...allSettings, ...updates };
+        
+        showSettingsStatus(`✓ Збережено ${data.saved} параметрів`);
+    } catch (err) {
+        showSettingsStatus('✗ Помилка: ' + err.message, true);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зберегти все';
+    }
 }
 
 </script>
