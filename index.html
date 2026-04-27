@@ -170,13 +170,28 @@
   .brand { cursor: default; user-select: none; }
 
 .brand-wrap {
-    display: flex; align-items: center; gap: 10px;
-    cursor: default; user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    user-select: none;
+    padding: 8px 0;
   }
   .brand-img {
-    width: 28px; height: 28px;
+    width: 200px;
+    height: auto;
+    max-height: 160px;
     object-fit: contain;
     flex-shrink: 0;
+  }
+  
+  /* На мобілках лого менше */
+  @media (max-width: 720px) {
+    .brand-img {
+      width: 140px;
+      max-height: 120px;
+    }
   }
 
   /* Admin: logout button */
@@ -1241,19 +1256,60 @@
 /* Footer */
   .site-footer {
     margin-top: 60px;
-    padding: 40px 24px 24px;
+    padding: 50px 24px 24px;
     background: var(--bg-1);
     border-top: 1px solid var(--line);
     font-size: 13px;
   }
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
-    gap: 32px;
+  .footer-inner {
     max-width: 980px;
     margin: 0 auto;
   }
-  .footer-col {}
+  
+  /* Бренд-блок зверху */
+  .footer-hero {
+    text-align: center;
+    padding-bottom: 36px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+  .footer-hero-logo {
+    width: 180px;
+    height: auto;
+    max-height: 160px;
+    object-fit: contain;
+    margin: 0 auto 16px;
+    display: block;
+  }
+  .footer-hero-name {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .footer-hero-tagline {
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--beige);
+    margin-bottom: 14px;
+  }
+  .footer-hero-desc {
+    font-size: 13px;
+    color: var(--ink-mute);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .footer-hero-desc:empty { display: none; }
+  
+  /* 3 колонки */
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+  }
   .footer-h {
     font-size: 10px;
     letter-spacing: 0.22em;
@@ -1262,26 +1318,6 @@
     margin-bottom: 14px;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-  }
-  .footer-brand {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 8px;
-  }
-  .footer-logo {
-    width: 32px; height: 32px;
-    object-fit: contain;
-  }
-  .footer-name {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    letter-spacing: 0.1em;
-    color: var(--ink);
-  }
-  .footer-tagline {
-    font-size: 12px;
-    color: var(--ink-mute);
-    line-height: 1.5;
-    max-width: 220px;
   }
   .footer-link {
     display: block;
@@ -1307,17 +1343,11 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
-  .footer-hours-list .hours-item .time {
-    font-family: 'JetBrains Mono', monospace;
-  }
   
   .footer-bottom {
-    margin-top: 32px;
+    margin-top: 36px;
     padding-top: 20px;
     border-top: 1px solid var(--line);
-    max-width: 980px;
-    margin-left: auto;
-    margin-right: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1338,14 +1368,15 @@
   }
   
   @media (max-width: 720px) {
+    .footer-hero-logo { width: 140px; }
+    .footer-hero-name { font-size: 24px; }
     .footer-grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: 1fr;
+      gap: 28px;
     }
     .footer-bottom {
       flex-direction: column;
       align-items: flex-start;
-      text-align: left;
     }
   }
 
@@ -1699,45 +1730,48 @@
 
 <!-- FOOTER -->
 <footer class="site-footer">
-    <div class="footer-grid">
-        <div class="footer-col">
-            <div class="footer-brand">
-                <img data-bind-logo src="" alt="" class="footer-logo" style="display:none;">
-                <div class="footer-name" data-bind="site_name">Unique Curls</div>
+    <div class="footer-inner">
+        <!-- Бренд-блок зверху -->
+        <div class="footer-hero">
+            <img data-bind-logo src="" alt="" class="footer-hero-logo" style="display:none;">
+            <div class="footer-hero-name" data-bind="site_name">Unique Curls</div>
+            <div class="footer-hero-tagline" data-bind="site_tagline">Авторський салон краси</div>
+            <div class="footer-hero-desc" data-bind="site_description"></div>
+        </div>
+
+        <!-- 3 колонки -->
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-h">Контакти</div>
+                <a href="#" class="footer-link" data-bind-phone>—</a>
+                <a href="#" class="footer-link" data-bind-email>—</a>
+                <div class="footer-link" data-bind="address" style="cursor:default;">—</div>
             </div>
-            <div class="footer-tagline" data-bind="site_tagline">Авторський салон краси</div>
-        </div>
-        
-        <div class="footer-col">
-            <div class="footer-h">Контакти</div>
-            <a href="#" class="footer-link" data-bind-phone>—</a>
-            <a href="#" class="footer-link" data-bind-email>—</a>
-            <div class="footer-link" data-bind="address" style="cursor:default;">—</div>
-        </div>
-        
-        <div class="footer-col">
-            <div class="footer-h">Соцмережі</div>
-            <a href="" class="footer-link" data-bind-href="instagram_url" target="_blank" rel="noopener">Instagram</a>
-            <a href="" class="footer-link" data-bind-href="telegram_url" target="_blank" rel="noopener">Telegram</a>
-            <a href="" class="footer-link" data-bind-href="tiktok_url" target="_blank" rel="noopener">TikTok</a>
-            <a href="" class="footer-link" data-bind-href="facebook_url" target="_blank" rel="noopener">Facebook</a>
-        </div>
-        
-        <div class="footer-col" id="footerHours">
-            <div class="footer-h">Графік роботи</div>
-            <div class="footer-hours-list" id="footerHoursList">
-                <div class="footer-link">—</div>
+
+            <div class="footer-col">
+                <div class="footer-h">Соцмережі</div>
+                <a href="" class="footer-link" data-bind-href="instagram_url" target="_blank" rel="noopener">Instagram</a>
+                <a href="" class="footer-link" data-bind-href="telegram_url" target="_blank" rel="noopener">Telegram</a>
+                <a href="" class="footer-link" data-bind-href="tiktok_url" target="_blank" rel="noopener">TikTok</a>
+                <a href="" class="footer-link" data-bind-href="facebook_url" target="_blank" rel="noopener">Facebook</a>
+            </div>
+
+            <div class="footer-col">
+                <div class="footer-h">Графік роботи</div>
+                <div class="footer-hours-list" id="footerHoursList">
+                    <div class="footer-link">—</div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="footer-bottom">
-        <div class="footer-legal">
-            © <span id="footerYear">2026</span> · <span data-bind="site_name">Unique Curls</span>
-        </div>
-        <div class="footer-legal-links">
-            <a href="" class="footer-link" data-bind-href="privacy_policy_url">Політика конфіденційності</a>
-            <a href="" class="footer-link" data-bind-href="terms_of_service_url">Публічна оферта</a>
+
+        <div class="footer-bottom">
+            <div class="footer-legal">
+                © <span id="footerYear">2026</span> · <span data-bind="site_name">Unique Curls</span>
+            </div>
+            <div class="footer-legal-links">
+                <a href="" class="footer-link" data-bind-href="privacy_policy_url">Політика конфіденційності</a>
+                <a href="" class="footer-link" data-bind-href="terms_of_service_url">Публічна оферта</a>
+            </div>
         </div>
     </div>
 </footer>
