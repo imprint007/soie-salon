@@ -2105,6 +2105,115 @@
 </div>
 
 <script>
+
+// ============================================
+// КЛИЕНТСКАЯ ЧАСТЬ — загрузка настроек из базы
+// ============================================
+let publicSettings = {};
+
+async function loadPublicSettings() {
+    try {
+        const res = await fetch('/api/public/settings.php');
+        const data = await res.json();
+        if (data.success) {
+            publicSettings = data.data;
+            applySettings();
+        }
+    } catch (err) {
+        console.warn('Не вдалося завантажити налаштування:', err);
+    }
+}
+
+function ps(key, fallback = '') {
+    return publicSettings[key] || fallback;
+}
+
+function applySettings() {
+    // Применяем цвета через CSS variables
+    const root = document.documentElement;
+    if (publicSettings.color_primary) root.style.setProperty('--beige', publicSettings.color_primary);
+    if (publicSettings.color_primary_2) root.style.setProperty('--beige-2', publicSettings.color_primary_2);
+    if (publicSettings.color_background) root.style.setProperty('--bg-0', publicSettings.color_background);
+    if (publicSettings.color_surface) root.style.setProperty('--bg-1', publicSettings.color_surface);
+    if (publicSettings.color_text) root.style.setProperty('--ink', publicSettings.color_text);
+    if (publicSettings.color_text_mute) root.style.setProperty('--ink-mute', publicSettings.color_text_mute);
+    
+    // Применяем шрифты через Google Fonts
+    if (publicSettings.font_heading || publicSettings.font_body) {
+        loadGoogleFonts(publicSettings.font_heading, publicSettings.font_body);
+    }
+    
+    // Применяем тексты
+    if (publicSettings.site_name) {
+        document.querySelectorAll('[data-bind="site_name"]').forEach(el => {
+            el.textContent = publicSettings.site_name;
+        });
+    }
+    if (publicSettings.seo_title) {
+        document.title = publicSettings.seo_title;
+    }
+    if (publicSettings.seo_description) {
+        const meta = document.querySelector('meta[name="description"]');
+        if (meta) meta.setAttribute('content', publicSettings.seo_description);
+    }
+    
+    // Логотип
+    if (publicSettings.logo_url) {
+        document.querySelectorAll('[data-bind="logo"]').forEach(el => {
+            if (el.tagName === 'IMG') el.src = publicSettings.logo_url;
+            else el.style.backgroundImage = `url('${publicSettings.logo_url}')`;
+        });
+    }
+    
+    // Favicon
+    if (publicSettings.favicon_url) {
+        let link = document.querySelector('link[rel="icon"]');
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = publicSettings.favicon_url;
+    }
+}
+
+function loadGoogleFonts(headingFont, bodyFont) {
+    // Удаляем старую ссылку если была
+    const old = document.getElementById('dynamic-fonts');
+    if (old) old.remove();
+    
+    const fonts = [];
+    if (headingFont) fonts.push(headingFont.replace(/\s+/g, '+') + ':ital,wght@0,300;0,400;0,500;1,300');
+    if (bodyFont && bodyFont !== headingFont) fonts.push(bodyFont.replace(/\s+/g, '+') + ':wght@300;400;500;600');
+    
+    if (fonts.length === 0) return;
+    
+    const link = document.createElement('link');
+    link.id = 'dynamic-fonts';
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${fonts.join('&family=')}&display=swap`;
+    document.head.appendChild(link);
+    
+    // Применяем в CSS
+    let style = document.getElementById('dynamic-font-styles');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'dynamic-font-styles';
+        document.head.appendChild(style);
+    }
+    style.textContent = `
+        body { font-family: '${bodyFont || 'Inter'}', sans-serif; }
+        h1, h2, h3, .brand, .auth-brand, .hero-title, .s-name, .mc-name, .ms-name { font-family: '${headingFont || 'Fraunces'}', serif; }
+    `;
+}
+
+// Вызов при старте
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPublicSettings);
+} else {
+    loadPublicSettings();
+}
+
   // ============================================
   // КЛИЕНТСКАЯ ЧАСТЬ — состояние брони
   // ============================================
