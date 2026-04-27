@@ -169,6 +169,16 @@
   /* Logo tap zone — invisible secret access */
   .brand { cursor: default; user-select: none; }
 
+.brand-wrap {
+    display: flex; align-items: center; gap: 10px;
+    cursor: default; user-select: none;
+  }
+  .brand-img {
+    width: 28px; height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
   /* Admin: logout button */
   .admin-logout {
     margin: 16px 24px 0;
@@ -1228,6 +1238,117 @@
     .hours-row .hr-spacer { display: none; }
   }
 
+/* Footer */
+  .site-footer {
+    margin-top: 60px;
+    padding: 40px 24px 24px;
+    background: var(--bg-1);
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+    gap: 32px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .footer-col {}
+  .footer-h {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--beige);
+    margin-bottom: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .footer-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .footer-logo {
+    width: 32px; height: 32px;
+    object-fit: contain;
+  }
+  .footer-name {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+  .footer-tagline {
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+    max-width: 220px;
+  }
+  .footer-link {
+    display: block;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 4px 0;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  .footer-link:hover { color: var(--beige); }
+  
+  .footer-hours-list .hours-item {
+    display: flex; justify-content: space-between;
+    padding: 3px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .footer-hours-list .hours-item.today {
+    color: var(--beige);
+  }
+  .footer-hours-list .hours-item .day {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .footer-hours-list .hours-item .time {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  .footer-bottom {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-legal {
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+  }
+  .footer-legal-links {
+    display: flex; gap: 20px; flex-wrap: wrap;
+  }
+  .footer-legal-links .footer-link {
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  
+  @media (max-width: 720px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1279,7 +1400,10 @@
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
   <div style="flex:1;"></div>
-  <div class="brand" id="brandLogo" onclick="brandTap()"><em>S</em>OIE</div>
+  <div class="brand-wrap" onclick="brandTap()" id="brandLogo">
+    <img data-bind-logo src="" alt="" class="brand-img" style="display:none;">
+    <span class="brand" data-bind="site_name"><em>Unique</em> Curls</span>
+</div>
   <div style="flex:1;"></div>
   <button class="icon-btn">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
@@ -1293,7 +1417,7 @@
 <!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="hero">
-    <div class="hero-img"></div>
+    <div class="hero-img" data-bind-hero></div>
     <div class="hero-content">
       <div class="hero-title">Краса<br><em>у тиші</em></div>
       <div class="hero-meta">
@@ -1572,6 +1696,51 @@
     <button class="btn" onclick="goScreen('detail')">Забронювати з образом</button>
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="footer-grid">
+        <div class="footer-col">
+            <div class="footer-brand">
+                <img data-bind-logo src="" alt="" class="footer-logo" style="display:none;">
+                <div class="footer-name" data-bind="site_name">Unique Curls</div>
+            </div>
+            <div class="footer-tagline" data-bind="site_tagline">Авторський салон краси</div>
+        </div>
+        
+        <div class="footer-col">
+            <div class="footer-h">Контакти</div>
+            <a href="#" class="footer-link" data-bind-phone>—</a>
+            <a href="#" class="footer-link" data-bind-email>—</a>
+            <div class="footer-link" data-bind="address" style="cursor:default;">—</div>
+        </div>
+        
+        <div class="footer-col">
+            <div class="footer-h">Соцмережі</div>
+            <a href="" class="footer-link" data-bind-href="instagram_url" target="_blank" rel="noopener">Instagram</a>
+            <a href="" class="footer-link" data-bind-href="telegram_url" target="_blank" rel="noopener">Telegram</a>
+            <a href="" class="footer-link" data-bind-href="tiktok_url" target="_blank" rel="noopener">TikTok</a>
+            <a href="" class="footer-link" data-bind-href="facebook_url" target="_blank" rel="noopener">Facebook</a>
+        </div>
+        
+        <div class="footer-col" id="footerHours">
+            <div class="footer-h">Графік роботи</div>
+            <div class="footer-hours-list" id="footerHoursList">
+                <div class="footer-link">—</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="footer-legal">
+            © <span id="footerYear">2026</span> · <span data-bind="site_name">Unique Curls</span>
+        </div>
+        <div class="footer-legal-links">
+            <a href="" class="footer-link" data-bind-href="privacy_policy_url">Політика конфіденційності</a>
+            <a href="" class="footer-link" data-bind-href="terms_of_service_url">Публічна оферта</a>
+        </div>
+    </div>
+</footer>
 
 <!-- SUCCESS -->
 <div class="screen" id="screen-success">
@@ -2129,8 +2298,9 @@ function ps(key, fallback = '') {
 }
 
 function applySettings() {
-    // Применяем цвета через CSS variables
     const root = document.documentElement;
+    
+    // Цвета
     if (publicSettings.color_primary) root.style.setProperty('--beige', publicSettings.color_primary);
     if (publicSettings.color_primary_2) root.style.setProperty('--beige-2', publicSettings.color_primary_2);
     if (publicSettings.color_background) root.style.setProperty('--bg-0', publicSettings.color_background);
@@ -2138,30 +2308,34 @@ function applySettings() {
     if (publicSettings.color_text) root.style.setProperty('--ink', publicSettings.color_text);
     if (publicSettings.color_text_mute) root.style.setProperty('--ink-mute', publicSettings.color_text_mute);
     
-    // Применяем шрифты через Google Fonts
+    // Шрифты
     if (publicSettings.font_heading || publicSettings.font_body) {
         loadGoogleFonts(publicSettings.font_heading, publicSettings.font_body);
     }
     
-    // Применяем тексты
-    if (publicSettings.site_name) {
-        document.querySelectorAll('[data-bind="site_name"]').forEach(el => {
-            el.textContent = publicSettings.site_name;
-        });
-    }
-    if (publicSettings.seo_title) {
-        document.title = publicSettings.seo_title;
-    }
+    // SEO meta
+    if (publicSettings.seo_title) document.title = publicSettings.seo_title;
     if (publicSettings.seo_description) {
         const meta = document.querySelector('meta[name="description"]');
         if (meta) meta.setAttribute('content', publicSettings.seo_description);
     }
     
-    // Логотип
+    // Logo image
     if (publicSettings.logo_url) {
-        document.querySelectorAll('[data-bind="logo"]').forEach(el => {
-            if (el.tagName === 'IMG') el.src = publicSettings.logo_url;
-            else el.style.backgroundImage = `url('${publicSettings.logo_url}')`;
+        document.querySelectorAll('[data-bind-logo]').forEach(el => {
+            if (el.tagName === 'IMG') {
+                el.src = publicSettings.logo_url;
+                el.style.display = 'block';
+            } else {
+                el.style.backgroundImage = `url('${publicSettings.logo_url}')`;
+            }
+        });
+    }
+    
+    // Hero image
+    if (publicSettings.hero_image_url) {
+        document.querySelectorAll('[data-bind-hero]').forEach(el => {
+            el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
         });
     }
     
@@ -2175,6 +2349,50 @@ function applySettings() {
         }
         link.href = publicSettings.favicon_url;
     }
+    
+    // Текстовые поля через data-bind
+    document.querySelectorAll('[data-bind]').forEach(el => {
+        const key = el.dataset.bind;
+        const val = publicSettings[key];
+        if (val !== undefined && val !== null && val !== '') {
+            el.textContent = val;
+        }
+    });
+    
+    // Ссылки через data-bind-href (для соцсетей и контактов)
+    document.querySelectorAll('[data-bind-href]').forEach(el => {
+        const key = el.dataset.bindHref;
+        const val = publicSettings[key];
+        if (val) {
+            el.href = val;
+            el.style.display = '';
+        } else {
+            el.style.display = 'none'; // скрыть ссылку если её не настроили
+        }
+    });
+    
+    // Телефон — особый случай (показываем display, ссылка идёт на чистый номер)
+    if (publicSettings.phone) {
+        document.querySelectorAll('a[data-bind-phone]').forEach(el => {
+            el.href = 'tel:' + publicSettings.phone.replace(/[^+\d]/g, '');
+            el.textContent = publicSettings.phone_display || publicSettings.phone;
+        });
+    }
+    
+    // Email — то же самое
+    if (publicSettings.email) {
+        document.querySelectorAll('a[data-bind-email]').forEach(el => {
+            el.href = 'mailto:' + publicSettings.email;
+            el.textContent = publicSettings.email;
+        });
+    }
+
+    // График работы в футере
+    renderFooterHours();
+    
+    // Год
+    const yearEl = document.getElementById('footerYear');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 }
 
 function loadGoogleFonts(headingFont, bodyFont) {
