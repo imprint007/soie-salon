@@ -61,7 +61,7 @@
 
   .auth-brand {
     font-family: 'Fraunces', serif;
-    font-size: 24px;
+    font-size: 26px;
     letter-spacing: 0.32em;
     color: var(--beige);
     font-weight: 400;
@@ -222,11 +222,16 @@
   .client-wrap.hide { display: none; }
 
   .topbar {
-    position: sticky; top: 0; z-index: 50;
+    position: sticky;
+    top: 0;
+    z-index: 50;
     padding: 18px 24px 14px;
     background: linear-gradient(to bottom, var(--bg-1) 80%, transparent);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     backdrop-filter: blur(20px);
+    flex-direction: column;
   }
   .brand { font-family: 'Fraunces', serif; font-size: 17px; letter-spacing: 0.32em; color: var(--beige); font-weight: 400; }
   .brand em { font-style: italic; font-weight: 300; color: var(--ink); margin-right: 2px; }
