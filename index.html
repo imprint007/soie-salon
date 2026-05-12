@@ -265,6 +265,21 @@
   .hero-title em { font-style: italic; color: var(--beige-2); }
   .hero-meta { margin-top: 14px; display: flex; gap: 14px; align-items: center; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
   .dot { width: 3px; height: 3px; background: var(--beige); border-radius: 50%; }
+  .hero-tagline {
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--beige);
+    margin-top: 10px;
+  }
+  .hero-desc {
+    font-size: 14px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+    margin-top: 14px;
+    max-width: 340px;
+  }
+  .hero-desc:empty { display: none; }
 
   .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 40px 0 18px; }
   .section-head h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; }
@@ -1445,23 +1460,17 @@
 </div>
 
 <!-- HOME -->
-<div class="screen active" id="screen-home">
-  <div class="hero">
+<div class="hero">
     <div class="hero-img" data-bind-hero></div>
     <div class="hero-content">
-      <div class="hero-title">Краса<br><em>у тиші</em></div>
+      <div class="hero-title" data-bind="site_name">Unique Curls</div>
+      <div class="hero-tagline" data-bind="site_tagline">Авторський салон</div>
+      <div class="hero-desc" data-bind="site_description"></div>
       <div class="hero-meta">
-        <span>Est. 2027</span><span class="dot"></span><span>Авторський салон</span>
+        <span>Est. 2027</span><span class="dot"></span><span data-bind="site_tagline">Авторський салон</span>
       </div>
     </div>
-  </div>
-
-  <div class="ai-banner" onclick="goScreen('ai')">
-    <div class="ai-pill">AI · Нове</div>
-    <div class="ai-title">Приміряйте<br>зачіску</div>
-    <div class="ai-sub">Завантажте селфі та подивіться, як виглядатимуть різні образи — до 5 варіантів від AI-стиліста.</div>
-    <div class="ai-cta">Спробувати</div>
-  </div>
+</div>
 
   <div class="section-head">
     <h2>Послуги</h2>
