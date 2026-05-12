@@ -1474,7 +1474,8 @@
 </div>
 
 <!-- HOME -->
-<div class="hero">
+<div class="screen active" id="screen-home">
+  <div class="hero">
     <div class="hero-img" data-bind-hero></div>
     <div class="hero-content">
       <div class="hero-title" data-bind="site_name">Unique Curls</div>
@@ -1484,16 +1485,16 @@
         <span>Est. 2027</span><span class="dot"></span><span data-bind="site_tagline">Авторський салон</span>
       </div>
     </div>
-</div>
+  </div>
 
   <div class="section-head">
     <h2>Послуги</h2>
     <span class="more" id="servicesCount">—</span>
-</div>
+  </div>
 
-<div class="tiles" id="tilesContainer">
+  <div class="tiles" id="tilesContainer">
     <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);font-size:13px;">Завантаження...</div>
-</div>
+  </div>
 
   <div class="section-head">
     <h2>Пакети</h2>
@@ -1521,6 +1522,7 @@
     </div>
   </div>
 </div>
+<!-- /HOME -->
 
 <!-- DETAIL -->
 <div class="screen" id="screen-detail">
@@ -1539,6 +1541,7 @@
     <button class="btn" style="flex: 0 0 auto; padding: 0 28px;" onclick="goScreen('datetime')">Далі</button>
   </div>
 </div>
+<!-- /DETAIL -->
 
 <!-- DATETIME -->
 <div class="screen" id="screen-datetime">
@@ -1598,6 +1601,7 @@
     <button class="btn" onclick="goScreen('contact')" id="dateBtn" disabled>Продовжити</button>
   </div>
 </div>
+<!-- /DATETIME -->
 
 <!-- CONTACT -->
 <div class="screen" id="screen-contact">
@@ -1605,17 +1609,17 @@
   <h1 class="display">Ваші <em>дані</em></h1>
   <p class="subtle">Надішлемо підтвердження на пошту з посиланням на керування бронюванням.</p>
 
-  <div class="input-group"><label class="input-label">Ім'я</label><input type="text" class="input" placeholder="Як до вас звертатися" value="Катерина"></div>
-  <div class="input-group"><label class="input-label">Телефон</label><input type="tel" class="input" placeholder="+380 (__) ___-__-__" value="+380 (67) 432-18-09"></div>
-  <div class="input-group"><label class="input-label">Email</label><input type="email" class="input" placeholder="your@email.com" value="kateryna.v@gmail.com"></div>
+  <div class="input-group"><label class="input-label">Ім'я</label><input type="text" class="input" placeholder="Як до вас звертатися"></div>
+  <div class="input-group"><label class="input-label">Телефон</label><input type="tel" class="input" placeholder="+380 (__) ___-__-__"></div>
+  <div class="input-group"><label class="input-label">Email</label><input type="email" class="input" placeholder="your@email.com"></div>
   <div class="input-group"><label class="input-label">Коментар (за бажанням)</label><input type="text" class="input" placeholder="Особливі побажання"></div>
 
   <div class="review-section" style="margin-top: 30px;">
-    <div class="review-row"><span class="lbl">Послуга</span><span class="val" id="reviewService">Біозавивка · Короткі</span></div>
-    <div class="review-row"><span class="lbl">Майстер</span><span class="val">Анна Воронова</span></div>
-    <div class="review-row"><span class="lbl">Дата і час</span><span class="val" id="reviewDate">25 квітня · 13:30</span></div>
-    <div class="review-row"><span class="lbl">Тривалість</span><span class="val" id="reviewDuration">1 год 30 хв</span></div>
-    <div class="review-total"><span class="lbl">До сплати</span><span class="val" id="reviewTotal">1 800 ₴</span></div>
+    <div class="review-row"><span class="lbl">Послуга</span><span class="val" id="reviewService">—</span></div>
+    <div class="review-row"><span class="lbl">Майстер</span><span class="val">—</span></div>
+    <div class="review-row"><span class="lbl">Дата і час</span><span class="val" id="reviewDate">—</span></div>
+    <div class="review-row"><span class="lbl">Тривалість</span><span class="val" id="reviewDuration">—</span></div>
+    <div class="review-total"><span class="lbl">До сплати</span><span class="val" id="reviewTotal">—</span></div>
     <div class="deposit-note"><strong>Депозит 600 ₴</strong> буде утримано для підтвердження бронювання. Залишок сплачується в салоні. Скасування безкоштовно за 24 години до візиту.</div>
   </div>
 
@@ -1624,6 +1628,7 @@
     <button class="btn" onclick="goScreen('success')">Сплатити</button>
   </div>
 </div>
+<!-- /CONTACT -->
 
 <!-- AI -->
 <div class="screen" id="screen-ai">
@@ -1663,7 +1668,7 @@
     <button class="btn" onclick="goScreen('detail')">Забронювати з образом</button>
   </div>
 </div>
-
+<!-- /AI -->
 <!-- FOOTER -->
 <footer class="site-footer">
     <div class="footer-inner">
@@ -2548,6 +2553,42 @@ function applySettings() {
     // Год
     const yearEl = document.getElementById('footerYear');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
+}
+
+function renderFooterHours() {
+    const list = document.getElementById('footerHoursList');
+    if (!list) return;
+    
+    const days = [
+        { key: 'mon', label: 'Пн' },
+        { key: 'tue', label: 'Вт' },
+        { key: 'wed', label: 'Ср' },
+        { key: 'thu', label: 'Чт' },
+        { key: 'fri', label: 'Пт' },
+        { key: 'sat', label: 'Сб' },
+        { key: 'sun', label: 'Нд' },
+    ];
+    
+    const jsDay = new Date().getDay();
+    const todayKey = ['sun','mon','tue','wed','thu','fri','sat'][jsDay];
+    
+    const html = days.map(d => {
+        let hours = { open: '—', close: '—', closed: false };
+        try {
+            const stored = publicSettings['working_hours_' + d.key];
+            if (stored) hours = { ...hours, ...JSON.parse(stored) };
+        } catch (e) {}
+        
+        const timeStr = hours.closed ? 'Вихідний' : `${hours.open} — ${hours.close}`;
+        const todayClass = d.key === todayKey ? ' today' : '';
+        
+        return `<div class="hours-item${todayClass}">
+            <span class="day">${d.label}</span>
+            <span class="time">${timeStr}</span>
+        </div>`;
+    }).join('');
+    
+    list.innerHTML = html;
 }
 
 function loadGoogleFonts(headingFont, bodyFont) {
