@@ -289,7 +289,7 @@
   .section-head .more { font-size: 11px; letter-spacing: 0.2em; color: var(--beige); text-transform: uppercase; cursor: pointer; }
 
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tile { aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer; background: var(--bg-2); transition: transform 0.4s; }
+  .tile { aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer; background: var(--bg-2); transition: transform 0.4s; border-radius: 10px; }
   .tile:hover { transform: scale(0.99); }
   .tile-img { position: absolute; inset: 0; background-size: cover; background-position: center; filter: grayscale(0.3) brightness(0.65); transition: all 0.6s; }
   .tile:hover .tile-img { filter: grayscale(0) brightness(0.8); transform: scale(1.05); }
@@ -1604,23 +1604,37 @@
   <h1 class="display">Ваші <em>дані</em></h1>
   <p class="subtle">Надішлемо підтвердження на пошту з посиланням на керування бронюванням.</p>
 
-  <div class="input-group"><label class="input-label">Ім'я</label><input type="text" class="input" placeholder="Як до вас звертатися"></div>
-  <div class="input-group"><label class="input-label">Телефон</label><input type="tel" class="input" placeholder="+380 (__) ___-__-__"></div>
-  <div class="input-group"><label class="input-label">Email</label><input type="email" class="input" placeholder="your@email.com"></div>
-  <div class="input-group"><label class="input-label">Коментар (за бажанням)</label><input type="text" class="input" placeholder="Особливі побажання"></div>
+  <div class="input-group">
+    <label class="input-label">Ім'я</label>
+    <input type="text" class="input" id="clientName" placeholder="Як до вас звертатися">
+  </div>
+  <div class="input-group">
+    <label class="input-label">Телефон</label>
+    <input type="tel" class="input" id="clientPhone" placeholder="+380 (__) ___-__-__">
+  </div>
+  <div class="input-group">
+    <label class="input-label">Email</label>
+    <input type="email" class="input" id="clientEmail" placeholder="your@email.com">
+  </div>
+  <div class="input-group">
+    <label class="input-label">Коментар (за бажанням)</label>
+    <input type="text" class="input" id="clientComment" placeholder="Особливі побажання">
+  </div>
 
   <div class="review-section" style="margin-top: 30px;">
     <div class="review-row"><span class="lbl">Послуга</span><span class="val" id="reviewService">—</span></div>
-    <div class="review-row"><span class="lbl">Майстер</span><span class="val">—</span></div>
+    <div class="review-row"><span class="lbl">Майстер</span><span class="val" id="reviewMaster">—</span></div>
     <div class="review-row"><span class="lbl">Дата і час</span><span class="val" id="reviewDate">—</span></div>
     <div class="review-row"><span class="lbl">Тривалість</span><span class="val" id="reviewDuration">—</span></div>
     <div class="review-total"><span class="lbl">До сплати</span><span class="val" id="reviewTotal">—</span></div>
-    <div class="deposit-note"><strong>Депозит 600 ₴</strong> буде утримано для підтвердження бронювання. Залишок сплачується в салоні. Скасування безкоштовно за 24 години до візиту.</div>
+    <div class="deposit-note" id="depositNote"><strong>Депозит 600 ₴</strong> буде утримано для підтвердження бронювання.</div>
   </div>
+
+  <div id="bookingError" class="auth-error" style="display:none;margin-top:14px;"></div>
 
   <div class="cta">
     <button class="btn ghost" onclick="goScreen('datetime')" style="flex: 0 0 auto; padding: 0 24px;">Назад</button>
-    <button class="btn" onclick="goScreen('success')">Сплатити</button>
+    <button class="btn" id="bookingSubmitBtn" onclick="submitBooking()">Сплатити</button>
   </div>
 </div>
 <!-- /CONTACT -->
@@ -1713,23 +1727,24 @@
 </footer>
 
 <!-- SUCCESS -->
+<!-- SUCCESS -->
 <div class="screen" id="screen-success">
   <div class="success-wrap">
     <div class="success-icon">
       <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div class="success-title">Ваш візит<br><em>підтверджено</em></div>
-    <div class="success-sub">Підтвердження надіслано на kateryna.v@gmail.com з посиланням на керування бронюванням.</div>
-    <div class="booking-code">SOIE · 2026 · 0428</div>
+    <div class="success-sub">Підтвердження надіслано на <span id="succEmail">—</span>.</div>
+    <div class="booking-code" id="succCode">—</div>
   </div>
 
   <div class="success-details">
-    <div class="line"><span>Послуга</span><strong id="succService">Біозавивка · Короткі</strong></div>
-    <div class="line"><span>Майстер</span><strong>Анна Воронова</strong></div>
-    <div class="line"><span>Дата</span><strong>Субота, 25 квітня</strong></div>
-    <div class="line"><span>Час</span><strong id="succTime">13:30 — 15:00</strong></div>
-    <div class="line"><span>Депозит</span><strong>600 ₴ · сплачено</strong></div>
-    <div class="line"><span>До доплати</span><strong id="succPayable">1 200 ₴</strong></div>
+    <div class="line"><span>Послуга</span><strong id="succService">—</strong></div>
+    <div class="line"><span>Майстер</span><strong id="succMaster">—</strong></div>
+    <div class="line"><span>Дата</span><strong id="succDate">—</strong></div>
+    <div class="line"><span>Час</span><strong id="succTime">—</strong></div>
+    <div class="line"><span>Депозит</span><strong id="succDeposit">—</strong></div>
+    <div class="line"><span>До доплати</span><strong id="succPayable">—</strong></div>
   </div>
 
   <div class="info-icons">
@@ -1748,10 +1763,10 @@
   </div>
 
   <div class="cta">
-    <button class="btn ghost" onclick="goScreen('home')" style="flex: 0 0 auto; padding: 0 24px;">На головну</button>
-    <button class="btn">У календар</button>
+    <button class="btn" onclick="resetAndGoHome()">На головну</button>
   </div>
 </div>
+<!-- /SUCCESS -->
 
 </div>
 <!-- END CLIENT -->
@@ -2870,30 +2885,55 @@ if (document.readyState === 'loading') {
     const totalTime = state.totalDuration;
     
     const optionNames = [];
-    Object.entries(state.selections).forEach(([groupName, sels]) => {
+    Object.entries(state.selections || {}).forEach(([groupName, sels]) => {
         sels.forEach(s => optionNames.push(s.name.toLowerCase()));
     });
     
     const svc = state.service.name + (optionNames.length ? ' · ' + optionNames.join(', ') : '');
     const deposit = parseInt(ps('deposit_amount', '600')) || 600;
     
-    if (document.getElementById('reviewService')) document.getElementById('reviewService').textContent = svc;
-    if (document.getElementById('reviewDuration')) document.getElementById('reviewDuration').textContent = formatDuration(totalTime);
-    if (document.getElementById('reviewTotal')) document.getElementById('reviewTotal').textContent = total.toLocaleString('uk-UA') + ' ₴';
-    if (document.getElementById('succService')) document.getElementById('succService').textContent = svc;
-    if (document.getElementById('succPayable')) document.getElementById('succPayable').textContent = Math.max(0, total - deposit).toLocaleString('uk-UA') + ' ₴';
+    // Екран Контакти
+    setText('reviewService', svc);
+    setText('reviewMaster', state.masterName || 'Будь-який');
+    setText('reviewDuration', formatDuration(totalTime));
+    setText('reviewTotal', total.toLocaleString('uk-UA') + ' ₴');
     
+    if (state.selectedDate && state.selectedTime) {
+        setText('reviewDate', `${state.selectedDate} · ${state.selectedTime}`);
+    }
+    
+    const depositNote = document.getElementById('depositNote');
+    if (depositNote) {
+        const cancelHours = parseInt(ps('cancel_hours_before', '24')) || 24;
+        depositNote.innerHTML = `<strong>Депозит ${deposit.toLocaleString('uk-UA')} ₴</strong> буде утримано для підтвердження бронювання. Залишок сплачується в салоні. Скасування безкоштовно за ${cancelHours} годин до візиту.`;
+    }
+    
+    // Екран Успіху
+    setText('succService', svc);
+    setText('succMaster', state.masterName || 'Будь-який');
+    setText('succEmail', document.getElementById('clientEmail')?.value || '—');
+    setText('succCode', state.bookingCode || '—');
+    setText('succDeposit', deposit.toLocaleString('uk-UA') + ' ₴ · сплачено');
+    setText('succPayable', Math.max(0, total - deposit).toLocaleString('uk-UA') + ' ₴');
+    
+    // Дата + час з межами
+    if (state.selectedDate) {
+        setText('succDate', state.selectedDate);
+    }
     if (state.selectedTime) {
         const [hh, mm] = state.selectedTime.split(':').map(Number);
         const endMin = hh * 60 + mm + totalTime;
         const endH = Math.floor(endMin / 60) % 24;
         const endM = endMin % 60;
         const endStr = String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
-        if (document.getElementById('succTime')) {
-            document.getElementById('succTime').textContent = state.selectedTime + ' — ' + endStr;
-        }
+        setText('succTime', state.selectedTime + ' — ' + endStr);
     }
-  }
+}
+
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
 
   function buildCalendar() {
     const grid = document.getElementById('calGrid');
@@ -2929,21 +2969,64 @@ if (document.readyState === 'loading') {
   }
   buildCalendar();
 
-  function pickTime(el, time, available) {
+  async function pickTime(el, time, available) {
     document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
     el.classList.add('selected');
     state.selectedTime = time;
+    
     if (available) {
-      document.getElementById('masterReveal').classList.add('show');
-      document.getElementById('noMaster').classList.remove('show');
-      document.getElementById('dateBtn').disabled = false;
+        document.getElementById('masterReveal').classList.add('show');
+        document.getElementById('noMaster').classList.remove('show');
+        document.getElementById('dateBtn').disabled = false;
+        
+        // Підтягуємо випадкового майстра який виконує цю послугу
+        await assignRandomMaster();
     } else {
-      document.getElementById('masterReveal').classList.remove('show');
-      document.getElementById('noMaster').classList.add('show');
-      document.getElementById('dateBtn').disabled = true;
+        document.getElementById('masterReveal').classList.remove('show');
+        document.getElementById('noMaster').classList.add('show');
+        document.getElementById('dateBtn').disabled = true;
+        state.masterId = null;
+        state.masterName = null;
     }
+    
     document.getElementById('reviewDate').textContent = `${state.selectedDate} квітня · ${time}`;
-  }
+}
+
+async function assignRandomMaster() {
+    try {
+        // Для пакета — будь-який майстер; для послуги — той що вміє
+        const serviceId = state.service?.isPackage ? '' : `?service_id=${state.serviceId}`;
+        const res = await fetch('/api/public/masters.php' + serviceId);
+        const data = await res.json();
+        
+        if (!data.success || !data.data || data.data.length === 0) {
+            // Немає підходящого майстра
+            document.getElementById('masterReveal').classList.remove('show');
+            document.getElementById('noMaster').classList.add('show');
+            document.getElementById('dateBtn').disabled = true;
+            return;
+        }
+        
+        // Беремо випадкового
+        const master = data.data[Math.floor(Math.random() * data.data.length)];
+        state.masterId = master.id;
+        state.masterName = master.name;
+        
+        // Оновлюємо UI
+        const reveal = document.getElementById('masterReveal');
+        const avatar = reveal.querySelector('.master-avatar');
+        const role = reveal.querySelector('.m-role');
+        const name = reveal.querySelector('.m-name');
+        const exp = reveal.querySelector('.m-exp');
+        
+        if (avatar) avatar.style.backgroundImage = `url('${master.photo_url || ''}')`;
+        if (role) role.textContent = 'Вільний майстер';
+        if (name) name.textContent = master.name;
+        if (exp) exp.textContent = (master.role || '') + (master.experience_years ? ` · ${master.experience_years} років досвіду` : '');
+    } catch (err) {
+        console.warn('Не вдалося завантажити майстра:', err);
+    }
+}
 
   function selectAI(el) {
     document.querySelectorAll('.ai-result').forEach(r => r.classList.remove('selected'));
@@ -3323,7 +3406,7 @@ function renderPublicPackages() {
         return;
     }
     
-    if (countEl) countEl.textContent = `${publicPackages.length} комплектів`;
+    if (countEl) countEl.textContent = `${publicPackages.length} комплекта`;
     
     container.innerHTML = publicPackages.map(p => {
         const saving = p.original_price > p.sale_price 
@@ -3392,6 +3475,134 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadPublicPackages);
 } else {
     loadPublicPackages();
+}
+
+// ============================================
+// СОЗДАНИЕ БРОНИ
+// ============================================
+async function submitBooking() {
+    const errorEl = document.getElementById('bookingError');
+    const btn = document.getElementById('bookingSubmitBtn');
+    errorEl.style.display = 'none';
+    
+    // Збираємо дані
+    const name = document.getElementById('clientName').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
+    const email = document.getElementById('clientEmail').value.trim();
+    const comment = document.getElementById('clientComment').value.trim();
+    
+    // Валідація
+    if (!name) { showBookingError('Введіть ваше імʼя'); return; }
+    if (!phone) { showBookingError('Введіть телефон'); return; }
+    if (!email) { showBookingError('Введіть email'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showBookingError('Невірний формат email'); return; }
+    if (!state.service) { showBookingError('Оберіть послугу'); return; }
+    if (!state.selectedDate || !state.selectedTime) { showBookingError('Оберіть дату і час'); return; }
+    
+    // Збираємо обрані опції для збереження
+    const selected_options = [];
+    Object.entries(state.selections || {}).forEach(([groupName, sels]) => {
+        sels.forEach(s => {
+            selected_options.push({
+                group: groupName,
+                id: s.id,
+                name: s.name,
+                price: s.price,
+                duration: s.duration
+            });
+        });
+    });
+    
+    // Дата у форматі YYYY-MM-DD
+    // state.selectedDate може бути числом дня — поки ставимо хардкод року+місяця
+    // (це виправимо коли зробимо реальний календар)
+    let bookingDate = state.selectedDate;
+    if (typeof bookingDate === 'number' || /^\d{1,2}$/.test(bookingDate)) {
+        // Старий формат — число дня. Збираємо повну дату.
+        const year = new Date().getFullYear();
+        const month = String(new Date().getMonth() + 1).padStart(2, '0');
+        const day = String(bookingDate).padStart(2, '0');
+        bookingDate = `${year}-${month}-${day}`;
+    }
+    
+    // Час у форматі HH:MM:SS
+    let bookingTime = state.selectedTime;
+    if (bookingTime && !bookingTime.includes(':00:')) {
+        bookingTime = bookingTime + ':00';
+    }
+    
+    // Пакет чи послуга?
+    let payload = {
+        client_name: name,
+        client_phone: phone,
+        client_email: email,
+        client_comment: comment,
+        master_id: state.masterId || 0,
+        booking_date: bookingDate,
+        booking_time: bookingTime,
+        total_price: state.totalPrice,
+        duration_min: state.totalDuration,
+        selected_options: selected_options
+    };
+    
+    if (state.service.isPackage) {
+        payload.package_id = state.service.packageId;
+        payload.service_id = null;
+    } else {
+        payload.service_id = state.serviceId;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Відправка...';
+    
+    try {
+        const res = await fetch('/api/public/bookings-create.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        // Зберігаємо дані броні в state для екрану успіху
+        state.bookingCode = data.booking.code;
+        state.bookingId = data.booking.id;
+        state.bookingDeposit = data.booking.deposit;
+        
+        goScreen('success');
+    } catch (err) {
+        showBookingError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Сплатити';
+    }
+}
+
+function showBookingError(msg) {
+    const el = document.getElementById('bookingError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function resetAndGoHome() {
+    // Очищуємо state
+    state.serviceId = null;
+    state.service = null;
+    state.selections = {};
+    state.selectedDate = null;
+    state.selectedTime = null;
+    state.masterId = null;
+    state.bookingCode = null;
+    
+    // Очищуємо форму
+    ['clientName','clientPhone','clientEmail','clientComment'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    goScreen('home');
 }
 
 // ============================================
