@@ -1501,26 +1501,9 @@
     <span class="more">—</span>
   </div>
 
-  <div class="pack-card" onclick="goScreen('detail')">
-    <div class="pack-badge">Вигода</div>
-    <div class="pack-title">Завивка + Стрижка</div>
-    <div class="pack-items">Біозавивка преміум · Авторська стрижка · Доглядова маска</div>
-    <div class="pack-pricing">
-      <span class="pack-old">3 900 ₴</span>
-      <span class="pack-new">3 200 ₴</span>
-      <span class="pack-save">− 18%</span>
-    </div>
-  </div>
-  <div class="pack-card" onclick="goScreen('detail')">
-    <div class="pack-badge">Бестселер</div>
-    <div class="pack-title">Завивка + Фарбування</div>
-    <div class="pack-items">Біозавивка · Фарбування в 1 тон · Укладка</div>
-    <div class="pack-pricing">
-      <span class="pack-old">4 500 ₴</span>
-      <span class="pack-new">3 750 ₴</span>
-      <span class="pack-save">− 17%</span>
-    </div>
-  </div>
+  <div id="packagesContainer">
+    <div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+  </div> 
 </div>
 <!-- /HOME -->
 
@@ -1786,6 +1769,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7h-7l-2-3H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
       Послуги
     </a>
+   <a onclick="setAdminSection('packages', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7h-7l-2-3H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+      Пакети
+    </a>
     <a onclick="setAdminSection('reports', this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Звіти
@@ -1991,6 +1978,96 @@
             <button class="admin-cta ghost" onclick="closeMasterModal()">Скасувати</button>
             <button class="admin-cta" id="mstSaveBtn" onclick="saveMaster()">Зберегти</button>
             <button class="admin-cta danger" id="mstDeleteBtn" onclick="deleteMaster()" style="display:none;">Видалити</button>
+        </div>
+    </div>
+</div>
+
+<!-- PACKAGES -->
+<div class="admin-section" id="ad-packages">
+    <div class="admin-head">
+        <h1>Пакети <em>послуг</em></h1>
+        <div class="head-meta">
+            <button class="admin-cta" onclick="openPackageModal()">+ Додати пакет</button>
+        </div>
+    </div>
+
+    <div id="packagesGrid" class="cards-grid">
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+    </div>
+</div>
+
+<!-- Package Modal -->
+<div class="modal-overlay" id="packageModal" onclick="if(event.target===this) closePackageModal()">
+    <div class="modal-card" style="max-width: 580px;">
+        <div class="modal-head">
+            <h2 id="packageModalTitle">Новий пакет</h2>
+            <button class="modal-close" onclick="closePackageModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="pkgId" value="">
+
+            <div class="form-group">
+                <label>Фото пакета</label>
+                <div id="pkgImageUploader"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Назва пакета</label>
+                <input type="text" id="pkgName" placeholder="Завивка + Стрижка">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Бейдж (мітка)</label>
+                    <input type="text" id="pkgBadge" placeholder="Вигода / Бестселер / Новинка">
+                </div>
+                <div class="form-group">
+                    <label>Загальна тривалість (хв)</label>
+                    <input type="number" id="pkgDuration" placeholder="180">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Склад пакета (короткий текст)</label>
+                <input type="text" id="pkgItemsText" placeholder="Біозавивка преміум · Авторська стрижка · Маска">
+            </div>
+
+            <div class="form-group">
+                <label>Опис пакета</label>
+                <textarea id="pkgDescription" rows="3" placeholder="Детальніше про пакет"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Звичайна ціна (₴)</label>
+                    <input type="number" id="pkgOriginalPrice" placeholder="3900">
+                </div>
+                <div class="form-group">
+                    <label>Ціна пакета (₴)</label>
+                    <input type="number" id="pkgSalePrice" placeholder="3200">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Які послуги входять у пакет</label>
+                <div id="pkgServicesList" class="services-checklist">
+                    <div style="padding:14px;color:var(--ink-mute);font-size:12px;">Завантаження...</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="pkgActive" checked>
+                    <span>Активний (показується клієнтам)</span>
+                </label>
+            </div>
+
+            <div id="pkgError" class="auth-error" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closePackageModal()">Скасувати</button>
+            <button class="admin-cta" id="pkgSaveBtn" onclick="savePackage()">Зберегти</button>
+            <button class="admin-cta danger" id="pkgDeleteBtn" onclick="deletePackage()" style="display:none;">Видалити</button>
         </div>
     </div>
 </div>
@@ -2954,6 +3031,7 @@ if (document.readyState === 'loading') {
     
     if (name === 'services') loadServices();
     if (name === 'masters') loadMasters();
+    if (name === 'packages') loadPackages();
     if (name === 'bookings') loadBookings();
     if (name === 'expenses') loadExpenses();
     if (name === 'reports') loadReports();
@@ -3163,6 +3241,332 @@ container.innerHTML = `
       setValue: setUrl
     };
   }
+
+// ============================================
+// ПУБЛИЧНЫЕ ПАКЕТЫ для главной
+// ============================================
+let publicPackages = [];
+
+async function loadPublicPackages() {
+    const container = document.getElementById('packagesContainer');
+    if (!container) return;
+    
+    try {
+        const res = await fetch('/api/public/packages.php');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        publicPackages = data.data;
+        renderPublicPackages();
+    } catch (err) {
+        container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--danger);">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderPublicPackages() {
+    const container = document.getElementById('packagesContainer');
+    
+    if (!publicPackages || publicPackages.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = publicPackages.map(p => {
+        const saving = p.original_price > p.sale_price 
+            ? Math.round((1 - p.sale_price / p.original_price) * 100) 
+            : 0;
+        const hasOldPrice = p.original_price > p.sale_price;
+        return `
+        <div class="pack-card" onclick="openPackageDetail(${p.id})">
+            ${p.badge ? `<div class="pack-badge">${escapeText(p.badge)}</div>` : ''}
+            <div class="pack-title">${escapeText(p.name)}</div>
+            <div class="pack-items">${escapeText(p.items_text || '')}</div>
+            <div class="pack-pricing">
+                ${hasOldPrice ? `<span class="pack-old">${Number(p.original_price).toLocaleString('uk-UA')} ₴</span>` : ''}
+                <span class="pack-new">${Number(p.sale_price).toLocaleString('uk-UA')} ₴</span>
+                ${saving > 0 ? `<span class="pack-save">− ${saving}%</span>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openPackageDetail(packageId) {
+    const p = publicPackages.find(x => x.id == packageId);
+    if (!p) return;
+    
+    // Поки що — перехід на календар, як для звичайної послуги
+    // Створюємо синтетичну "послугу" з даних пакета
+    state.serviceId = 'pkg_' + p.id;
+    state.service = {
+        id: 'pkg_' + p.id,
+        name: p.name,
+        description: p.description || p.items_text,
+        base_price: p.sale_price,
+        duration_min: p.duration_min,
+        image_url: p.image_url,
+        option_groups: [],
+        isPackage: true,
+        packageId: p.id
+    };
+    state.basePrice = Number(p.sale_price);
+    state.baseDuration = Number(p.duration_min);
+    state.selections = {};
+    state.selectedDate = null;
+    state.selectedTime = null;
+    state.totalPrice = state.basePrice;
+    state.totalDuration = state.baseDuration;
+    
+    // Рендер деталей як для послуги (без опцій)
+    const imgEl = document.getElementById('detailImage');
+    if (imgEl) imgEl.style.backgroundImage = `url('${p.image_url || 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=800&q=80'}')`;
+    
+    const kicker = document.getElementById('detailKicker');
+    const title = document.getElementById('detailTitle');
+    const desc = document.getElementById('detailDescription');
+    if (kicker) kicker.textContent = (p.badge || 'Пакет') + ' · Комплекс послуг';
+    if (title) title.textContent = p.name;
+    if (desc) desc.textContent = p.description || p.items_text || '';
+    
+    document.getElementById('detailOptions').innerHTML = '';
+    recalcTotal();
+    
+    goScreen('detail');
+}
+
+// Підвантажуємо пакети при завантаженні
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPublicPackages);
+} else {
+    loadPublicPackages();
+}
+
+// ============================================
+// АДМИНКА — пакеты
+// ============================================
+let currentPackages = [];
+let pkgImageUploader = null;
+
+async function loadPackages() {
+    const grid = document.getElementById('packagesGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/packages-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        currentPackages = data.data;
+        renderPackagesAdmin();
+    } catch (err) {
+        grid.innerHTML = `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--danger);">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderPackagesAdmin() {
+    const grid = document.getElementById('packagesGrid');
+    const cards = currentPackages.map(p => {
+        const saving = p.original_price > p.sale_price 
+            ? Math.round((1 - p.sale_price / p.original_price) * 100) 
+            : 0;
+        return `
+        <div class="master-card" onclick='editPackage(${p.id})' style="cursor:pointer;">
+            <div class="mc-avatar" style="background-image:url('${p.image_url || ''}');background-color:var(--bg-3);border-radius:0;"></div>
+            <div class="mc-info">
+                <div class="mc-name">${escapeHtml(p.name)}</div>
+                <div class="mc-role">${escapeHtml(p.badge || '—')}</div>
+                <div class="mc-stats">
+                    <span><strong>${Number(p.sale_price).toLocaleString('uk-UA')}</strong> ₴</span>
+                    ${saving > 0 ? `<span style="color:var(--success);">−${saving}%</span>` : ''}
+                    ${p.is_active == 0 ? '<span style="color:var(--danger);">⏸</span>' : ''}
+                </div>
+                <div class="mc-services-count"><strong>${(p.service_ids || []).length}</strong> послуг · ${p.duration_min} хв</div>
+            </div>
+        </div>`;
+    }).join('');
+    
+    grid.innerHTML = cards + `
+        <div class="master-card add" onclick="openPackageModal()">
+            <div class="plus">+</div>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;">Додати пакет</div>
+        </div>
+    `;
+}
+
+function showPkgError(msg) {
+    const el = document.getElementById('pkgError');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function closePackageModal() {
+    document.getElementById('packageModal').classList.remove('show');
+}
+
+async function openPackageModal() {
+    document.getElementById('packageModalTitle').textContent = 'Новий пакет';
+    document.getElementById('pkgId').value = '';
+    document.getElementById('pkgName').value = '';
+    document.getElementById('pkgBadge').value = '';
+    document.getElementById('pkgDuration').value = '';
+    document.getElementById('pkgItemsText').value = '';
+    document.getElementById('pkgDescription').value = '';
+    document.getElementById('pkgOriginalPrice').value = '';
+    document.getElementById('pkgSalePrice').value = '';
+    document.getElementById('pkgActive').checked = true;
+    document.getElementById('pkgError').style.display = 'none';
+    document.getElementById('pkgDeleteBtn').style.display = 'none';
+    
+    const uploaderContainer = document.getElementById('pkgImageUploader');
+    uploaderContainer.className = '';
+    pkgImageUploader = createImageUploader({
+        container: uploaderContainer,
+        folder: 'packages',
+        currentUrl: ''
+    });
+    
+    await renderPackageServicesList([]);
+    document.getElementById('packageModal').classList.add('show');
+}
+
+async function editPackage(id) {
+    const p = currentPackages.find(x => x.id == id);
+    if (!p) return;
+    
+    document.getElementById('packageModalTitle').textContent = 'Редагувати: ' + p.name;
+    document.getElementById('pkgId').value = p.id;
+    document.getElementById('pkgName').value = p.name || '';
+    document.getElementById('pkgBadge').value = p.badge || '';
+    document.getElementById('pkgDuration').value = p.duration_min || '';
+    document.getElementById('pkgItemsText').value = p.items_text || '';
+    document.getElementById('pkgDescription').value = p.description || '';
+    document.getElementById('pkgOriginalPrice').value = p.original_price || '';
+    document.getElementById('pkgSalePrice').value = p.sale_price || '';
+    document.getElementById('pkgActive').checked = p.is_active == 1;
+    document.getElementById('pkgError').style.display = 'none';
+    document.getElementById('pkgDeleteBtn').style.display = 'inline-block';
+    
+    const uploaderContainer = document.getElementById('pkgImageUploader');
+    uploaderContainer.className = '';
+    pkgImageUploader = createImageUploader({
+        container: uploaderContainer,
+        folder: 'packages',
+        currentUrl: p.image_url || ''
+    });
+    
+    await renderPackageServicesList(p.service_ids || []);
+    document.getElementById('packageModal').classList.add('show');
+}
+
+async function renderPackageServicesList(selectedIds) {
+    const list = document.getElementById('pkgServicesList');
+    
+    if (currentServices.length === 0) {
+        try {
+            const res = await fetch('/api/admin/services-list.php', { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) currentServices = data.data;
+        } catch (err) {
+            list.innerHTML = '<div class="empty">Не вдалося завантажити послуги</div>';
+            return;
+        }
+    }
+    
+    if (currentServices.length === 0) {
+        list.innerHTML = '<div class="empty">Спочатку створіть послуги</div>';
+        return;
+    }
+    
+    const selectedSet = new Set((selectedIds || []).map(Number));
+    
+    list.innerHTML = currentServices.map(s => `
+        <label class="svc-check-row">
+            <input type="checkbox" class="pkg-svc-cb" data-svc-id="${s.id}" ${selectedSet.has(Number(s.id)) ? 'checked' : ''}>
+            <div class="svc-check-thumb" style="background-image:url('${s.image_url || ''}')"></div>
+            <div class="svc-check-info">
+                <div class="svc-check-name">${escapeHtml(s.name)}</div>
+                <div class="svc-check-meta">${Number(s.base_price).toLocaleString('uk-UA')} ₴ · ${s.duration_min} хв</div>
+            </div>
+        </label>
+    `).join('');
+}
+
+async function savePackage() {
+    const errorEl = document.getElementById('pkgError');
+    const btn = document.getElementById('pkgSaveBtn');
+    errorEl.style.display = 'none';
+    
+    const service_ids = [];
+    document.querySelectorAll('.pkg-svc-cb:checked').forEach(cb => {
+        service_ids.push(parseInt(cb.dataset.svcId));
+    });
+    
+    const payload = {
+        id: parseInt(document.getElementById('pkgId').value) || 0,
+        name: document.getElementById('pkgName').value.trim(),
+        description: document.getElementById('pkgDescription').value.trim(),
+        items_text: document.getElementById('pkgItemsText').value.trim(),
+        badge: document.getElementById('pkgBadge').value.trim(),
+        image_url: pkgImageUploader ? pkgImageUploader.getValue() : '',
+        original_price: parseInt(document.getElementById('pkgOriginalPrice').value) || 0,
+        sale_price: parseInt(document.getElementById('pkgSalePrice').value) || 0,
+        duration_min: parseInt(document.getElementById('pkgDuration').value) || 0,
+        is_active: document.getElementById('pkgActive').checked ? 1 : 0,
+        service_ids
+    };
+    
+    if (!payload.name) { showPkgError('Введіть назву'); return; }
+    if (payload.sale_price <= 0) { showPkgError('Введіть ціну пакета'); return; }
+    if (payload.duration_min <= 0) { showPkgError('Введіть тривалість'); return; }
+    
+    btn.disabled = true;
+    btn.textContent = 'Збереження...';
+    
+    try {
+        const res = await fetch('/api/admin/packages-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closePackageModal();
+        await loadPackages();
+    } catch (err) {
+        showPkgError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зберегти';
+    }
+}
+
+async function deletePackage() {
+    const id = parseInt(document.getElementById('pkgId').value);
+    if (!id) return;
+    if (!confirm('Видалити пакет? Це не можна скасувати.')) return;
+    
+    const btn = document.getElementById('pkgDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Видалення...';
+    
+    try {
+        const res = await fetch('/api/admin/packages-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        closePackageModal();
+        await loadPackages();
+    } catch (err) {
+        showPkgError(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Видалити';
+    }
+}
+
 
   // ============================================
   // АДМИНКА — управление услугами
