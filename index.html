@@ -692,6 +692,17 @@
     display: flex; align-items: center; justify-content: center;
   }
   .opt-row-remove:hover { color: var(--danger); border-color: var(--danger); }
+  .opt-icon {
+    width: 32px;
+    height: 32px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-3);
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+    margin-left: 6px;
+  }
+
   
 /* Компактна сітка опцій (іконка + назва + ціна + час + видалити) */
   .opt-row.opt-row-compact {
@@ -1513,72 +1524,17 @@
 
 <!-- DETAIL -->
 <div class="screen" id="screen-detail">
-  <div class="detail-head" style="background-image:url('https://images.unsplash.com/photo-1560869713-7d0a29430803?w=800&q=80');"></div>
-  <div class="kicker">01 · Hair · Curls</div>
-  <h1 class="display">Біозавивка <em>волосся</em></h1>
-  <p class="subtle">Щадна процедура на основі амінокислот. Надає об'єм та структуру без шкоди для волосся. Тримається 3–6 місяців.</p>
+  <div class="detail-head" id="detailImage"></div>
+  <div class="kicker" id="detailKicker">—</div>
+  <h1 class="display" id="detailTitle">—</h1>
+  <p class="subtle" id="detailDescription"></p>
 
-  <div class="option-group">
-    <div class="option-label"><span>Довжина волосся</span><span class="hint">Обов'язково</span></div>
-    <div class="option-row selected" onclick="pickRadio(this, 'length', 1800, 90, 'Короткі')">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Короткі</div><div class="opt-sub">до плечей · 90 хв</div></div>
-      </div><div class="opt-price">1 800 ₴</div>
-    </div>
-    <div class="option-row" onclick="pickRadio(this, 'length', 2350, 120, 'Середні')">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Середні</div><div class="opt-sub">до лопаток · 120 хв</div></div>
-      </div><div class="opt-price plus">+ 550 ₴</div>
-    </div>
-    <div class="option-row" onclick="pickRadio(this, 'length', 2900, 150, 'Довгі')">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Довгі</div><div class="opt-sub">нижче лопаток · 150 хв</div></div>
-      </div><div class="opt-price plus">+ 1 100 ₴</div>
-    </div>
-  </div>
-
-  <div class="option-group">
-    <div class="option-label"><span>Тип завитка</span><span class="hint">Обов'язково</span></div>
-    <div class="option-row selected" onclick="pickRadio(this, 'curl', 0, 0)">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Велика хвиля</div><div class="opt-sub">романтичний образ</div></div>
-      </div><div class="opt-price">Включено</div>
-    </div>
-    <div class="option-row" onclick="pickRadio(this, 'curl', 200, 15)">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Спіральний локон</div><div class="opt-sub">чіткі пружинки</div></div>
-      </div><div class="opt-price plus">+ 200 ₴</div>
-    </div>
-    <div class="option-row" onclick="pickRadio(this, 'curl', 320, 20)">
-      <div class="opt-left"><div class="radio"></div>
-        <div><div class="opt-name">Прикореневий об'єм</div><div class="opt-sub">текстура біля коренів</div></div>
-      </div><div class="opt-price plus">+ 320 ₴</div>
-    </div>
-  </div>
-
-  <div class="option-group">
-    <div class="option-label"><span>Додатково</span><span class="hint">За бажанням</span></div>
-    <div class="check-row" onclick="pickCheck(this, 'mask', 360, 20)">
-      <div class="opt-left"><div class="check"></div>
-        <div><div class="opt-name">Доглядова маска</div><div class="opt-sub">після завивки · 20 хв</div></div>
-      </div><div class="opt-price plus">+ 360 ₴</div>
-    </div>
-    <div class="check-row" onclick="pickCheck(this, 'style', 480, 25)">
-      <div class="opt-left"><div class="check"></div>
-        <div><div class="opt-name">Укладка</div><div class="opt-sub">з фінальною укладкою</div></div>
-      </div><div class="opt-price plus">+ 480 ₴</div>
-    </div>
-    <div class="check-row" onclick="pickCheck(this, 'wash', 240, 15)">
-      <div class="opt-left"><div class="check"></div>
-        <div><div class="opt-name">Преміум-миття</div><div class="opt-sub">з масажем голови</div></div>
-      </div><div class="opt-price plus">+ 240 ₴</div>
-    </div>
-  </div>
+  <div id="detailOptions"></div>
 
   <div class="summary-bar">
     <div>
-      <div class="sum-label">Разом · <span id="sumTime">90 хв</span></div>
-      <div class="sum-total" id="sumTotal">1 800 ₴</div>
+      <div class="sum-label">Разом · <span id="sumTime">—</span></div>
+      <div class="sum-total" id="sumTotal">—</div>
     </div>
     <button class="btn" style="flex: 0 0 auto; padding: 0 28px;" onclick="goScreen('datetime')">Далі</button>
   </div>
@@ -2311,15 +2267,189 @@ function ps(key, fallback = '') {
     return publicSettings[key] || fallback;
 }
 
+// ============================================
+// ЭКРАН ДЕТАЛЕЙ УСЛУГИ
+// ============================================
 function openServiceDetail(serviceId) {
     const s = publicServices.find(x => x.id == serviceId);
     if (!s) return;
     
-    console.log('Відкриваємо послугу:', s);
-    // Пока просто переходим на экран — рендер сделаем когда вы пришлёте HTML
-    state.currentServiceId = s.id;
-    state.currentService = s;
+    state.serviceId = s.id;
+    state.service = s;
+    state.basePrice = Number(s.base_price);
+    state.baseDuration = Number(s.duration_min);
+    state.selections = {};
+    state.selectedDate = null;
+    state.selectedTime = null;
+    state.masterId = null;
+    state.masterName = null;
+    
+    const imgEl = document.getElementById('detailImage');
+    const img = s.image_url || 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=800&q=80';
+    if (imgEl) imgEl.style.backgroundImage = `url('${img}')`;
+    
+    const idx = publicServices.findIndex(x => x.id == s.id);
+    const kicker = document.getElementById('detailKicker');
+    const title = document.getElementById('detailTitle');
+    const desc = document.getElementById('detailDescription');
+    if (kicker) kicker.textContent = String(idx + 1).padStart(2, '0') + ' · Послуга салону';
+    if (title) title.textContent = s.name;
+    if (desc) desc.textContent = s.description || '';
+    
+    renderServiceOptions(s);
+    recalcTotal();
+    
     goScreen('detail');
+}
+
+function renderServiceOptions(service) {
+    const container = document.getElementById('detailOptions');
+    if (!container) return;
+    
+    const groups = service.option_groups || [];
+    
+    if (groups.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = groups.map(g => {
+        const isMultiple = g.is_multiple == 1;
+        const isRequired = g.is_required == 1;
+        const hint = isRequired 
+            ? "Обов'язково" + (isMultiple ? " · можна декілька" : "")
+            : "За бажанням";
+        
+        const rowsHtml = g.options.map((opt, i) => {
+            const priceLabel = opt.price_modifier == 0 
+                ? (isRequired && i === 0 && !isMultiple ? 'Включено' : '0 ₴')
+                : `+ ${Number(opt.price_modifier).toLocaleString('uk-UA')} ₴`;
+            const priceClass = opt.price_modifier > 0 ? 'plus' : '';
+            const durationLabel = opt.duration_modifier > 0 
+                ? `+${opt.duration_modifier} хв` 
+                : (isRequired && i === 0 && !isMultiple ? `${service.duration_min} хв` : '');
+            const subText = (opt.description ? escapeText(opt.description) : '') 
+                + (durationLabel ? (opt.description ? ' · ' : '') + durationLabel : '');
+            
+            const isPreselected = isRequired && !isMultiple && i === 0;
+            const selectedClass = isPreselected ? ' selected' : '';
+            
+            const iconHtml = opt.icon_url 
+                ? `<div class="opt-icon" style="background-image:url('${escapeAttr(opt.icon_url)}')"></div>` 
+                : '';
+            
+            const rowClass = isMultiple ? 'check-row' : 'option-row';
+            const controlEl = isMultiple ? '<div class="check"></div>' : '<div class="radio"></div>';
+            const handler = isMultiple 
+                ? `toggleOption(this, '${escapeAttr(g.name)}', ${opt.id}, ${opt.price_modifier}, ${opt.duration_modifier})`
+                : `selectOption(this, '${escapeAttr(g.name)}', ${opt.id}, ${opt.price_modifier}, ${opt.duration_modifier})`;
+            
+            return `
+                <div class="${rowClass}${selectedClass}" data-option-id="${opt.id}" onclick="${handler}">
+                    <div class="opt-left">
+                        ${controlEl}
+                        ${iconHtml}
+                        <div>
+                            <div class="opt-name">${escapeText(opt.name)}</div>
+                            <div class="opt-sub">${subText}</div>
+                        </div>
+                    </div>
+                    <div class="opt-price ${priceClass}">${priceLabel}</div>
+                </div>
+            `;
+        }).join('');
+        
+        return `
+            <div class="option-group" data-group="${escapeAttr(g.name)}" data-required="${isRequired}" data-multiple="${isMultiple}">
+                <div class="option-label">
+                    <span>${escapeText(g.name)}</span>
+                    <span class="hint">${hint}</span>
+                </div>
+                ${rowsHtml}
+            </div>
+        `;
+    }).join('');
+    
+    // Зберігаємо preselected в state
+    groups.forEach(g => {
+        if (g.is_required == 1 && g.is_multiple != 1 && g.options.length > 0) {
+            const first = g.options[0];
+            state.selections[g.name] = [{
+                id: first.id,
+                name: first.name,
+                price: Number(first.price_modifier),
+                duration: Number(first.duration_modifier)
+            }];
+        }
+    });
+}
+
+function selectOption(el, groupName, optId, price, duration) {
+    const group = el.closest('.option-group');
+    group.querySelectorAll('.option-row').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+    
+    const groupData = state.service.option_groups.find(g => g.name === groupName);
+    const opt = groupData?.options.find(o => o.id == optId);
+    if (!opt) return;
+    
+    state.selections[groupName] = [{
+        id: opt.id,
+        name: opt.name,
+        price: Number(opt.price_modifier),
+        duration: Number(opt.duration_modifier)
+    }];
+    
+    recalcTotal();
+}
+
+function toggleOption(el, groupName, optId, price, duration) {
+    el.classList.toggle('selected');
+    
+    const groupData = state.service.option_groups.find(g => g.name === groupName);
+    const opt = groupData?.options.find(o => o.id == optId);
+    if (!opt) return;
+    
+    if (!state.selections[groupName]) state.selections[groupName] = [];
+    
+    if (el.classList.contains('selected')) {
+        state.selections[groupName].push({
+            id: opt.id,
+            name: opt.name,
+            price: Number(opt.price_modifier),
+            duration: Number(opt.duration_modifier)
+        });
+    } else {
+        state.selections[groupName] = state.selections[groupName].filter(x => x.id != optId);
+    }
+    
+    recalcTotal();
+}
+
+function recalcTotal() {
+    let total = state.basePrice;
+    let duration = state.baseDuration;
+    
+    Object.values(state.selections).forEach(groupSelections => {
+        groupSelections.forEach(sel => {
+            total += Number(sel.price) || 0;
+            duration += Number(sel.duration) || 0;
+        });
+    });
+    
+    state.totalPrice = total;
+    state.totalDuration = duration;
+    
+    const totalEl = document.getElementById('sumTotal');
+    const timeEl = document.getElementById('sumTime');
+    if (totalEl) totalEl.textContent = total.toLocaleString('uk-UA') + ' ₴';
+    if (timeEl) timeEl.textContent = formatDuration(duration);
+}
+
+function formatDuration(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return ((h ? h + ' год ' : '') + (m ? m + ' хв' : '')).trim() || '0 хв';
 }
 
 function applySettings() {
@@ -2526,14 +2656,18 @@ if (document.readyState === 'loading') {
   // КЛИЕНТСКАЯ ЧАСТЬ — состояние брони
   // ============================================
   let state = {
-    length: 1800, lengthTime: 90, lengthName: 'Короткі',
-    curl: 0, curlTime: 0,
-    mask: 0, maskTime: 0,
-    style: 0, styleTime: 0,
-    wash: 0, washTime: 0,
-    selectedDate: '25',
+    serviceId: null,
+    service: null,
+    basePrice: 0,
+    baseDuration: 0,
+    selections: {},
+    totalPrice: 0,
+    totalDuration: 0,
+    selectedDate: null,
     selectedTime: null,
-  };
+    masterId: null,
+    masterName: null,
+};
 
   const progressMap = { home: 0, detail: 1, datetime: 2, contact: 3, success: 4, ai: 0 };
 
@@ -2560,52 +2694,35 @@ if (document.readyState === 'loading') {
     if (idx > 0) goScreen(order[idx - 1]);
   }
 
-  function pickRadio(el, key, price, time, name) {
-    const group = el.parentElement;
-    group.querySelectorAll('.option-row').forEach(r => r.classList.remove('selected'));
-    el.classList.add('selected');
-    state[key] = price;
-    state[key + 'Time'] = time;
-    if (key === 'length' && name) state.lengthName = name;
-    recalc();
-  }
-
-  function pickCheck(el, key, price, time) {
-    el.classList.toggle('selected');
-    state[key] = el.classList.contains('selected') ? price : 0;
-    state[key + 'Time'] = el.classList.contains('selected') ? time : 0;
-    recalc();
-  }
-
-  function recalc() {
-    const total = state.length + state.curl + state.mask + state.style + state.wash;
-    const totalTime = state.lengthTime + state.curlTime + state.maskTime + state.styleTime + state.washTime;
-    document.getElementById('sumTotal').textContent = total.toLocaleString('uk-UA') + ' ₴';
-    const h = Math.floor(totalTime / 60); const m = totalTime % 60;
-    document.getElementById('sumTime').textContent = ((h ? h + ' год ' : '') + (m ? m + ' хв' : '')).trim();
-  }
-
   function updateReview() {
-    const total = state.length + state.curl + state.mask + state.style + state.wash;
-    const totalTime = state.lengthTime + state.curlTime + state.maskTime + state.styleTime + state.washTime;
-    const h = Math.floor(totalTime / 60); const m = totalTime % 60;
-    const timeStr = ((h ? h + ' год ' : '') + (m ? m + ' хв' : '')).trim();
-    const extras = [];
-    if (state.mask) extras.push('маска');
-    if (state.style) extras.push('укладка');
-    if (state.wash) extras.push('преміум-миття');
-    const svc = 'Біозавивка · ' + state.lengthName + (extras.length ? ' + ' + extras.join(', ') : '');
+    if (!state.service) return;
+    
+    const total = state.totalPrice;
+    const totalTime = state.totalDuration;
+    
+    const optionNames = [];
+    Object.entries(state.selections).forEach(([groupName, sels]) => {
+        sels.forEach(s => optionNames.push(s.name.toLowerCase()));
+    });
+    
+    const svc = state.service.name + (optionNames.length ? ' · ' + optionNames.join(', ') : '');
+    const deposit = parseInt(ps('deposit_amount', '600')) || 600;
+    
     if (document.getElementById('reviewService')) document.getElementById('reviewService').textContent = svc;
-    if (document.getElementById('reviewDuration')) document.getElementById('reviewDuration').textContent = timeStr;
+    if (document.getElementById('reviewDuration')) document.getElementById('reviewDuration').textContent = formatDuration(totalTime);
     if (document.getElementById('reviewTotal')) document.getElementById('reviewTotal').textContent = total.toLocaleString('uk-UA') + ' ₴';
     if (document.getElementById('succService')) document.getElementById('succService').textContent = svc;
-    if (document.getElementById('succPayable')) document.getElementById('succPayable').textContent = (total - 600).toLocaleString('uk-UA') + ' ₴';
+    if (document.getElementById('succPayable')) document.getElementById('succPayable').textContent = Math.max(0, total - deposit).toLocaleString('uk-UA') + ' ₴';
+    
     if (state.selectedTime) {
-      const [hh, mm] = state.selectedTime.split(':').map(Number);
-      const endMin = hh * 60 + mm + totalTime;
-      const endH = Math.floor(endMin / 60) % 24; const endM = endMin % 60;
-      const endStr = String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
-      if (document.getElementById('succTime')) document.getElementById('succTime').textContent = state.selectedTime + ' — ' + endStr;
+        const [hh, mm] = state.selectedTime.split(':').map(Number);
+        const endMin = hh * 60 + mm + totalTime;
+        const endH = Math.floor(endMin / 60) % 24;
+        const endM = endMin % 60;
+        const endStr = String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
+        if (document.getElementById('succTime')) {
+            document.getElementById('succTime').textContent = state.selectedTime + ' — ' + endStr;
+        }
     }
   }
 
