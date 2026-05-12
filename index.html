@@ -225,13 +225,13 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    padding: 18px 24px 14px;
+    padding: 14px 20px;
     background: linear-gradient(to bottom, var(--bg-1) 80%, transparent);
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
     backdrop-filter: blur(20px);
-    flex-direction: column;
   }
   .brand { font-family: 'Fraunces', serif; font-size: 17px; letter-spacing: 0.32em; color: var(--beige); font-weight: 400; }
   .brand em { font-style: italic; font-weight: 300; color: var(--ink); margin-right: 2px; }
@@ -1461,10 +1461,11 @@
   <button class="icon-btn" onclick="goBack()" id="backBtn" style="display:none;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
-  <div style="flex:1;"></div>
   <div class="brand-wrap" onclick="brandTap()" id="brandLogo">
     <img data-bind-logo src="" alt="" class="brand-img" style="display:none;">
     <span class="brand" data-bind="site_name"><em>Unique</em> Curls</span>
+  </div>
+  <div style="flex:1;"></div>
 </div>
   
 </div>
