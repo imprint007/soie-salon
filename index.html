@@ -1477,43 +1477,12 @@
 
   <div class="section-head">
     <h2>Послуги</h2>
-    <span class="more">Усі →</span>
-  </div>
+    <span class="more" id="servicesCount">—</span>
+</div>
 
-  <div class="tiles">
-    <div class="tile" onclick="goScreen('detail')">
-      <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80');"></div>
-      <div class="tile-body">
-        <div class="tile-num">01 / Hair</div>
-        <div class="tile-title">Біозавивка</div>
-        <div class="tile-price">від 1 800 ₴</div>
-      </div>
-    </div>
-    <div class="tile" onclick="goScreen('detail')">
-      <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80');"></div>
-      <div class="tile-body">
-        <div class="tile-num">02 / Color</div>
-        <div class="tile-title">Фарбування</div>
-        <div class="tile-price">від 2 300 ₴</div>
-      </div>
-    </div>
-    <div class="tile" onclick="goScreen('detail')">
-      <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80');"></div>
-      <div class="tile-body">
-        <div class="tile-num">03 / Cut</div>
-        <div class="tile-title">Авторська стрижка</div>
-        <div class="tile-price">від 1 300 ₴</div>
-      </div>
-    </div>
-    <div class="tile" onclick="goScreen('detail')">
-      <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=600&q=80');"></div>
-      <div class="tile-body">
-        <div class="tile-num">04 / Care</div>
-        <div class="tile-title">Догляд & ботокс</div>
-        <div class="tile-price">від 1 150 ₴</div>
-      </div>
-    </div>
-  </div>
+<div class="tiles" id="tilesContainer">
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);font-size:13px;">Завантаження...</div>
+</div>
 
   <div class="section-head">
     <h2>Пакети</h2>
@@ -2342,6 +2311,17 @@ function ps(key, fallback = '') {
     return publicSettings[key] || fallback;
 }
 
+function openServiceDetail(serviceId) {
+    const s = publicServices.find(x => x.id == serviceId);
+    if (!s) return;
+    
+    console.log('Відкриваємо послугу:', s);
+    // Пока просто переходим на экран — рендер сделаем когда вы пришлёте HTML
+    state.currentServiceId = s.id;
+    state.currentService = s;
+    goScreen('detail');
+}
+
 function applySettings() {
     const root = document.documentElement;
     
@@ -2475,6 +2455,71 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadPublicSettings);
 } else {
     loadPublicSettings();
+}
+
+// ============================================
+// ПУБЛИЧНЫЕ УСЛУГИ для главной
+// ============================================
+let publicServices = [];
+
+async function loadPublicServices() {
+    const container = document.getElementById('tilesContainer');
+    if (!container) return;
+    
+    try {
+        const res = await fetch('/api/public/services.php');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        publicServices = data.data;
+        renderPublicServices();
+    } catch (err) {
+        container.innerHTML = `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--danger);">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderPublicServices() {
+    const container = document.getElementById('tilesContainer');
+    const countEl = document.getElementById('servicesCount');
+    
+    if (!publicServices || publicServices.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Послуг поки немає</div>';
+        if (countEl) countEl.textContent = '';
+        return;
+    }
+    
+    if (countEl) countEl.textContent = publicServices.length + ' · Усі →';
+    
+    container.innerHTML = publicServices.map((s, i) => {
+        const fallbackImg = 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80';
+        const img = s.image_url || fallbackImg;
+        const num = String(i + 1).padStart(2, '0');
+        return `
+        <div class="tile" onclick="openServiceDetail(${s.id})">
+            <div class="tile-img" style="background-image:url('${escapeAttr(img)}');"></div>
+            <div class="tile-body">
+                <div class="tile-num">${num} / ${(s.option_groups || []).length > 0 ? 'З опціями' : 'Базова'}</div>
+                <div class="tile-title">${escapeText(s.name)}</div>
+                <div class="tile-price">від ${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Утилиты экранирования (если ещё не определены) — для использования на клиентской части
+function escapeText(str) {
+    if (str === undefined || str === null) return '';
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(str) {
+    if (str === undefined || str === null) return '';
+    return String(str).replace(/['"]/g, c => ({'"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Вызов при загрузке страницы
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPublicServices);
+} else {
+    loadPublicServices();
 }
 
   // ============================================
