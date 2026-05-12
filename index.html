@@ -171,26 +171,23 @@
 
 .brand-wrap {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: default;
     user-select: none;
-    padding: 8px 0;
   }
   .brand-img {
-    width: 200px;
-    height: auto;
-    max-height: 160px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
     flex-shrink: 0;
   }
   
-  /* На мобілках лого менше */
   @media (max-width: 720px) {
     .brand-img {
-      width: 140px;
-      max-height: 120px;
+      width: 30px;
+      height: 30px;
     }
   }
 
