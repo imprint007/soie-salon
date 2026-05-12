@@ -1489,7 +1489,7 @@
 
   <div class="section-head">
     <h2>Послуги</h2>
-    <span class="more" id="servicesCount">—</span>
+    <span class="more" id="servicesCount" onclick="goScreen('all-services')" style="cursor:pointer;">—</span>
   </div>
 
   <div class="tiles" id="tilesContainer">
@@ -1498,7 +1498,7 @@
 
   <div class="section-head">
     <h2>Пакети</h2>
-    <span class="more">—</span>
+    <span class="more">${'<!-- empty -->'}</span>
   </div>
 
   <div id="packagesContainer">
@@ -1506,6 +1506,18 @@
   </div> 
 </div>
 <!-- /HOME -->
+
+<!-- ALL SERVICES -->
+<div class="screen" id="screen-all-services">
+  <div class="kicker">Каталог</div>
+  <h1 class="display">Усі <em>послуги</em></h1>
+  <p class="subtle" id="allServicesCount">—</p>
+
+  <div class="tiles" id="allServicesContainer">
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+  </div>
+</div>
+<!-- /ALL SERVICES -->
 
 <!-- DETAIL -->
 <div class="screen" id="screen-detail">
@@ -2349,6 +2361,35 @@ function ps(key, fallback = '') {
     return publicSettings[key] || fallback;
 }
 
+function renderAllServices() {
+    const container = document.getElementById('allServicesContainer');
+    const countEl = document.getElementById('allServicesCount');
+    if (!container) return;
+    
+    if (!publicServices || publicServices.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Послуг поки немає</div>';
+        if (countEl) countEl.textContent = '';
+        return;
+    }
+    
+    if (countEl) countEl.textContent = `${publicServices.length} послуг`;
+    
+    container.innerHTML = publicServices.map((s, i) => {
+        const fallbackImg = 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80';
+        const img = s.image_url || fallbackImg;
+        const num = String(i + 1).padStart(2, '0');
+        return `
+        <div class="tile" onclick="openServiceDetail(${s.id})">
+            <div class="tile-img" style="background-image:url('${escapeAttr(img)}');"></div>
+            <div class="tile-body">
+                <div class="tile-num">${num} / ${(s.option_groups || []).length > 0 ? 'З опціями' : 'Базова'}</div>
+                <div class="tile-title">${escapeText(s.name)}</div>
+                <div class="tile-price">від ${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
 // ============================================
 // ЭКРАН ДЕТАЛЕЙ УСЛУГИ
 // ============================================
@@ -2793,6 +2834,10 @@ if (document.readyState === 'loading') {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + name).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Рендер при переходе
+    if (name === 'all-services') renderAllServices();
+    
     const step = progressMap[name];
     const bars = document.querySelectorAll('#progress span');
     bars.forEach((b, i) => {
@@ -2802,7 +2847,7 @@ if (document.readyState === 'loading') {
     });
     document.getElementById('backBtn').style.display = (name === 'home') ? 'none' : 'inline-flex';
     if (name === 'contact' || name === 'success') updateReview();
-  }
+}
 
   function goBack() {
     const active = document.querySelector('.screen.active').id.replace('screen-', '');
@@ -3264,11 +3309,15 @@ async function loadPublicPackages() {
 
 function renderPublicPackages() {
     const container = document.getElementById('packagesContainer');
+    const countEl = document.getElementById('packagesCount');
     
     if (!publicPackages || publicPackages.length === 0) {
         container.innerHTML = '';
+        if (countEl) countEl.textContent = '';
         return;
     }
+    
+    if (countEl) countEl.textContent = `${publicPackages.length} комплектів`;
     
     container.innerHTML = publicPackages.map(p => {
         const saving = p.original_price > p.sale_price 
