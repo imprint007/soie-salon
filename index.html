@@ -1498,7 +1498,7 @@
 
   <div class="section-head">
     <h2>Пакети</h2>
-    <span class="more">${'<!-- empty -->'}</span>
+    <span class="more" id="packagesCount">—</span>
   </div>
 
   <div id="packagesContainer">
@@ -2852,10 +2852,16 @@ if (document.readyState === 'loading') {
   function goBack() {
     const active = document.querySelector('.screen.active').id.replace('screen-', '');
     const order = ['home', 'detail', 'datetime', 'contact', 'success'];
+    
+    // Спеціальні екрани — повертаються на головну
+    if (active === 'ai' || active === 'all-services') {
+        goScreen('home');
+        return;
+    }
+    
     const idx = order.indexOf(active);
-    if (active === 'ai') { goScreen('home'); return; }
     if (idx > 0) goScreen(order[idx - 1]);
-  }
+}
 
   function updateReview() {
     if (!state.service) return;
