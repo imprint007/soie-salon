@@ -1545,45 +1545,39 @@
   <p class="subtle">Ми підберемо вільного майстра під ваш вибір.</p>
 
   <div class="cal-head">
-    <div class="cal-month">Квітень 2026</div>
+    <div class="cal-month" id="calMonthLabel">—</div>
     <div class="cal-nav">
-      <button class="icon-btn" style="width:32px;height:32px;">
+      <button class="icon-btn" id="calPrevBtn" style="width:32px;height:32px;" onclick="calendarPrev()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <button class="icon-btn" style="width:32px;height:32px;">
+      <button class="icon-btn" id="calNextBtn" style="width:32px;height:32px;" onclick="calendarNext()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
   </div>
 
   <div class="cal-weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span></div>
-  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-grid" id="calGrid">
+    <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>
+  </div>
 
   <div class="times-head">
     <div>
       <div class="kicker" style="margin-bottom:6px;">Доступний час</div>
-      <div style="font-family:'Fraunces',serif;font-size:18px;" id="selectedDate">Субота, 25 квітня</div>
+      <div style="font-family:'Fraunces',serif;font-size:18px;" id="selectedDate">—</div>
     </div>
   </div>
 
-  <div class="times-grid">
-    <div class="time-slot" onclick="pickTime(this, '10:00', true)">10:00</div>
-    <div class="time-slot unavailable">11:30</div>
-    <div class="time-slot" onclick="pickTime(this, '12:00', true)">12:00</div>
-    <div class="time-slot" onclick="pickTime(this, '13:30', true)">13:30</div>
-    <div class="time-slot unavailable">15:00</div>
-    <div class="time-slot unavailable">16:30</div>
-    <div class="time-slot" onclick="pickTime(this, '17:00', false)">17:00</div>
-    <div class="time-slot" onclick="pickTime(this, '18:30', true)">18:30</div>
-    <div class="time-slot" onclick="pickTime(this, '20:00', true)">20:00</div>
+  <div class="times-grid" id="timesGrid">
+    <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Оберіть дату</div>
   </div>
 
   <div class="master-reveal" id="masterReveal">
-    <div class="master-avatar" style="background-image:url('https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80');"></div>
+    <div class="master-avatar" id="masterAvatar"></div>
     <div class="master-info">
-      <div class="m-role">Вільний майстер</div>
-      <div class="m-name">Анна Воронова</div>
-      <div class="m-exp">Senior · 8 років досвіду · 1 240 клієнтів</div>
+      <div class="m-role" id="masterRole">Вільний майстер</div>
+      <div class="m-name" id="masterName">—</div>
+      <div class="m-exp" id="masterExp">—</div>
     </div>
   </div>
 
@@ -2813,6 +2807,7 @@ if (document.readyState === 'loading') {
     
     // Рендер при переходе
     if (name === 'all-services') renderAllServices();
+    if (name === 'datetime') initCalendar();  // ← добавили
     
     const step = progressMap[name];
     const bars = document.querySelectorAll('#progress span');
@@ -2823,7 +2818,7 @@ if (document.readyState === 'loading') {
     });
     document.getElementById('backBtn').style.display = (name === 'home') ? 'none' : 'inline-flex';
     if (name === 'contact' || name === 'success') updateReview();
-}
+  }
 
   function goBack() {
     const active = document.querySelector('.screen.active').id.replace('screen-', '');
@@ -2896,39 +2891,6 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
-  function buildCalendar() {
-    const grid = document.getElementById('calGrid');
-    if (!grid) return;
-    const disabled = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
-    const days = [];
-    days.push({num:30,other:true}); days.push({num:31,other:true});
-    for (let d = 1; d <= 30; d++) {
-      days.push({num:d, disabled: disabled.includes(d), today: d === 24, selected: d === 25});
-    }
-    days.push({num:1,other:true}); days.push({num:2,other:true}); days.push({num:3,other:true});
-    days.forEach(d => {
-      const el = document.createElement('div');
-      el.className = 'cal-day';
-      el.textContent = d.num;
-      if (d.other) el.classList.add('other', 'disabled');
-      if (d.disabled) el.classList.add('disabled');
-      if (d.today) el.classList.add('today');
-      if (d.selected) el.classList.add('selected');
-      if (!d.other && !d.disabled) {
-        el.onclick = () => {
-          document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
-          el.classList.add('selected');
-          state.selectedDate = d.num;
-          const base = 5;
-          const idx = (base + (d.num - 24) + 7) % 7;
-          const names = ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'];
-          document.getElementById('selectedDate').textContent = `${names[idx]}, ${d.num} квітня`;
-        };
-      }
-      grid.appendChild(el);
-    });
-  }
-  buildCalendar();
 
   async function pickTime(el, time, available) {
     document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
@@ -4059,6 +4021,235 @@ async function deletePackage() {
       btn.textContent = 'Видалити';
     }
   }
+
+// ============================================
+// КАЛЕНДАРЬ И СЛОТЫ ВРЕМЕНИ
+// ============================================
+let calendarState = {
+    year: null,
+    month: null, // 1-12
+    selectedDate: null, // 'YYYY-MM-DD'
+    canGoPrev: false,
+    canGoNext: false,
+};
+
+async function initCalendar() {
+    const now = new Date();
+    calendarState.year = now.getFullYear();
+    calendarState.month = now.getMonth() + 1;
+    calendarState.selectedDate = null;
+    
+    // Очищаємо UI
+    document.getElementById('timesGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Оберіть дату</div>';
+    document.getElementById('selectedDate').textContent = '—';
+    hideMasterInfo();
+    document.getElementById('dateBtn').disabled = true;
+    
+    await loadCalendar();
+}
+
+async function loadCalendar() {
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    try {
+        const res = await fetch(`/api/public/calendar-days.php?year=${calendarState.year}&month=${calendarState.month}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        calendarState.canGoPrev = data.can_go_prev;
+        calendarState.canGoNext = data.can_go_next;
+        
+        // Заголовок місяця
+        document.getElementById('calMonthLabel').textContent = `${data.month_name} ${data.year}`;
+        
+        // Кнопки навігації
+        const prevBtn = document.getElementById('calPrevBtn');
+        const nextBtn = document.getElementById('calNextBtn');
+        prevBtn.style.opacity = data.can_go_prev ? '1' : '0.3';
+        prevBtn.style.pointerEvents = data.can_go_prev ? 'auto' : 'none';
+        nextBtn.style.opacity = data.can_go_next ? '1' : '0.3';
+        nextBtn.style.pointerEvents = data.can_go_next ? 'auto' : 'none';
+        
+        // Рендер днів
+        renderCalendarDays(data.days);
+    } catch (err) {
+        grid.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderCalendarDays(days) {
+    const grid = document.getElementById('calGrid');
+    
+    grid.innerHTML = days.map(d => {
+        const classes = ['cal-day'];
+        if (d.is_other_month) classes.push('other');
+        if (d.is_past) classes.push('disabled');
+        if (d.is_closed && !d.is_past) classes.push('disabled');
+        if (d.is_too_far) classes.push('disabled');
+        if (d.is_today) classes.push('today');
+        if (d.date === calendarState.selectedDate) classes.push('selected');
+        
+        const clickable = d.is_available;
+        const onclick = clickable ? `onclick="selectCalendarDay('${d.date}')"` : '';
+        
+        return `<div class="${classes.join(' ')}" ${onclick}>${d.day}</div>`;
+    }).join('');
+}
+
+function calendarPrev() {
+    if (!calendarState.canGoPrev) return;
+    calendarState.month--;
+    if (calendarState.month < 1) {
+        calendarState.month = 12;
+        calendarState.year--;
+    }
+    loadCalendar();
+}
+
+function calendarNext() {
+    if (!calendarState.canGoNext) return;
+    calendarState.month++;
+    if (calendarState.month > 12) {
+        calendarState.month = 1;
+        calendarState.year++;
+    }
+    loadCalendar();
+}
+
+async function selectCalendarDay(dateStr) {
+    calendarState.selectedDate = dateStr;
+    state.selectedDate = dateStr;
+    state.selectedTime = null;
+    state.masterId = null;
+    state.masterName = null;
+    
+    // Оновлюємо UI календаря
+    document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+    document.querySelectorAll('.cal-day').forEach(d => {
+        if (d.onclick && d.onclick.toString().includes(dateStr)) {
+            d.classList.add('selected');
+        }
+    });
+    
+    // Форматуємо дату для заголовка
+    const date = new Date(dateStr);
+    const dayNames = ['Неділя','Понеділок','Вівторок','Середа','Четвер','Пʼятниця','Субота'];
+    const monthNames = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+    const formatted = `${dayNames[date.getDay()]}, ${date.getDate()} ${monthNames[date.getMonth()]}`;
+    document.getElementById('selectedDate').textContent = formatted;
+    
+    // Сбрасываем мастера и кнопку
+    hideMasterInfo();
+    document.getElementById('dateBtn').disabled = true;
+    
+    // Завантажуємо слоти
+    await loadTimeSlots(dateStr);
+}
+
+async function loadTimeSlots(dateStr) {
+    const grid = document.getElementById('timesGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    if (!state.service) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--danger);font-size:12px;">Спочатку оберіть послугу</div>';
+        return;
+    }
+    
+    try {
+        const params = new URLSearchParams({
+            date: dateStr,
+            duration: state.totalDuration || state.baseDuration
+        });
+        if (state.service.isPackage) {
+            params.append('package_id', state.service.packageId);
+        } else {
+            params.append('service_id', state.serviceId);
+        }
+        
+        const res = await fetch('/api/public/calendar-slots.php?' + params);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        if (data.closed) {
+            grid.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:13px;">${escapeText(data.message)}</div>`;
+            return;
+        }
+        
+        if (!data.slots || data.slots.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:13px;">${escapeText(data.message || 'Немає вільних слотів')}</div>`;
+            return;
+        }
+        
+        renderTimeSlots(data.slots);
+    } catch (err) {
+        grid.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderTimeSlots(slots) {
+    const grid = document.getElementById('timesGrid');
+    
+    grid.innerHTML = slots.map(slot => {
+        const classes = ['time-slot'];
+        if (!slot.available) classes.push('unavailable');
+        
+        const slotData = JSON.stringify({
+            time: slot.time,
+            master_id: slot.master_id,
+            master_name: slot.master_name,
+            master_photo: slot.master_photo,
+            master_role: slot.master_role,
+            available: slot.available
+        }).replace(/"/g, '&quot;');
+        
+        const onclick = slot.available 
+            ? `onclick='selectTimeSlot(${JSON.stringify(slot).replace(/'/g, "&#39;")})'` 
+            : '';
+        
+        return `<div class="${classes.join(' ')}" ${onclick}>${slot.time}</div>`;
+    }).join('');
+}
+
+function selectTimeSlot(slot) {
+    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    
+    state.selectedTime = slot.time;
+    state.masterId = slot.master_id;
+    state.masterName = slot.master_name;
+    
+    // Показуємо інформацію про майстра
+    showMasterInfo(slot);
+    
+    document.getElementById('dateBtn').disabled = false;
+}
+
+function showMasterInfo(slot) {
+    const reveal = document.getElementById('masterReveal');
+    const noMaster = document.getElementById('noMaster');
+    
+    if (!slot.master_id) {
+        reveal.classList.remove('show');
+        noMaster.classList.add('show');
+        return;
+    }
+    
+    document.getElementById('masterAvatar').style.backgroundImage = `url('${slot.master_photo || ''}')`;
+    document.getElementById('masterName').textContent = slot.master_name || '—';
+    document.getElementById('masterRole').textContent = slot.master_role || 'Вільний майстер';
+    document.getElementById('masterExp').textContent = slot.free_masters_count > 1 
+        ? `Доступно ${slot.free_masters_count} майстрів на цей час` 
+        : 'Єдиний вільний майстер';
+    
+    reveal.classList.add('show');
+    noMaster.classList.remove('show');
+}
+
+function hideMasterInfo() {
+    document.getElementById('masterReveal').classList.remove('show');
+    document.getElementById('noMaster').classList.remove('show');
+}
 
 // ============================================
 // АДМИНКА — управление мастерами
