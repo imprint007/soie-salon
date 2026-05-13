@@ -3163,7 +3163,11 @@ async function assignRandomMaster() {
   // ============================================
   // Использование: createImageUploader({ container, folder, currentUrl, onChange, compact })
 
-  function createImageUploader({ container, folder = 'general', currentUrl = '', onChange = () => {}, compact = false }) {
+  function createImageUploader({ container, folder = 'general', currentUrl = '', onChange = () => {}, compact = false, accept = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml', allowVideo = false }) {
+    
+    if (allowVideo) {
+        accept = accept + ',video/mp4,video/webm,video/quicktime';
+    }
     container.classList.add('img-uploader');
     if (compact) container.classList.add('img-up-compact');
 
@@ -3197,7 +3201,11 @@ container.innerHTML = `
       <div class="img-up-error" style="display:none;"></div>
     </div>
   </div>
-  <input type="file" class="up-file-input" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" style="display:none;">
+  <input type="file" class="up-file-input" accept="${accept}" style="display:none;">
+  if (!file || !file.type.startsWith('image/')) {
+    showError('Перетягніть картинку');
+    return;
+}
 `;
 
     const preview = container.querySelector('.img-up-preview');
@@ -3213,19 +3221,28 @@ container.innerHTML = `
     let currentValue = currentUrl;
 
     function setUrl(url) {
-      currentValue = url;
-      urlInput.value = url;
-      if (url) {
-        preview.style.backgroundImage = `url('${url}')`;
+    currentValue = url;
+    urlInput.value = url;
+    if (url) {
+        const isVideoFile = /\.(mp4|webm|mov)$/i.test(url);
+        if (isVideoFile) {
+            preview.style.backgroundImage = '';
+            preview.style.backgroundColor = 'var(--bg-3)';
+            preview.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-mute);letter-spacing:0.1em;">VIDEO</div>';
+        } else {
+            preview.style.backgroundImage = `url('${url}')`;
+            preview.innerHTML = '';
+        }
         preview.classList.remove('empty');
         clearBtn.style.display = '';
-      } else {
+    } else {
         preview.style.backgroundImage = '';
+        preview.innerHTML = '';
         preview.classList.add('empty');
         clearBtn.style.display = 'none';
-      }
-      onChange(url);
     }
+    onChange(url);
+}
 
     function showError(msg) {
       errorEl.textContent = msg;
@@ -3251,18 +3268,20 @@ container.innerHTML = `
     urlInput.addEventListener('change', () => setUrl(urlInput.value.trim()));
 
     fileInput.addEventListener('change', async () => {
-      if (!fileInput.files || !fileInput.files[0]) return;
-      const file = fileInput.files[0];
-
-      if (file.size > 5 * 1024 * 1024) {
-        showError('Файл більше 5 MB');
+    if (!fileInput.files || !fileInput.files[0]) return;
+    const file = fileInput.files[0];
+    
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        showError(isVideo ? 'Відео більше 50 MB' : 'Файл більше 5 MB');
         fileInput.value = '';
         return;
-      }
-
-      await uploadFile(file);
-      fileInput.value = '';
-    });
+    }
+    
+    await uploadFile(file);
+    fileInput.value = '';
+});
 
     container.addEventListener('dragover', e => {
       e.preventDefault();
@@ -3273,14 +3292,21 @@ container.innerHTML = `
       e.preventDefault();
       container.classList.remove('dragging');
       const file = e.dataTransfer.files[0];
-      if (!file || !file.type.startsWith('image/')) {
-        showError('Перетягніть картинку');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        showError('Файл більше 5 MB');
-        return;
-      }
+if (!file) {
+    showError('Файл не знайдено');
+    return;
+}
+const isImage = file.type.startsWith('image/');
+const isVideo = file.type.startsWith('video/');
+if (!isImage && !(allowVideo && isVideo)) {
+    showError(allowVideo ? 'Перетягніть картинку або відео' : 'Перетягніть картинку');
+    return;
+}
+const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+if (file.size > maxSize) {
+    showError(isVideo ? 'Відео більше 50 MB' : 'Файл більше 5 MB');
+    return;
+}
       await uploadFile(file);
     });
 
@@ -5291,10 +5317,11 @@ function renderBrandSettings() {
 
     // Аплоадер відео (та сама функція, тільки папка інша)
     window.heroVideoUploader = createImageUploader({
-        container: document.getElementById('heroVideoUploaderContainer'),
-        folder: 'brand',
-        currentUrl: s('hero_video_url')
-    });
+    container: document.getElementById('heroVideoUploaderContainer'),
+    folder: 'brand',
+    currentUrl: s('hero_video_url'),
+    allowVideo: true
+});
 }
 
 // ====== КОНТАКТИ ======
