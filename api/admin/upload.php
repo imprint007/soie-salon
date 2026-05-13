@@ -26,11 +26,18 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 }
 
 // Перевірка розміру (макс 5 MB)
-$maxSize = 5 * 1024 * 1024;
-if ($file['size'] > $maxSize) jsonError('Файл занадто великий (макс 5 MB)');
+// Для відео — більший ліміт
+$isVideo = strpos($mime, 'video/') === 0;
+$maxSize = $isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+if ($file['size'] > $maxSize) {
+    jsonError($isVideo ? 'Відео більше 50 MB' : 'Файл більше 5 MB');
+}
 
 // Перевірка типу файла
-$allowedMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+$allowedMime = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'video/mp4', 'video/webm', 'video/quicktime'
+];
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mime = finfo_file($finfo, $file['tmp_name']);
 finfo_close($finfo);
@@ -41,11 +48,14 @@ if (!in_array($mime, $allowedMime)) {
 
 // Розширення
 $extMap = [
-    'image/jpeg'    => 'jpg',
-    'image/png'     => 'png',
-    'image/gif'     => 'gif',
-    'image/webp'    => 'webp',
-    'image/svg+xml' => 'svg',
+    'image/jpeg'      => 'jpg',
+    'image/png'       => 'png',
+    'image/gif'       => 'gif',
+    'image/webp'      => 'webp',
+    'image/svg+xml'   => 'svg',
+    'video/mp4'       => 'mp4',
+    'video/webm'      => 'webm',
+    'video/quicktime' => 'mov',
 ];
 $ext = $extMap[$mime];
 

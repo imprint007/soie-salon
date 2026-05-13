@@ -284,6 +284,23 @@
   }
   .hero-desc:empty { display: none; }
 
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.3) contrast(1.05) brightness(0.55);
+    z-index: 0;
+  }
+  .hero-video.show {
+    display: block !important;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
   .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 40px 0 18px; }
   .section-head h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; }
   .section-head .more { font-size: 11px; letter-spacing: 0.2em; color: var(--beige); text-transform: uppercase; cursor: pointer; }
@@ -1476,13 +1493,14 @@
 <!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="hero">
-    <div class="hero-img" data-bind-hero></div>
+    <div class="hero-img" data-bind-hero id="heroImg"></div>
+    <video class="hero-video" id="heroVideo" autoplay muted loop playsinline style="display:none;"></video>
     <div class="hero-content">
       <div class="hero-title" data-bind="site_name">Unique Curls</div>
       <div class="hero-tagline" data-bind="site_tagline">Авторський салон</div>
       <div class="hero-desc" data-bind="site_description"></div>
     </div>
-  </div>
+</div>
 
   <div class="section-head">
     <h2>Послуги</h2>
@@ -2579,12 +2597,31 @@ function applySettings() {
         });
     }
     
-    // Hero image
-    if (publicSettings.hero_image_url) {
-        document.querySelectorAll('[data-bind-hero]').forEach(el => {
-            el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
-        });
-    }
+    // Hero image або video
+const heroImg = document.getElementById('heroImg');
+const heroVideo = document.getElementById('heroVideo');
+const heroVideoUrl = publicSettings.hero_video_url;
+const heroSpeed = parseFloat(publicSettings.hero_video_speed || '0.5');
+
+if (heroVideoUrl && heroVideo) {
+    // Видео має пріоритет над картинкою
+    heroVideo.src = heroVideoUrl;
+    heroVideo.playbackRate = heroSpeed;
+    heroVideo.classList.add('show');
+    if (heroImg) heroImg.style.display = 'none';
+    
+    // Стартуємо програвання
+    heroVideo.play().catch(err => {
+        console.warn('Не вдалося програти відео:', err);
+        // Якщо відео не пішло — показуємо картинку як fallback
+        heroVideo.classList.remove('show');
+        if (heroImg) heroImg.style.display = '';
+    });
+} else if (publicSettings.hero_image_url) {
+    document.querySelectorAll('[data-bind-hero]').forEach(el => {
+        el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
+    });
+}
     
     // Favicon
     if (publicSettings.favicon_url) {
@@ -5179,15 +5216,34 @@ function renderBrandSettings() {
                     </div>
                 </div>
                 <div class="settings-grid">
-                    <div class="form-group">
-                        <label>Hero-зображення (фон головної)</label>
-                        <div id="heroImageUploaderContainer"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>OG-зображення (для соцмереж)</label>
-                        <div id="ogImageUploaderContainer"></div>
-                    </div>
-                </div>
+    <div class="form-group">
+        <label>Hero-зображення (фон головної)</label>
+        <div id="heroImageUploaderContainer"></div>
+    </div>
+    <div class="form-group">
+        <label>OG-зображення (для соцмереж)</label>
+        <div id="ogImageUploaderContainer"></div>
+    </div>
+</div>
+
+<div class="settings-grid">
+    <div class="form-group">
+        <label>Hero-відео (має пріоритет над зображенням)</label>
+        <div id="heroVideoUploaderContainer"></div>
+        <div style="font-size:11px;color:var(--ink-mute);margin-top:6px;line-height:1.5;">
+            MP4 або WebM, до 50 MB. Без звуку, в циклі. Замість фото.
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Швидкість відео</label>
+        <select id="set-hero_video_speed" style="width:100%;padding:11px 14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;">
+            <option value="0.3" ${s('hero_video_speed') === '0.3' ? 'selected' : ''}>0.3× (дуже повільно)</option>
+            <option value="0.5" ${s('hero_video_speed') === '0.5' ? 'selected' : ''}>0.5× (повільно)</option>
+            <option value="0.75" ${s('hero_video_speed') === '0.75' ? 'selected' : ''}>0.75× (трохи повільніше)</option>
+            <option value="1" ${s('hero_video_speed') === '1' ? 'selected' : ''}>1× (звичайна)</option>
+        </select>
+    </div>
+</div>
             </div>
 
             <div class="settings-card">
@@ -5231,6 +5287,13 @@ function renderBrandSettings() {
         container: document.getElementById('ogImageUploaderContainer'),
         folder: 'brand',
         currentUrl: s('og_image_url')
+    });
+
+    // Аплоадер відео (та сама функція, тільки папка інша)
+    window.heroVideoUploader = createImageUploader({
+        container: document.getElementById('heroVideoUploaderContainer'),
+        folder: 'brand',
+        currentUrl: s('hero_video_url')
     });
 }
 
@@ -5857,9 +5920,10 @@ async function saveSettings() {
     
     // Аплоадери (логотип, фавікон і т.д.) — якщо вкладка "Бренд" зараз відкрита
     if (logoUploader) updates.logo_url = logoUploader.getValue();
-    if (faviconUploader) updates.favicon_url = faviconUploader.getValue();
-    if (heroImageUploader) updates.hero_image_url = heroImageUploader.getValue();
-    if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
+if (faviconUploader) updates.favicon_url = faviconUploader.getValue();
+if (heroImageUploader) updates.hero_image_url = heroImageUploader.getValue();
+if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
+if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.getValue();
     
     // Час роботи (JSON)
     document.querySelectorAll('.hours-row').forEach(row => {
