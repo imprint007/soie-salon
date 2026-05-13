@@ -3168,6 +3168,7 @@ async function assignRandomMaster() {
     if (allowVideo) {
         accept = accept + ',video/mp4,video/webm,video/quicktime';
     }
+    
     container.classList.add('img-uploader');
     if (compact) container.classList.add('img-up-compact');
 
@@ -3202,10 +3203,6 @@ container.innerHTML = `
     </div>
   </div>
   <input type="file" class="up-file-input" accept="${accept}" style="display:none;">
-  if (!file || !file.type.startsWith('image/')) {
-    showError('Перетягніть картинку');
-    return;
-}
 `;
 
     const preview = container.querySelector('.img-up-preview');
