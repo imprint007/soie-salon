@@ -1595,22 +1595,24 @@
   <h1 class="display">Ваші <em>дані</em></h1>
   <p class="subtle">Надішлемо підтвердження на пошту з посиланням на керування бронюванням.</p>
 
-  <div class="input-group">
-    <label class="input-label">Ім'я</label>
-    <input type="text" class="input" id="clientName" placeholder="Як до вас звертатися">
-  </div>
-  <div class="input-group">
-    <label class="input-label">Телефон</label>
-    <input type="tel" class="input" id="clientPhone" placeholder="+380 (__) ___-__-__">
-  </div>
-  <div class="input-group">
-    <label class="input-label">Email</label>
-    <input type="email" class="input" id="clientEmail" placeholder="your@email.com">
-  </div>
-  <div class="input-group">
-    <label class="input-label">Коментар (за бажанням)</label>
-    <input type="text" class="input" id="clientComment" placeholder="Особливі побажання">
-  </div>
+  <form autocomplete="on" onsubmit="event.preventDefault();">
+    <div class="input-group">
+        <label class="input-label">Імʼя</label>
+        <input type="text" class="input" id="clientName" name="name" placeholder="..." autocomplete="given-name">
+    </div>
+    <div class="input-group">
+        <label class="input-label">Телефон</label>
+        <input type="tel" class="input" id="clientPhone" name="tel" placeholder="..." autocomplete="tel">
+    </div>
+    <div class="input-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="input" id="clientEmail" name="email" placeholder="..." autocomplete="email">
+    </div>
+    <div class="input-group">
+        <label class="input-label">Коментар (за бажанням)</label>
+        <input type="text" class="input" id="clientComment" name="comment" placeholder="...">
+    </div>
+</form>
 
   <div class="review-section" style="margin-top: 30px;">
     <div class="review-row"><span class="lbl">Послуга</span><span class="val" id="reviewService">—</span></div>

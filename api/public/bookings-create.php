@@ -206,7 +206,7 @@ try {
             
             $commentHtml = '';
             if (!empty($comment)) {
-                $commentHtml = '<tr><td style="padding:4px 0;color:#666;">Коментар:</td><td><em>' . htmlspecialchars($comment) . '</em></td></tr>';
+                $commentHtml = $comment; // просто текст коментаря
             }
             
             $adminBody = emailTemplateAdminBooking([
