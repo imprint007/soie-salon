@@ -1002,6 +1002,61 @@
   .ms-services-grid .row .v.rev { color: var(--beige); }
   
   /* Список товарів/послуг (для топу) */
+  /* Top list — гарні картки */
+  .top-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+  .top-item:hover {
+    border-color: var(--beige);
+  }
+  .top-rank {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--beige);
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .top-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .top-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .top-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .top-meta strong {
+    color: var(--beige);
+    font-weight: 600;
+  }
+  .top-thumb {
+    width: 56px;
+    height: 56px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-3);
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+  .top-thumb.square {
+    border-radius: 4px;
+  }
   .top-list { display: flex; flex-direction: column; gap: 12px; }
   .top-row {
     display: grid; grid-template-columns: 32px 1fr auto auto;
@@ -4651,74 +4706,140 @@ function renderTopList(container, items, valueLabel = 'грн') {
 }
 
 // ============================================
-// ОБЗОР (Dashboard)
+// ОГЛЯД (Dashboard)
 // ============================================
-let dashCurrentPeriod = 'month';
-let lastDashData = null;
+let dashboardPeriod = 'month';
 
 async function loadDashboard() {
     try {
-        const res = await fetch('/api/admin/analytics.php?period=' + dashCurrentPeriod, { credentials: 'include' });
+        const res = await fetch('/api/admin/analytics.php?period=' + dashboardPeriod, { credentials: 'include' });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
-        lastDashData = data;
-        renderDashboard(data);
+        renderDashboard(data.data || data);
     } catch (err) {
-        console.error('Dashboard load:', err);
+        console.error('Dashboard error:', err);
     }
 }
 
-function renderDashboard(data) {
-    const s = data.stats || {};
+function renderDashboard(d) {
+    const s = d.stats || {};
+    const bookings = s.total_bookings || 0;
+    const revenue = parseFloat(s.total_revenue) || 0;
+    const avgCheck = bookings > 0 ? Math.round(revenue / bookings) : 0;
     
-    // Карточки зверху
-    setText('dashTotalBookings', s.total_bookings || 0);
-    setText('dashTotalRevenue', fmtMoney(s.total_revenue || 0));
-    setText('dashTotalExpenses', fmtMoney(s.total_expenses || 0));
-    setText('dashProfit', fmtMoney(s.profit || 0));
+    fillStatCards('dashStats', [
+        { label: 'Виручка', value: fmtMoneyShort(revenue) },
+        { label: 'Заявок', value: bookings },
+        { label: 'Середній чек', value: fmtMoneyShort(avgCheck) },
+        { label: 'Скасовано', value: s.cancelled_count || 0 },
+    ]);
     
-    // Статус-розбивка (якщо є відповідні елементи в HTML)
-    setText('dashPending', s.pending_count || 0);
-    setText('dashConfirmed', s.confirmed_count || 0);
-    setText('dashDone', s.done_count || 0);
-    setText('dashCancelled', s.cancelled_count || 0);
-    setText('dashDeposits', fmtMoney(s.deposits_collected || 0));
-    
-    // Таймлайн
-    renderDashboardTimeline(data.timeline || []);
-    
-    // Топ майстри
-    renderDashboardMasters(data.top_masters || []);
-    
-    // Топ послуги
-    renderDashboardServices(data.top_services || []);
-    
-    // Останні заявки
-    renderDashboardLatest(data.latest_bookings || []);
+    renderTimeline(document.getElementById('dashTimeline'), d.timeline || []);
+    renderTopList(document.getElementById('dashTopMasters'), d.top_masters || [], 'master');
+    renderTopList(document.getElementById('dashTopServices'), d.top_services || [], 'service');
 }
 
-function renderDashboardTimeline(timeline) {
-    const container = document.getElementById('dashTimeline');
+// ============================================
+// ЗВІТИ (Reports)
+// ============================================
+let reportsPeriod = '6months';
+
+async function loadReports() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + reportsPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        renderReports(data.data || data);
+    } catch (err) {
+        console.error('Reports error:', err);
+    }
+}
+
+function renderReports(d) {
+    const s = d.stats || {};
+    
+    fillStatCards('reportsStats', [
+        { label: 'Виручка', value: fmtMoneyShort(s.total_revenue || 0) },
+        { label: 'Заявок', value: s.total_bookings || 0 },
+        { label: 'Скасовано', value: s.cancelled_count || 0 },
+        { label: 'Прибуток', value: fmtMoneyShort(s.profit || 0) },
+    ]);
+    
+    renderTimeline(document.getElementById('reportsTimeline'), d.timeline || []);
+    renderTopList(document.getElementById('reportsMasters'), d.top_masters || [], 'master');
+    renderTopList(document.getElementById('reportsTopServices'), d.top_services || [], 'service');
+    
+    // Скасування — список останніх скасованих
+    renderCancellations(d.latest_bookings || []);
+    
+    // Послуги майстрів — поки заглушка (потрібно окреме API)
+    const msEl = document.getElementById('reportsMasterServices');
+    if (msEl) {
+        msEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Розширений звіт буде доступний пізніше</div>';
+    }
+}
+
+function renderCancellations(bookings) {
+    const container = document.getElementById('reportsCancellations');
     if (!container) return;
     
-    if (timeline.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
+    const cancelled = (bookings || []).filter(b => b.status === 'cancelled');
+    
+    if (cancelled.length === 0) {
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Скасувань немає 🎉</div>';
+        return;
+    }
+    
+    container.innerHTML = cancelled.slice(0, 8).map(b => `
+        <div class="top-item" style="padding:10px 12px;">
+            <div class="top-info">
+                <div class="top-name">${escapeHtml(b.client_name)} · ${escapeHtml(b.booking_code)}</div>
+                <div class="top-meta">
+                    <span>${escapeHtml(b.service_name || '—')}</span>
+                    <span>${b.booking_date} ${(b.booking_time || '').substring(0, 5)}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// УТИЛІТИ ДЛЯ РЕНДЕРУ
+// ============================================
+function fillStatCards(containerId, items) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = items.map(it => `
+        <div class="stat-card">
+            <div class="stat-label">${it.label}</div>
+            <div class="stat-value">${it.value}</div>
+        </div>
+    `).join('');
+}
+
+function renderTimeline(container, timeline) {
+    if (!container) return;
+    
+    if (!timeline || timeline.length === 0) {
+        container.innerHTML = '<div style="padding:80px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних за період</div>';
         return;
     }
     
     const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
     
     container.innerHTML = `
-        <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:10px 0;">
+        <div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding:10px 0;">
             ${timeline.map(t => {
-                const h = ((parseFloat(t.revenue) || 0) / maxRevenue) * 100;
+                const rev = parseFloat(t.revenue) || 0;
+                const h = Math.max((rev / maxRevenue) * 100, 2);
                 const day = new Date(t.date).getDate();
                 return `
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:8px;">
                         <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
-                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:0.85;" title="${fmtMoney(t.revenue)}"></div>
+                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${rev > 0 ? 0.85 : 0.15};" title="${fmtMoney(rev)} · ${t.date}"></div>
                         </div>
-                        <div style="font-size:10px;color:var(--ink-mute);">${day}</div>
+                        <div style="font-size:9px;color:var(--ink-mute);">${day}</div>
                     </div>
                 `;
             }).join('')}
@@ -4726,77 +4847,116 @@ function renderDashboardTimeline(timeline) {
     `;
 }
 
-function renderDashboardMasters(masters) {
-    const container = document.getElementById('dashTopMasters');
+function renderTopList(container, items, type) {
     if (!container) return;
     
-    if (masters.length === 0) {
-        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
         return;
     }
     
-    container.innerHTML = masters.map(m => `
-        <div class="topitem-row">
-            <div class="topitem-thumb" style="background-image:url('${m.photo_url || ''}')"></div>
-            <div class="topitem-info">
-                <div class="topitem-name">${escapeHtml(m.name)}</div>
-                <div class="topitem-meta">${m.bookings_count || 0} заявок · ${fmtMoney(m.revenue || 0)}</div>
+    container.innerHTML = items.map((item, i) => {
+        const rank = String(i + 1).padStart(2, '0');
+        const isService = type === 'service';
+        const thumbUrl = isService ? item.image_url : item.photo_url;
+        const thumbClass = isService ? 'top-thumb square' : 'top-thumb';
+        const countLabel = isService ? 'замовлень' : 'заявок';
+        const count = item.bookings_count || 0;
+        const revenue = parseFloat(item.revenue) || 0;
+        
+        return `
+            <div class="top-item">
+                <div class="top-rank">${rank}</div>
+                <div class="top-info">
+                    <div class="top-name">${escapeHtml(item.name)}</div>
+                    <div class="top-meta">
+                        <span><strong>${count}</strong> ${countLabel}</span>
+                        <span><strong>${fmtMoney(revenue)}</strong></span>
+                        ${item.role ? `<span>${escapeHtml(item.role)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="${thumbClass}" style="background-image:url('${thumbUrl || ''}')"></div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-function renderDashboardServices(services) {
-    const container = document.getElementById('dashTopServices');
-    if (!container) return;
-    
-    if (services.length === 0) {
-        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+function fmtMoneyShort(n) {
+    n = Number(n) || 0;
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0','') + ' млн ₴';
+    if (n >= 10000) return Math.round(n / 1000) + 'k ₴';
+    return n.toLocaleString('uk-UA') + ' ₴';
+}
+
+// ============================================
+// EXPORTS
+// ============================================
+async function exportDashboard(format) {
+    if (format === 'pdf') {
+        window.print();
         return;
     }
-    
-    container.innerHTML = services.map(s => `
-        <div class="topitem-row">
-            <div class="topitem-thumb" style="background-image:url('${s.image_url || ''}')"></div>
-            <div class="topitem-info">
-                <div class="topitem-name">${escapeHtml(s.name)}</div>
-                <div class="topitem-meta">${s.bookings_count || 0} замовлень · ${fmtMoney(s.revenue || 0)}</div>
-            </div>
-        </div>
-    `).join('');
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + dashboardPeriod, { credentials: 'include' });
+        const d = await res.json();
+        if (!d.success) return alert('Помилка');
+        const data = d.data || d;
+        const s = data.stats || {};
+        const rows = [
+            ['Метрика', 'Значення'],
+            ['Виручка', s.total_revenue || 0],
+            ['Заявок', s.total_bookings || 0],
+            ['Виконано', s.done_count || 0],
+            ['Підтверджено', s.confirmed_count || 0],
+            ['Очікують', s.pending_count || 0],
+            ['Скасовано', s.cancelled_count || 0],
+            ['Витрати', s.total_expenses || 0],
+            ['Прибуток', s.profit || 0],
+        ];
+        downloadCsv('dashboard_' + dashboardPeriod + '.csv', rows);
+    } catch (e) {
+        alert('Помилка експорту');
+    }
 }
 
-function renderDashboardLatest(bookings) {
-    const container = document.getElementById('dashLatestBookings');
-    if (!container) return;
-    
-    if (bookings.length === 0) {
-        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Заявок поки немає</div>';
-        return;
+async function exportReports() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + reportsPeriod, { credentials: 'include' });
+        const d = await res.json();
+        if (!d.success) return alert('Помилка');
+        const data = d.data || d;
+        const rows = [['Майстер', 'Заявок', 'Виручка']];
+        (data.top_masters || []).forEach(m => {
+            rows.push([m.name, m.bookings_count || 0, m.revenue || 0]);
+        });
+        rows.push([]);
+        rows.push(['Послуга', 'Замовлень', 'Виручка']);
+        (data.top_services || []).forEach(s => {
+            rows.push([s.name, s.bookings_count || 0, s.revenue || 0]);
+        });
+        downloadCsv('reports_' + reportsPeriod + '.csv', rows);
+    } catch (e) {
+        alert('Помилка експорту');
     }
-    
-    container.innerHTML = bookings.map(b => `
-        <div class="latest-row">
-            <div class="latest-code">${escapeHtml(b.booking_code)}</div>
-            <div class="latest-info">
-                <div class="latest-client">${escapeHtml(b.client_name)}</div>
-                <div class="latest-meta">${escapeHtml(b.service_name || '—')} · ${b.booking_date} ${b.booking_time}</div>
-            </div>
-            <div class="latest-price">${fmtMoney(b.total_price)}</div>
-            <div class="latest-status">${statusBadge(b.status)}</div>
-        </div>
-    `).join('');
 }
 
-// Кликаем по фильтрам периода
-document.addEventListener('click', e => {
-    if (e.target.matches('#dashFilters .filter-chip')) {
-        document.querySelectorAll('#dashFilters .filter-chip').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        dashCurrentPeriod = e.target.dataset.period;
-        loadDashboard();
-    }
-});
+function downloadCsv(filename, rows) {
+    const BOM = '\uFEFF';
+    const csv = BOM + rows.map(r => r.map(c => {
+        const s = String(c ?? '');
+        return s.includes(',') || s.includes('"') || s.includes('\n') 
+            ? '"' + s.replace(/"/g, '""') + '"' 
+            : s;
+    }).join(',')).join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 // ============================================
 // ЗАЯВКИ (Bookings)
@@ -4836,13 +4996,13 @@ function renderBookingsFilters(counts) {
 
 function statusBadge(status) {
     const map = {
-        pending:   { cls: 'pending',   text: 'Очікує' },
-        confirmed: { cls: 'confirmed', text: 'Активна' },
-        done:      { cls: 'done',      text: 'Виконано' },
-        cancelled: { cls: 'cancelled', text: 'Скасовано' }
+        pending: { bg: '#3a3429', color: '#d8c490', label: 'Очікує' },
+        confirmed: { bg: '#1f3a2b', color: '#8ce0a8', label: 'Підтверджено' },
+        done: { bg: '#1a2f3a', color: '#8ec5e6', label: 'Виконано' },
+        cancelled: { bg: '#3a2024', color: '#e89999', label: 'Скасовано' },
     };
-    const s = map[status] || { cls: 'pending', text: status };
-    return `<span class="status ${s.cls}">${s.text}</span>`;
+    const s = map[status] || map.pending;
+    return `<span style="display:inline-block;padding:3px 8px;background:${s.bg};color:${s.color};border-radius:3px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">${s.label}</span>`;
 }
 
 function renderBookings() {

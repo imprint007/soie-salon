@@ -11,27 +11,32 @@ try {
     $today = date('Y-m-d');
     
     switch ($period) {
-        case 'week':
-            $startDate = date('Y-m-d', strtotime('-7 days'));
-            break;
-        case 'month':
-            $startDate = date('Y-m-d', strtotime('-30 days'));
-            break;
-        case 'quarter':
-            $startDate = date('Y-m-d', strtotime('-90 days'));
-            break;
-        case 'halfyear':
-            $startDate = date('Y-m-d', strtotime('-180 days'));
-            break;
-        case 'year':
-            $startDate = date('Y-m-d', strtotime('-365 days'));
-            break;
-        case 'all':
-            $startDate = '2020-01-01';
-            break;
-        default:
-            $startDate = date('Y-m-d', strtotime('-30 days'));
-    }
+    case 'today':
+        $startDate = date('Y-m-d');
+        break;
+    case 'week':
+        $startDate = date('Y-m-d', strtotime('-7 days'));
+        break;
+    case 'month':
+        $startDate = date('Y-m-d', strtotime('-30 days'));
+        break;
+    case 'quarter':
+    case '3months':
+        $startDate = date('Y-m-d', strtotime('-90 days'));
+        break;
+    case 'halfyear':
+    case '6months':
+        $startDate = date('Y-m-d', strtotime('-180 days'));
+        break;
+    case 'year':
+        $startDate = date('Y-m-d', strtotime('-365 days'));
+        break;
+    case 'all':
+        $startDate = '2020-01-01';
+        break;
+    default:
+        $startDate = date('Y-m-d', strtotime('-30 days'));
+}
     
     // ============================================
     // СТАТИСТИКА ЗА ПЕРІОД
