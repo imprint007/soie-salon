@@ -6241,6 +6241,10 @@ window.renderReports = function(d) {
     
     const msEl = document.getElementById('reportsMasterServices');
     if (msEl) msEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Розширений звіт буде доступний пізніше</div>';
+    // Завантажуємо заробіток
+    if (typeof window.loadMasterSalary === 'function') {
+        window.loadMasterSalary();
+    }
 };
 
 window.fillStatCards = function(id, items) {
@@ -6398,24 +6402,37 @@ document.addEventListener('click', (e) => {
 // ЗАРОБІТОК МАЙСТРІВ
 // ============================================
 window.loadMasterSalary = async function() {
+    console.log('🔵 loadMasterSalary СТАРТ');
     const container = document.getElementById('reportsMasterSalary');
-    if (!container) return;
-    container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    if (!container) {
+        console.log('🔴 контейнер не знайдено');
+        return;
+    }
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Завантаження...</div>';
+    console.log('🟡 контейнер знайдено, fetch...');
     
     try {
         const res = await fetch('/api/admin/salary-calculate.php?period=' + (window.reportsPeriod || 'month'), { 
             credentials: 'include' 
         });
         const data = await res.json();
+        console.log('🟢 fetch успіх, masters:', data.masters?.length || data.data?.masters?.length);
         if (!data.success) throw new Error(data.error);
         renderMasterSalary(data.data || data);
+        console.log('✅ renderMasterSalary викликана');
     } catch (err) {
-        container.innerHTML = `<div style="padding:20px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+        console.log('🔴 ERROR:', err);
+        container.innerHTML = `<div style="padding:20px;color:#e89999;font-size:12px;">Помилка: ${err.message}</div>`;
     }
 };
 
 function renderMasterSalary(data) {
+    console.log('🟣 renderMasterSalary СТАРТ, masters:', data.masters?.length);
     const container = document.getElementById('reportsMasterSalary');
+    if (!container) {
+        console.log('🔴 контейнер відсутній в renderMasterSalary');
+        return;
+    }
     if (!container) return;
     
     const masters = data.masters || [];
@@ -6470,6 +6487,8 @@ function renderMasterSalary(data) {
             }).join('')}
         </div>
     `;
+    container.innerHTML = html;
+    console.log('✅ renderMasterSalary КОНЕЦ, children тепер:', container.children.length);
 }
 
 function renderSalaryDetailsHTML(m) {
