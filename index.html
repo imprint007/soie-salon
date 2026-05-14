@@ -5052,6 +5052,22 @@ function renderBookings() {
     `).join('');
 }
 
+// Окремий обробник для кнопок зарплати — НЕ конфліктує з reports-фільтром
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-salary-period]');
+    if (!btn) return;
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const period = btn.dataset.salaryPeriod;
+    window.salaryPeriod = period;
+    
+    if (typeof window.loadMasterSalary === 'function') {
+        window.loadMasterSalary();
+    }
+}, true); // true = capture phase, спрацьовує перш ніж інші
+
 document.addEventListener('click', e => {
     if (e.target.matches('#bookingsFilters .filter-chip')) {
         document.querySelectorAll('#bookingsFilters .filter-chip').forEach(b => b.classList.remove('active'));
@@ -6401,10 +6417,6 @@ document.addEventListener('click', (e) => {
 // ============================================
 // ЗАРОБІТОК МАЙСТРІВ
 // ============================================
-window.setSalaryPeriod = function(period) {
-    window.salaryPeriod = period;
-    window.loadMasterSalary();
-};
 
 window.loadMasterSalary = async function() {
     console.log('🔵 loadMasterSalary СТАРТ');
@@ -6451,7 +6463,7 @@ const currentSalaryPeriod = window.salaryPeriod || (window.reportsPeriod || 'mon
 let html = '';
 
 // Фільтр періоду саме для зарплат
-html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">';
+html += '<div class="salary-period-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">';
 const periods = [
     { key: 'today', label: 'Сьогодні' },
     { key: 'week', label: 'Тиждень' },
@@ -6465,7 +6477,8 @@ periods.forEach(function(p) {
     const bg = isActive ? '#e0c9a8' : 'transparent';
     const color = isActive ? '#0d0c0b' : '#ede6d9';
     const border = isActive ? '#e0c9a8' : 'rgba(224,201,168,0.18)';
-    html += '<button onclick="setSalaryPeriod(\'' + p.key + '\')" style="padding:8px 14px;background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">' + p.label + '</button>';
+    // ВАЖЛИВО: type="button" і event.stopPropagation()
+    html += '<button type="button" data-salary-period="' + p.key + '" style="padding:8px 14px;background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">' + p.label + '</button>';
 });
 html += '</div>';
 
