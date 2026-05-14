@@ -1496,7 +1496,7 @@
 <div class="screen active" id="screen-home">
   <div class="hero">
     <div class="hero-img" data-bind-hero id="heroImg"></div>
-    <video class="hero-video" id="heroVideo" autoplay muted loop playsinline style="display:none;"></video>
+    <video class="hero-video" id="heroVideo" autoplay muted playsinline style="display:none;"></video>
     <div class="hero-content">
       <div class="hero-title" data-bind="site_name">Unique Curls</div>
       <div class="hero-tagline" data-bind="site_tagline">Авторський салон</div>
@@ -2606,19 +2606,55 @@ const heroVideoUrl = publicSettings.hero_video_url;
 const heroSpeed = parseFloat(publicSettings.hero_video_speed || '0.5');
 
 if (heroVideoUrl && heroVideo) {
-    // Видео має пріоритет над картинкою
     heroVideo.src = heroVideoUrl;
     heroVideo.playbackRate = heroSpeed;
     heroVideo.classList.add('show');
     if (heroImg) heroImg.style.display = 'none';
     
-    // Стартуємо програвання
-    heroVideo.play().catch(err => {
-        console.warn('Не вдалося програти відео:', err);
-        // Якщо відео не пішло — показуємо картинку як fallback
-        heroVideo.classList.remove('show');
-        if (heroImg) heroImg.style.display = '';
-    });
+    // ПІНГ-ПОНГ ЦИКЛ (вперед-назад)
+    let pingPongDirection = 1; // 1 = вперед, -1 = назад
+    let pingPongRaf = null;
+    let lastTime = null;
+    
+    function pingPongLoop(now) {
+        if (!heroVideo.duration || isNaN(heroVideo.duration)) {
+            pingPongRaf = requestAnimationFrame(pingPongLoop);
+            return;
+        }
+        
+        if (lastTime === null) lastTime = now;
+        const deltaSec = (now - lastTime) / 1000;
+        lastTime = now;
+        
+        const newTime = heroVideo.currentTime + (deltaSec * heroSpeed * pingPongDirection);
+        
+        if (newTime >= heroVideo.duration) {
+            heroVideo.currentTime = heroVideo.duration;
+            pingPongDirection = -1; // повертаємось назад
+        } else if (newTime <= 0) {
+            heroVideo.currentTime = 0;
+            pingPongDirection = 1; // знову вперед
+        } else {
+            heroVideo.currentTime = newTime;
+        }
+        
+        pingPongRaf = requestAnimationFrame(pingPongLoop);
+    }
+    
+    heroVideo.addEventListener('loadedmetadata', () => {
+        // Пауза автозапуску — будемо рулити вручну
+        heroVideo.pause();
+        heroVideo.currentTime = 0;
+        pingPongDirection = 1;
+        lastTime = null;
+        
+        if (pingPongRaf) cancelAnimationFrame(pingPongRaf);
+        pingPongRaf = requestAnimationFrame(pingPongLoop);
+    }, { once: true });
+    
+    // Fallback на випадок коли pingPong не зміг запуститись
+    heroVideo.play().catch(() => {});
+    
 } else if (publicSettings.hero_image_url) {
     document.querySelectorAll('[data-bind-hero]').forEach(el => {
         el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
