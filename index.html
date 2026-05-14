@@ -1485,6 +1485,28 @@
     }
   }
 
+  /* Плавне оновлення блоків */
+  .smooth-update {
+    transition: opacity 0.2s ease;
+  }
+  .smooth-update.updating {
+    opacity: 0.4;
+  }
+  
+  .salary-row-fade {
+    animation: fadeInUp 0.3s ease forwards;
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -6193,6 +6215,11 @@ window.loadDashboard = async function() {
 };
 
 window.renderDashboard = function(d) {
+    const adDash = document.getElementById('ad-dashboard');
+    if (adDash) {
+        adDash.classList.add('smooth-update', 'updating');
+        setTimeout(() => adDash.classList.remove('updating'), 50);
+    }
     const s = d.stats || {};
     const bookings = parseInt(s.total_bookings) || 0;
     const revenue = parseFloat(s.total_revenue) || 0;
@@ -6220,6 +6247,11 @@ window.loadReports = async function() {
 };
 
 window.renderReports = function(d) {
+    const adReports = document.getElementById('ad-reports');
+    if (adReports) {
+        adReports.classList.add('smooth-update', 'updating');
+        setTimeout(() => adReports.classList.remove('updating'), 50);
+    }
     const s = d.stats || {};
     window.salaryPeriod = 'today';  // ← добавили
     
@@ -6407,7 +6439,9 @@ document.addEventListener('click', (e) => {
 window.loadMasterSalary = async function() {
     const container = document.getElementById('reportsMasterSalary');
     if (!container) return;
-    container.innerHTML = '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Завантаження...</div>';
+    
+    // Не очищуємо контейнер, а робимо його напівпрозорим
+    container.classList.add('smooth-update', 'updating');
     
     try {
         const period = window.salaryPeriod || 'today';
@@ -6416,9 +6450,19 @@ window.loadMasterSalary = async function() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
+        
+        // Минимальная задержка для плавности (250ms)
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
         renderMasterSalary(data.data || data);
+        
+        // Знімаємо прозорість
+        requestAnimationFrame(() => {
+            container.classList.remove('updating');
+        });
     } catch (err) {
         container.innerHTML = `<div style="padding:20px;color:#e89999;font-size:12px;">Помилка: ${err.message}</div>`;
+        container.classList.remove('updating');
     }
 };
 
@@ -6477,7 +6521,7 @@ if (masters.length === 0) {
         const avg = m.bookings_count > 0 ? Math.round(m.total_salary / m.bookings_count) : 0;
         const noRules = !m.has_rules && m.bookings_count > 0;
         
-        html += '<div style="background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:10px;border-radius:4px;">';
+        html += '<div class="salary-row-fade" style="background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:10px;border-radius:4px;animation-delay:' + (i * 50) + 'ms;">';
         html += '<div style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;" onclick="toggleSalaryDetails(' + m.master_id + ')">';
         html += '<div style="font-family:\'Fraunces\',serif;font-size:28px;color:#e0c9a8;width:40px;text-align:center;flex-shrink:0;">' + rank + '</div>';
         html += '<div style="width:52px;height:52px;border-radius:50%;background-image:url(\'' + (m.master_photo || '') + '\');background-size:cover;background-position:center;background-color:#2a2622;flex-shrink:0;"></div>';
