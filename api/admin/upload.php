@@ -8,11 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonError('Тільки POST', 405);
 if (empty($_FILES['file'])) jsonError('Файл не надіслано');
 
 $file = $_FILES['file'];
-$folder = trim($_POST['folder'] ?? 'general'); // services, options, masters, logo, etc.
-$folder = preg_replace('/[^a-z0-9_\-]/i', '', $folder); // безпека: тільки літери та цифри
+$folder = trim($_POST['folder'] ?? 'general');
+$folder = preg_replace('/[^a-z0-9_\-]/i', '', $folder);
 if (empty($folder)) $folder = 'general';
 
-// Перевірка помилок завантаження
 if ($file['error'] !== UPLOAD_ERR_OK) {
     $errors = [
         UPLOAD_ERR_INI_SIZE   => 'Файл занадто великий (ліміт сервера)',
@@ -25,28 +24,37 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
     jsonError($errors[$file['error']] ?? 'Помилка завантаження');
 }
 
-// Перевірка розміру (макс 5 MB)
-// Для відео — більший ліміт
+// Визначаємо MIME
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$mime = finfo_file($finfo, $file['tmp_name']);
+finfo_close($finfo);
+
+$allowedMime = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'video/mp4', 'video/webm', 'video/quicktime'
+];
+
+// Деякі сервери повертають дивний MIME для відео — перевіряємо ще й розширення
+$origName = $file['name'] ?? '';
+$origExt = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+$videoExtensions = ['mp4', 'webm', 'mov'];
+
+if (!in_array($mime, $allowedMime)) {
+    // Можливо MIME не визначився — спробуємо за розширенням
+    if (in_array($origExt, $videoExtensions)) {
+        $extToMime = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'mov' => 'video/quicktime'];
+        $mime = $extToMime[$origExt];
+    } else {
+        jsonError('Дозволені тільки зображення (JPG, PNG, GIF, WebP, SVG) та відео (MP4, WebM, MOV). MIME: ' . $mime);
+    }
+}
+
 $isVideo = strpos($mime, 'video/') === 0;
 $maxSize = $isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
 if ($file['size'] > $maxSize) {
     jsonError($isVideo ? 'Відео більше 50 MB' : 'Файл більше 5 MB');
 }
 
-// Перевірка типу файла
-$allowedMime = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-    'video/mp4', 'video/webm', 'video/quicktime'
-];
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$mime = finfo_file($finfo, $file['tmp_name']);
-finfo_close($finfo);
-
-if (!in_array($mime, $allowedMime)) {
-    jsonError('Дозволені тільки зображення (JPG, PNG, GIF, WebP, SVG)');
-}
-
-// Розширення
 $extMap = [
     'image/jpeg'      => 'jpg',
     'image/png'       => 'png',
@@ -59,10 +67,8 @@ $extMap = [
 ];
 $ext = $extMap[$mime];
 
-// Унікальне імʼя
 $basename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $ext;
 
-// Шлях
 $uploadsRoot = __DIR__ . '/../../uploads';
 $targetDir = $uploadsRoot . '/' . $folder;
 
@@ -78,12 +84,12 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     jsonError('Не вдалося зберегти файл', 500);
 }
 
-// Публічний URL
 $publicUrl = '/uploads/' . $folder . '/' . $basename;
 
 jsonOk([
     'url' => $publicUrl,
     'filename' => $basename,
     'size' => $file['size'],
-    'folder' => $folder
+    'folder' => $folder,
+    'is_video' => $isVideo,
 ]);
