@@ -2021,6 +2021,21 @@
                 </div>
             </div>
 
+            <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <label style="margin:0;">Зарплата майстра (%)</label>
+        <button type="button" class="admin-cta ghost" onclick="addSalaryRule()" style="padding:6px 14px;font-size:11px;">+ Додати правило</button>
+    </div>
+    
+    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+        Базовий % застосовується до всіх послуг. Можна додати окремий % для конкретних послуг або опцій.
+    </div>
+    
+    <div id="salaryRulesList" style="display:flex;flex-direction:column;gap:8px;">
+        <!-- правила будуть рендеритись JS -->
+    </div>
+</div>
+
             <div class="form-group">
                 <label class="checkbox-label">
                     <input type="checkbox" id="mstActive" checked>
@@ -4489,6 +4504,8 @@ async function openMasterModal() {
     await renderMasterServicesList([]);
 
     document.getElementById('masterModal').classList.add('show');
+    currentSalaryRules = [];
+    renderSalaryRules();
 }
 
 async function editMaster(id) {
@@ -4518,6 +4535,8 @@ async function editMaster(id) {
     await renderMasterServicesList(m.service_ids || []);
 
     document.getElementById('masterModal').classList.add('show');
+
+    await loadSalaryRules(id);
 }
 
 async function renderMasterServicesList(selectedIds) {
@@ -4593,6 +4612,11 @@ async function saveMaster() {
         if (!data.success) throw new Error(data.error);
         closeMasterModal();
         await loadMasters();
+        // Зберегти правила зарплати
+    const savedMasterId = data.id || parseInt(document.getElementById('mId')?.value);
+    if (savedMasterId) {
+        await saveSalaryRules(savedMasterId);
+    }
     } catch (err) {
         showMstError(err.message);
     } finally {
@@ -4626,6 +4650,188 @@ async function deleteMaster() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Видалити';
+    }
+}
+
+// ============================================
+// ЗАРПЛАТА МАЙСТРА
+// ============================================
+let currentSalaryRules = [];
+let allOptionsCache = null;
+
+async function loadAllOptions() {
+    if (allOptionsCache) return allOptionsCache;
+    try {
+        const res = await fetch('/api/admin/all-options-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            allOptionsCache = data.data;
+            return allOptionsCache;
+        }
+    } catch (err) {}
+    return [];
+}
+
+async function loadSalaryRules(masterId) {
+    currentSalaryRules = [];
+    if (!masterId) {
+        renderSalaryRules();
+        return;
+    }
+    try {
+        const res = await fetch('/api/admin/salary-rules-list.php?master_id=' + masterId, { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            currentSalaryRules = data.data;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    renderSalaryRules();
+}
+
+function renderSalaryRules() {
+    const list = document.getElementById('salaryRulesList');
+    if (!list) return;
+    
+    if (currentSalaryRules.length === 0) {
+        list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;">Правил поки немає. Додайте хоча б базовий %.</div>';
+        return;
+    }
+    
+    list.innerHTML = currentSalaryRules.map((r, i) => {
+        return `
+            <div class="salary-rule" data-index="${i}" style="display:flex;gap:8px;align-items:center;padding:10px;background:var(--bg-2);border:1px solid var(--line-2);">
+                <select class="rule-type" data-index="${i}" style="flex:0 0 130px;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;">
+                    <option value="all" ${r.rule_type === 'all' ? 'selected' : ''}>Базовий %</option>
+                    <option value="service" ${r.rule_type === 'service' ? 'selected' : ''}>За послугу</option>
+                    <option value="option" ${r.rule_type === 'option' ? 'selected' : ''}>За опцію</option>
+                </select>
+                
+                <select class="rule-target" data-index="${i}" style="flex:1;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;">
+                    <option value="">—</option>
+                </select>
+                
+                <div style="display:flex;align-items:center;gap:4px;flex:0 0 90px;">
+                    <input type="number" class="rule-percent" data-index="${i}" value="${r.percent || 0}" min="0" max="100" step="0.5" style="width:60px;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;">
+                    <span style="color:var(--ink-mute);">%</span>
+                </div>
+                
+                <button type="button" onclick="removeSalaryRule(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;">✕</button>
+            </div>
+        `;
+    }).join('');
+    
+    // Заповнюємо селекти "target" і додаємо обробники
+    currentSalaryRules.forEach((r, i) => {
+        updateRuleTargetSelect(i);
+    });
+    
+    list.querySelectorAll('.rule-type').forEach(el => {
+        el.addEventListener('change', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            currentSalaryRules[i].rule_type = e.target.value;
+            currentSalaryRules[i].service_id = null;
+            currentSalaryRules[i].option_id = null;
+            updateRuleTargetSelect(i);
+        });
+    });
+    
+    list.querySelectorAll('.rule-target').forEach(el => {
+        el.addEventListener('change', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            const val = e.target.value;
+            const type = currentSalaryRules[i].rule_type;
+            if (type === 'service') {
+                currentSalaryRules[i].service_id = val ? parseInt(val) : null;
+            } else if (type === 'option') {
+                currentSalaryRules[i].option_id = val ? parseInt(val) : null;
+            }
+        });
+    });
+    
+    list.querySelectorAll('.rule-percent').forEach(el => {
+        el.addEventListener('input', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            currentSalaryRules[i].percent = parseFloat(e.target.value) || 0;
+        });
+    });
+}
+
+async function updateRuleTargetSelect(index) {
+    const list = document.getElementById('salaryRulesList');
+    const select = list.querySelector(`.rule-target[data-index="${index}"]`);
+    if (!select) return;
+    
+    const rule = currentSalaryRules[index];
+    
+    if (rule.rule_type === 'all') {
+        select.innerHTML = '<option value="">Усі послуги (базовий)</option>';
+        select.disabled = true;
+        select.style.opacity = '0.5';
+        return;
+    }
+    
+    select.disabled = false;
+    select.style.opacity = '1';
+    
+    if (rule.rule_type === 'service') {
+        const services = currentServices || [];
+        select.innerHTML = '<option value="">Оберіть послугу...</option>' + 
+            services.map(s => `<option value="${s.id}" ${rule.service_id == s.id ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('');
+    } else if (rule.rule_type === 'option') {
+        const options = await loadAllOptions();
+        select.innerHTML = '<option value="">Оберіть опцію...</option>' + 
+            options.map(o => `<option value="${o.id}" ${rule.option_id == o.id ? 'selected' : ''}>${escapeHtml(o.service_name)} → ${escapeHtml(o.group_name)} → ${escapeHtml(o.option_name)}</option>`).join('');
+    }
+}
+
+function addSalaryRule() {
+    // Якщо ще немає базового — додаємо його
+    const hasBase = currentSalaryRules.some(r => r.rule_type === 'all');
+    if (!hasBase) {
+        currentSalaryRules.push({
+            rule_type: 'all',
+            service_id: null,
+            option_id: null,
+            percent: 30
+        });
+    } else {
+        currentSalaryRules.push({
+            rule_type: 'service',
+            service_id: null,
+            option_id: null,
+            percent: 30
+        });
+    }
+    renderSalaryRules();
+}
+
+function removeSalaryRule(index) {
+    currentSalaryRules.splice(index, 1);
+    renderSalaryRules();
+}
+
+async function saveSalaryRules(masterId) {
+    if (!masterId) return;
+    try {
+        const res = await fetch('/api/admin/salary-rules-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                master_id: masterId,
+                rules: currentSalaryRules.filter(r => {
+                    if (r.rule_type === 'service' && !r.service_id) return false;
+                    if (r.rule_type === 'option' && !r.option_id) return false;
+                    return r.percent > 0;
+                })
+            })
+        });
+        const data = await res.json();
+        if (!data.success) console.error('Salary save error:', data.error);
+    } catch (err) {
+        console.error('Salary save error:', err);
     }
 }
 
