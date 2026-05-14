@@ -6401,6 +6401,11 @@ document.addEventListener('click', (e) => {
 // ============================================
 // ЗАРОБІТОК МАЙСТРІВ
 // ============================================
+window.setSalaryPeriod = function(period) {
+    window.salaryPeriod = period;
+    window.loadMasterSalary();
+};
+
 window.loadMasterSalary = async function() {
     console.log('🔵 loadMasterSalary СТАРТ');
     const container = document.getElementById('reportsMasterSalary');
@@ -6412,6 +6417,7 @@ window.loadMasterSalary = async function() {
     console.log('🟡 контейнер знайдено, fetch...');
     
     try {
+        const period = window.salaryPeriod || window.reportsPeriod || 'month';
         const res = await fetch('/api/admin/salary-calculate.php?period=' + (window.reportsPeriod || 'month'), { 
             credentials: 'include' 
         });
@@ -6440,15 +6446,39 @@ function renderMasterSalary(data) {
     };
     
     const masters = data.masters || [];
-    if (masters.length === 0) {
-        container.innerHTML = '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Немає даних</div>';
-        return;
-    }
+const currentSalaryPeriod = window.salaryPeriod || (window.reportsPeriod || 'month');
+
+let html = '';
+
+// Фільтр періоду саме для зарплат
+html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">';
+const periods = [
+    { key: 'today', label: 'Сьогодні' },
+    { key: 'week', label: 'Тиждень' },
+    { key: 'month', label: 'Місяць' },
+    { key: '3months', label: '3 місяці' },
+    { key: '6months', label: 'Півроку' },
+    { key: 'year', label: 'Рік' }
+];
+periods.forEach(function(p) {
+    const isActive = p.key === currentSalaryPeriod;
+    const bg = isActive ? '#e0c9a8' : 'transparent';
+    const color = isActive ? '#0d0c0b' : '#ede6d9';
+    const border = isActive ? '#e0c9a8' : 'rgba(224,201,168,0.18)';
+    html += '<button onclick="setSalaryPeriod(\'' + p.key + '\')" style="padding:8px 14px;background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">' + p.label + '</button>';
+});
+html += '</div>';
+
+if (masters.length === 0) {
+    html += '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Немає виконаних робіт за цей період</div>';
+    container.innerHTML = html;
+    return;
+}
     
     const sorted = [...masters].sort((a, b) => b.total_salary - a.total_salary);
     const totalAll = data.total || 0;
     
-    let html = '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:14px;border-radius:4px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:14px;border-radius:4px;">';
     html += '<div style="font-size:11px;color:#9e968a;letter-spacing:0.1em;text-transform:uppercase;">Загалом до виплати</div>';
     html += '<div style="font-family:\'Fraunces\',serif;font-size:26px;color:#e0c9a8;">' + Number(totalAll).toLocaleString('uk-UA') + ' ₴</div>';
     html += '</div>';
