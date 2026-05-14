@@ -4705,138 +4705,6 @@ function renderTopList(container, items, valueLabel = 'грн') {
     }).join('') + '</div>';
 }
 
-// ============================================
-// ОГЛЯД (Dashboard)
-// ============================================
-let dashboardPeriod = 'month';
-let reportsPeriod = '6months';
-
-async function loadDashboard() {
-    try {
-        const res = await fetch('/api/admin/analytics.php?period=' + dashboardPeriod, { credentials: 'include' });
-        const data = await res.json();
-        console.log('Dashboard response:', data);
-        if (!data.success) throw new Error(data.error || 'Помилка');
-        const payload = data.data || data;
-        renderDashboard(payload);
-    } catch (err) {
-        console.error('Dashboard error:', err);
-    }
-}
-
-function renderDashboard(d) {
-    const s = d.stats || {};
-    const bookings = s.total_bookings || 0;
-    const revenue = parseFloat(s.total_revenue) || 0;
-    const paidBookings = (s.done_count || 0) + (s.confirmed_count || 0);
-    const avgCheck = paidBookings > 0 ? Math.round(revenue / paidBookings) : 0;
-    
-    fillStatCards('dashStats', [
-        { label: 'Виручка', value: fmtMoneyShort(revenue) },
-        { label: 'Заявок', value: bookings },
-        { label: 'Середній чек', value: fmtMoneyShort(avgCheck) },
-        { label: 'Скасовано', value: s.cancelled_count || 0 },
-    ]);
-    
-    renderTimeline(document.getElementById('dashTimeline'), d.timeline || []);
-    renderTopList(document.getElementById('dashTopMasters'), d.top_masters || [], 'master');
-    renderTopList(document.getElementById('dashTopServices'), d.top_services || [], 'service');
-}
-
-// ============================================
-// УТИЛІТИ ДЛЯ РЕНДЕРУ
-// ============================================
-function fillStatCards(containerId, items) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = items.map(it => `
-        <div class="stat-card">
-            <div class="stat-label">${it.label}</div>
-            <div class="stat-value">${it.value}</div>
-        </div>
-    `).join('');
-}
-
-function renderTimeline(container, timeline) {
-    if (!container) return;
-    
-    if (!timeline || timeline.length === 0) {
-        container.innerHTML = '<div style="padding:80px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних за період</div>';
-        return;
-    }
-    
-    const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
-    const maxBookings = Math.max(...timeline.map(t => parseInt(t.bookings) || 0), 1);
-    
-    container.innerHTML = `
-        <div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding:10px 0;">
-            ${timeline.map(t => {
-                const rev = parseFloat(t.revenue) || 0;
-                const cnt = parseInt(t.bookings) || 0;
-                // Якщо є виручка — рахуємо по виручці, інакше по кількості заявок
-                let h = 2;
-                if (rev > 0) {
-                    h = Math.max((rev / maxRevenue) * 100, 8);
-                } else if (cnt > 0) {
-                    h = Math.max((cnt / maxBookings) * 40, 8);
-                }
-                const day = new Date(t.date).getDate();
-                const opacity = rev > 0 ? 0.9 : (cnt > 0 ? 0.4 : 0.1);
-                const tooltip = `${t.date} · ${cnt} заявок · ${fmtMoney(rev)}`;
-                return `
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:8px;">
-                        <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
-                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${opacity};" title="${tooltip}"></div>
-                        </div>
-                        <div style="font-size:9px;color:var(--ink-mute);">${day}</div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-}
-
-function renderTopList(container, items, type) {
-    if (!container) return;
-    
-    if (!items || items.length === 0) {
-        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
-        return;
-    }
-    
-    container.innerHTML = items.map((item, i) => {
-        const rank = String(i + 1).padStart(2, '0');
-        const isService = type === 'service';
-        const thumbUrl = isService ? item.image_url : item.photo_url;
-        const thumbClass = isService ? 'top-thumb square' : 'top-thumb';
-        const countLabel = isService ? 'замовлень' : 'заявок';
-        const count = item.bookings_count || 0;
-        const revenue = parseFloat(item.revenue) || 0;
-        
-        return `
-            <div class="top-item">
-                <div class="top-rank">${rank}</div>
-                <div class="top-info">
-                    <div class="top-name">${escapeHtml(item.name)}</div>
-                    <div class="top-meta">
-                        <span><strong>${count}</strong> ${countLabel}</span>
-                        <span><strong>${fmtMoney(revenue)}</strong></span>
-                        ${item.role ? `<span>${escapeHtml(item.role)}</span>` : ''}
-                    </div>
-                </div>
-                <div class="${thumbClass}" style="background-image:url('${thumbUrl || ''}')"></div>
-            </div>
-        `;
-    }).join('');
-}
-
-function fmtMoneyShort(n) {
-    n = Number(n) || 0;
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0','') + ' млн ₴';
-    if (n >= 10000) return Math.round(n / 1000) + 'k ₴';
-    return n.toLocaleString('uk-UA') + ' ₴';
-}
 
 // ============================================
 // EXPORTS
@@ -5233,189 +5101,7 @@ function exportExpenses() {
     downloadCsv('expenses.csv', headers, rows);
 }
 
-// ============================================
-// ЗВІТИ (Reports) — главное по запросу
-// ============================================
-let reportsCurrentPeriod = '6months';
-let lastReportsData = null;
 
-async function loadReports() {
-    try {
-        const res = await fetch('/api/admin/analytics.php?period=' + reportsPeriod, { credentials: 'include' });
-        const data = await res.json();
-        console.log('Reports response:', data);
-        if (!data.success) throw new Error(data.error || 'Помилка');
-        // API повертає stats/timeline/top_masters одразу на верхньому рівні
-        const payload = data.data || data;
-        renderReports(payload);
-    } catch (err) {
-        console.error('Reports error:', err);
-    }
-}
-
-function renderReports(data) {
-    const s = data.stats || {};
-    
-    setText('reportTotalBookings', s.total_bookings || 0);
-    setText('reportTotalRevenue', fmtMoney(s.total_revenue || 0));
-    setText('reportTotalExpenses', fmtMoney(s.total_expenses || 0));
-    setText('reportProfit', fmtMoney(s.profit || 0));
-    setText('reportCancelled', s.cancelled_count || 0);
-    setText('reportDeposits', fmtMoney(s.deposits_collected || 0));
-    
-    // Статус-розбивка
-    setText('reportPending', s.pending_count || 0);
-    setText('reportConfirmed', s.confirmed_count || 0);
-    setText('reportDone', s.done_count || 0);
-    
-    // Таймлайн (якщо рендериться окремо в звітах)
-    const tl = document.getElementById('reportTimeline');
-    if (tl) {
-        renderTimelineInto(tl, data.timeline || []);
-    }
-    
-    // Топ майстрів — таблиця
-    renderReportMasters(data.top_masters || []);
-    
-    // Топ послуг — таблиця
-    renderReportServices(data.top_services || []);
-}
-
-function renderTimelineInto(container, timeline) {
-    if (!timeline || timeline.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних</div>';
-        return;
-    }
-    const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
-    container.innerHTML = `
-        <div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding:10px 0;">
-            ${timeline.map(t => {
-                const h = ((parseFloat(t.revenue) || 0) / maxRevenue) * 100;
-                const day = new Date(t.date).getDate();
-                return `
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:8px;">
-                        <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
-                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:0.85;" title="${fmtMoney(t.revenue)} · ${t.date}"></div>
-                        </div>
-                        <div style="font-size:9px;color:var(--ink-mute);">${day}</div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-}
-
-function renderReportMasters(masters) {
-    const container = document.getElementById('reportMasters');
-    if (!container) return;
-    
-    if (masters.length === 0) {
-        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
-        return;
-    }
-    
-    container.innerHTML = `
-        <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-                <tr style="border-bottom:1px solid var(--line);">
-                    <th style="text-align:left;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Майстер</th>
-                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Заявок</th>
-                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Виручка</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${masters.map(m => `
-                    <tr style="border-bottom:1px solid var(--line-2);">
-                        <td style="padding:10px 4px;">
-                            <div style="display:flex;align-items:center;gap:10px;">
-                                <div style="width:32px;height:32px;border-radius:50%;background-image:url('${m.photo_url || ''}');background-size:cover;background-color:var(--bg-3);"></div>
-                                <div>
-                                    <div style="font-weight:500;">${escapeHtml(m.name)}</div>
-                                    <div style="font-size:11px;color:var(--ink-mute);">${escapeHtml(m.role || '')}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="padding:10px 4px;text-align:right;">${m.bookings_count || 0}</td>
-                        <td style="padding:10px 4px;text-align:right;font-weight:600;color:var(--beige);">${fmtMoney(m.revenue || 0)}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
-function renderReportServices(services) {
-    const container = document.getElementById('reportServices');
-    if (!container) return;
-    
-    if (services.length === 0) {
-        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
-        return;
-    }
-    
-    container.innerHTML = `
-        <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-                <tr style="border-bottom:1px solid var(--line);">
-                    <th style="text-align:left;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Послуга</th>
-                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Замовлень</th>
-                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Виручка</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${services.map(s => `
-                    <tr style="border-bottom:1px solid var(--line-2);">
-                        <td style="padding:10px 4px;">
-                            <div style="display:flex;align-items:center;gap:10px;">
-                                <div style="width:36px;height:36px;background-image:url('${s.image_url || ''}');background-size:cover;background-color:var(--bg-3);"></div>
-                                <div style="font-weight:500;">${escapeHtml(s.name)}</div>
-                            </div>
-                        </td>
-                        <td style="padding:10px 4px;text-align:right;">${s.bookings_count || 0}</td>
-                        <td style="padding:10px 4px;text-align:right;font-weight:600;color:var(--beige);">${fmtMoney(s.revenue || 0)}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
-document.addEventListener('click', (e) => {
-    const chip = e.target.closest('.filter-chip');
-    if (!chip) return;
-    
-    const parent = chip.closest('#dashFilters, #reportsFilters');
-    if (!parent) return;
-    
-    parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    
-    const period = chip.dataset.period;
-    if (parent.id === 'dashFilters') {
-        dashboardPeriod = period;
-        loadDashboard();
-    } else if (parent.id === 'reportsFilters') {
-        reportsPeriod = period;
-        loadReports();
-    }
-});
-
-function exportReports() {
-    if (!lastReportsData) { alert('Немає даних'); return; }
-    const d = lastReportsData;
-    const headers = ['Майстер', 'Робіт', 'Виконано', 'Скасовано', 'Виручка', 'Середній чек'];
-    const rows = (d.top_masters || []).map(m => [
-        m.name, m.bookings_count, m.done_count, m.cancelled_count, m.revenue, m.avg_check || 0
-    ]);
-    downloadCsv('reports-masters.csv', headers, rows);
-}
-
-function exportDashboard(format) {
-    if (!lastDashData) { alert('Немає даних'); return; }
-    const headers = ['Майстер', 'Робіт', 'Виручка'];
-    const rows = (lastDashData.top_masters || []).map(m => [m.name, m.bookings_count, m.revenue]);
-    downloadCsv('dashboard.csv', headers, rows);
-}
 
 // ============================================
 // CSV Export Helper
@@ -6282,6 +5968,145 @@ if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.
         btn.textContent = 'Зберегти все';
     }
 }
+
+// === ОСТАТОЧНИЙ БЛОК (виконується після всіх інших) ===
+window.dashboardPeriod = 'month';
+window.reportsPeriod = '6months';
+
+window.loadDashboard = async function() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + window.dashboardPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Помилка');
+        window.renderDashboard(data.data || data);
+    } catch (err) { console.error('Dashboard:', err); }
+};
+
+window.renderDashboard = function(d) {
+    const s = d.stats || {};
+    const bookings = parseInt(s.total_bookings) || 0;
+    const revenue = parseFloat(s.total_revenue) || 0;
+    const paid = (parseInt(s.done_count) || 0) + (parseInt(s.confirmed_count) || 0);
+    const avg = paid > 0 ? Math.round(revenue / paid) : 0;
+    
+    window.fillStatCards('dashStats', [
+        { label: 'Виручка', value: window.fmtMoneyShort(revenue) },
+        { label: 'Заявок', value: bookings },
+        { label: 'Середній чек', value: window.fmtMoneyShort(avg) },
+        { label: 'Скасовано', value: parseInt(s.cancelled_count) || 0 },
+    ]);
+    window.renderTimeline(document.getElementById('dashTimeline'), d.timeline || []);
+    window.renderTopList(document.getElementById('dashTopMasters'), d.top_masters || [], 'master');
+    window.renderTopList(document.getElementById('dashTopServices'), d.top_services || [], 'service');
+};
+
+window.loadReports = async function() {
+    try {
+        const res = await fetch('/api/admin/analytics.php?period=' + window.reportsPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Помилка');
+        window.renderReports(data.data || data);
+    } catch (err) { console.error('Reports:', err); }
+};
+
+window.renderReports = function(d) {
+    const s = d.stats || {};
+    
+    window.fillStatCards('reportsStats', [
+        { label: 'Виручка', value: window.fmtMoneyShort(parseFloat(s.total_revenue) || 0) },
+        { label: 'Заявок', value: parseInt(s.total_bookings) || 0 },
+        { label: 'Скасовано', value: parseInt(s.cancelled_count) || 0 },
+        { label: 'Прибуток', value: window.fmtMoneyShort(parseFloat(s.profit) || 0) },
+    ]);
+    window.renderTimeline(document.getElementById('reportsTimeline'), d.timeline || []);
+    window.renderTopList(document.getElementById('reportsMasters'), d.top_masters || [], 'master');
+    window.renderTopList(document.getElementById('reportsTopServices'), d.top_services || [], 'service');
+    
+    const cancelEl = document.getElementById('reportsCancellations');
+    if (cancelEl) {
+        const cancelled = (d.latest_bookings || []).filter(b => b.status === 'cancelled');
+        cancelEl.innerHTML = cancelled.length === 0
+            ? '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Скасувань немає 🎉</div>'
+            : cancelled.slice(0, 8).map(b => `<div class="top-item"><div class="top-info"><div class="top-name">${window.escapeHtml(b.client_name)} · ${window.escapeHtml(b.booking_code)}</div><div class="top-meta"><span>${window.escapeHtml(b.service_name||'—')}</span><span>${b.booking_date} ${(b.booking_time||'').substring(0,5)}</span></div></div></div>`).join('');
+    }
+    
+    const msEl = document.getElementById('reportsMasterServices');
+    if (msEl) msEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Розширений звіт буде доступний пізніше</div>';
+};
+
+window.fillStatCards = function(id, items) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = items.map(it => `<div class="stat-card"><div class="stat-label">${it.label}</div><div class="stat-value">${it.value}</div></div>`).join('');
+};
+
+window.renderTimeline = function(container, timeline) {
+    if (!container) return;
+    if (!timeline || timeline.length === 0) {
+        container.innerHTML = '<div style="padding:80px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних за період</div>';
+        return;
+    }
+    const maxRev = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
+    const maxCnt = Math.max(...timeline.map(t => parseInt(t.bookings) || 0), 1);
+    container.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding:10px 0;">${timeline.map(t => {
+        const rev = parseFloat(t.revenue) || 0;
+        const cnt = parseInt(t.bookings) || 0;
+        let h = 2;
+        if (rev > 0) h = Math.max((rev / maxRev) * 100, 8);
+        else if (cnt > 0) h = Math.max((cnt / maxCnt) * 40, 8);
+        const day = new Date(t.date).getDate();
+        const op = rev > 0 ? 0.9 : (cnt > 0 ? 0.4 : 0.1);
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:8px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${op};" title="${t.date} · ${cnt} заявок · ${rev} ₴"></div></div><div style="font-size:9px;color:var(--ink-mute);">${day}</div></div>`;
+    }).join('')}</div>`;
+};
+
+window.renderTopList = function(container, items, type) {
+    if (!container) return;
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
+    }
+    container.innerHTML = items.map((item, i) => {
+        const rank = String(i + 1).padStart(2, '0');
+        const isService = type === 'service';
+        const thumb = isService ? item.image_url : item.photo_url;
+        const cls = isService ? 'top-thumb square' : 'top-thumb';
+        const lbl = isService ? 'замовлень' : 'заявок';
+        const cnt = parseInt(item.bookings_count) || 0;
+        const rev = parseFloat(item.revenue) || 0;
+        return `<div class="top-item"><div class="top-rank">${rank}</div><div class="top-info"><div class="top-name">${window.escapeHtml(item.name)}</div><div class="top-meta"><span><strong>${cnt}</strong> ${lbl}</span><span><strong>${rev.toLocaleString('uk-UA')} ₴</strong></span>${item.role ? `<span>${window.escapeHtml(item.role)}</span>` : ''}</div></div><div class="${cls}" style="background-image:url('${thumb || ''}')"></div></div>`;
+    }).join('');
+};
+
+window.fmtMoneyShort = function(n) {
+    n = Number(n) || 0;
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0','') + ' млн ₴';
+    if (n >= 10000) return Math.round(n / 1000) + 'k ₴';
+    return n.toLocaleString('uk-UA') + ' ₴';
+};
+
+window.escapeHtml = window.escapeHtml || function(s) {
+    if (s === undefined || s === null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+};
+
+// Кліки по чіпам — теж переопределяем
+document.addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    const parent = chip.closest('#dashFilters, #reportsFilters');
+    if (!parent) return;
+    parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const period = chip.dataset.period;
+    if (parent.id === 'dashFilters') {
+        window.dashboardPeriod = period;
+        window.loadDashboard();
+    } else {
+        window.reportsPeriod = period;
+        window.loadReports();
+    }
+});
 
 </script>
 
