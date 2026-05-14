@@ -6430,100 +6430,103 @@ function renderMasterSalary(data) {
     console.log('🟣 renderMasterSalary СТАРТ, masters:', data.masters?.length);
     const container = document.getElementById('reportsMasterSalary');
     if (!container) {
-        console.log('🔴 контейнер відсутній в renderMasterSalary');
+        console.log('🔴 контейнер відсутній');
         return;
     }
-    if (!container) return;
+    
+    const esc = window.escapeHtml || function(s) {
+        if (s === undefined || s === null) return '';
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    };
     
     const masters = data.masters || [];
     if (masters.length === 0) {
-        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Немає даних</div>';
         return;
     }
     
-    // Сортуємо за зарплатою спадаюче
     const sorted = [...masters].sort((a, b) => b.total_salary - a.total_salary);
     const totalAll = data.total || 0;
     
-    container.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-2);border:1px solid var(--line-2);margin-bottom:12px;">
-            <div style="font-size:11px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Загалом до виплати</div>
-            <div style="font-family:'Fraunces',serif;font-size:24px;color:var(--beige);">${totalAll.toLocaleString('uk-UA')} ₴</div>
-        </div>
+    let html = '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:14px;border-radius:4px;">';
+    html += '<div style="font-size:11px;color:#9e968a;letter-spacing:0.1em;text-transform:uppercase;">Загалом до виплати</div>';
+    html += '<div style="font-family:\'Fraunces\',serif;font-size:26px;color:#e0c9a8;">' + Number(totalAll).toLocaleString('uk-UA') + ' ₴</div>';
+    html += '</div>';
+    
+    sorted.forEach(function(m, i) {
+        const rank = String(i + 1).padStart(2, '0');
+        const avg = m.bookings_count > 0 ? Math.round(m.total_salary / m.bookings_count) : 0;
+        const noRules = !m.has_rules && m.bookings_count > 0;
         
-        <div style="display:flex;flex-direction:column;gap:10px;">
-            ${sorted.map((m, i) => {
-                const rank = String(i + 1).padStart(2, '0');
-                const avg = m.bookings_count > 0 ? Math.round(m.total_salary / m.bookings_count) : 0;
-                const noRules = !m.has_rules && m.bookings_count > 0;
-                
-                return `
-                    <div class="salary-master-row" data-master-id="${m.master_id}" style="background:var(--bg-2);border:1px solid var(--line-2);">
-                        <div style="display:flex;align-items:center;gap:14px;padding:14px;cursor:pointer;" onclick="toggleSalaryDetails(${m.master_id})">
-                            <div class="top-rank" style="width:36px;">${rank}</div>
-                            <div class="top-thumb" style="background-image:url('${m.master_photo || ''}');width:48px;height:48px;flex-shrink:0;"></div>
-                            <div style="flex:1;min-width:0;">
-                                <div style="font-size:14px;font-weight:500;color:var(--ink);">${escapeHtml(m.master_name)}</div>
-                                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">
-                                    <span><strong style="color:var(--ink);">${m.bookings_count}</strong> заявок</span>
-                                    <span style="margin:0 10px;">·</span>
-                                    <span><strong style="color:var(--ink);">${Number(m.total_revenue).toLocaleString('uk-UA')} ₴</strong> виручка</span>
-                                    ${m.bookings_count > 0 ? `<span style="margin:0 10px;">·</span><span><strong style="color:var(--ink);">${avg.toLocaleString('uk-UA')} ₴</strong> сер.</span>` : ''}
-                                </div>
-                                ${noRules ? '<div style="font-size:11px;color:var(--danger);margin-top:6px;">⚠ Налаштуйте % зарплати для цього майстра</div>' : ''}
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--beige);">${Number(m.total_salary).toLocaleString('uk-UA')} ₴</div>
-                                <div style="font-size:10px;color:var(--ink-mute);margin-top:2px;letter-spacing:0.1em;text-transform:uppercase;">До виплати</div>
-                            </div>
-                            <div style="width:24px;color:var(--ink-mute);font-size:18px;" id="salaryChevron_${m.master_id}">▼</div>
-                        </div>
-                        
-                        <div class="salary-master-details" id="salaryDetails_${m.master_id}" style="display:none;border-top:1px solid var(--line-2);padding:0;">
-                            ${renderSalaryDetailsHTML(m)}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
+        html += '<div style="background:#1a1917;border:1px solid rgba(224,201,168,0.18);margin-bottom:10px;border-radius:4px;">';
+        html += '<div style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;" onclick="toggleSalaryDetails(' + m.master_id + ')">';
+        html += '<div style="font-family:\'Fraunces\',serif;font-size:28px;color:#e0c9a8;width:40px;text-align:center;flex-shrink:0;">' + rank + '</div>';
+        html += '<div style="width:52px;height:52px;border-radius:50%;background-image:url(\'' + (m.master_photo || '') + '\');background-size:cover;background-position:center;background-color:#2a2622;flex-shrink:0;"></div>';
+        html += '<div style="flex:1;min-width:0;">';
+        html += '<div style="font-size:15px;font-weight:500;color:#ede6d9;margin-bottom:6px;">' + esc(m.master_name) + '</div>';
+        html += '<div style="font-size:12px;color:#9e968a;">';
+        html += '<span><strong style="color:#ede6d9;">' + m.bookings_count + '</strong> заявок</span>';
+        html += '<span style="margin:0 10px;">·</span>';
+        html += '<span><strong style="color:#ede6d9;">' + Number(m.total_revenue).toLocaleString('uk-UA') + ' ₴</strong> виручка</span>';
+        if (m.bookings_count > 0) {
+            html += '<span style="margin:0 10px;">·</span>';
+            html += '<span><strong style="color:#ede6d9;">' + avg.toLocaleString('uk-UA') + ' ₴</strong> сер.</span>';
+        }
+        html += '</div>';
+        if (noRules) {
+            html += '<div style="font-size:11px;color:#e89999;margin-top:6px;">⚠ Налаштуйте % зарплати</div>';
+        }
+        html += '</div>';
+        html += '<div style="text-align:right;min-width:140px;">';
+        html += '<div style="font-family:\'Fraunces\',serif;font-size:22px;color:#e0c9a8;">' + Number(m.total_salary).toLocaleString('uk-UA') + ' ₴</div>';
+        html += '<div style="font-size:10px;color:#9e968a;margin-top:2px;letter-spacing:0.1em;text-transform:uppercase;">До виплати</div>';
+        html += '</div>';
+        html += '<div style="width:24px;color:#9e968a;font-size:14px;flex-shrink:0;" id="salaryChevron_' + m.master_id + '">▼</div>';
+        html += '</div>';
+        html += '<div id="salaryDetails_' + m.master_id + '" style="display:none;border-top:1px solid rgba(224,201,168,0.18);">';
+        html += renderSalaryDetailsHTML(m);
+        html += '</div>';
+        html += '</div>';
+    });
+    
     container.innerHTML = html;
-    console.log('✅ renderMasterSalary КОНЕЦ, children тепер:', container.children.length);
+    console.log('✅ renderMasterSalary КОНЕЦ, children:', container.children.length);
 }
 
 function renderSalaryDetailsHTML(m) {
+    const esc = window.escapeHtml || function(s) {
+        if (s === undefined || s === null) return '';
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    };
+    
     if (!m.bookings || m.bookings.length === 0) {
-        return '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає виконаних робіт</div>';
+        return '<div style="padding:20px;text-align:center;color:#9e968a;font-size:12px;">Немає виконаних робіт</div>';
     }
     
-    return `
-        <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead>
-                    <tr style="background:var(--bg-1);">
-                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Дата</th>
-                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Клієнт</th>
-                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Послуга</th>
-                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Сума</th>
-                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">%</th>
-                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Заробіток</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${m.bookings.map(b => `
-                        <tr style="border-top:1px solid var(--line-2);">
-                            <td style="padding:10px 14px;color:var(--ink);">${b.date}<br><span style="font-size:10px;color:var(--ink-mute);">${b.time}</span></td>
-                            <td style="padding:10px 14px;color:var(--ink);">${escapeHtml(b.client_name)}<br><span style="font-size:10px;color:var(--ink-mute);">${escapeHtml(b.booking_code)}</span></td>
-                            <td style="padding:10px 14px;color:var(--ink);">${escapeHtml(b.service_name || '—')}</td>
-                            <td style="padding:10px 14px;text-align:right;color:var(--ink);">${Number(b.total_price).toLocaleString('uk-UA')} ₴</td>
-                            <td style="padding:10px 14px;text-align:right;color:var(--ink-mute);">${b.service_percent}%</td>
-                            <td style="padding:10px 14px;text-align:right;color:var(--beige);font-weight:600;">${Number(b.salary_total).toLocaleString('uk-UA')} ₴</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
+    let html = '<div style="overflow-x:auto;">';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    html += '<thead><tr style="background:#0f0e0d;">';
+    html += '<th style="text-align:left;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Дата</th>';
+    html += '<th style="text-align:left;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Клієнт</th>';
+    html += '<th style="text-align:left;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Послуга</th>';
+    html += '<th style="text-align:right;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Сума</th>';
+    html += '<th style="text-align:right;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">%</th>';
+    html += '<th style="text-align:right;padding:10px 14px;color:#9e968a;font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Заробіток</th>';
+    html += '</tr></thead><tbody>';
+    
+    m.bookings.forEach(function(b) {
+        html += '<tr style="border-top:1px solid rgba(224,201,168,0.18);">';
+        html += '<td style="padding:10px 14px;color:#ede6d9;">' + b.date + '<br><span style="font-size:10px;color:#9e968a;">' + b.time + '</span></td>';
+        html += '<td style="padding:10px 14px;color:#ede6d9;">' + esc(b.client_name) + '<br><span style="font-size:10px;color:#9e968a;">' + esc(b.booking_code) + '</span></td>';
+        html += '<td style="padding:10px 14px;color:#ede6d9;">' + esc(b.service_name || '—') + '</td>';
+        html += '<td style="padding:10px 14px;text-align:right;color:#ede6d9;">' + Number(b.total_price).toLocaleString('uk-UA') + ' ₴</td>';
+        html += '<td style="padding:10px 14px;text-align:right;color:#9e968a;">' + b.service_percent + '%</td>';
+        html += '<td style="padding:10px 14px;text-align:right;color:#e0c9a8;font-weight:600;">' + Number(b.salary_total).toLocaleString('uk-UA') + ' ₴</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table></div>';
+    return html;
 }
 
 function toggleSalaryDetails(masterId) {
