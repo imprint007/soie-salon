@@ -4714,8 +4714,10 @@ async function loadDashboard() {
     try {
         const res = await fetch('/api/admin/analytics.php?period=' + dashboardPeriod, { credentials: 'include' });
         const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        renderDashboard(data.data || data);
+        console.log('Dashboard response:', data);
+        if (!data.success) throw new Error(data.error || 'Помилка');
+        const payload = data.data || data;
+        renderDashboard(payload);
     } catch (err) {
         console.error('Dashboard error:', err);
     }
@@ -4738,70 +4740,6 @@ function renderDashboard(d) {
     renderTimeline(document.getElementById('dashTimeline'), d.timeline || []);
     renderTopList(document.getElementById('dashTopMasters'), d.top_masters || [], 'master');
     renderTopList(document.getElementById('dashTopServices'), d.top_services || [], 'service');
-}
-
-// ============================================
-// ЗВІТИ (Reports)
-// ============================================
-let reportsPeriod = '6months';
-
-async function loadReports() {
-    try {
-        const res = await fetch('/api/admin/analytics.php?period=' + reportsPeriod, { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        renderReports(data.data || data);
-    } catch (err) {
-        console.error('Reports error:', err);
-    }
-}
-
-function renderReports(d) {
-    const s = d.stats || {};
-    
-    fillStatCards('reportsStats', [
-        { label: 'Виручка', value: fmtMoneyShort(s.total_revenue || 0) },
-        { label: 'Заявок', value: s.total_bookings || 0 },
-        { label: 'Скасовано', value: s.cancelled_count || 0 },
-        { label: 'Прибуток', value: fmtMoneyShort(s.profit || 0) },
-    ]);
-    
-    renderTimeline(document.getElementById('reportsTimeline'), d.timeline || []);
-    renderTopList(document.getElementById('reportsMasters'), d.top_masters || [], 'master');
-    renderTopList(document.getElementById('reportsTopServices'), d.top_services || [], 'service');
-    
-    // Скасування — список останніх скасованих
-    renderCancellations(d.latest_bookings || []);
-    
-    // Послуги майстрів — поки заглушка (потрібно окреме API)
-    const msEl = document.getElementById('reportsMasterServices');
-    if (msEl) {
-        msEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Розширений звіт буде доступний пізніше</div>';
-    }
-}
-
-function renderCancellations(bookings) {
-    const container = document.getElementById('reportsCancellations');
-    if (!container) return;
-    
-    const cancelled = (bookings || []).filter(b => b.status === 'cancelled');
-    
-    if (cancelled.length === 0) {
-        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Скасувань немає 🎉</div>';
-        return;
-    }
-    
-    container.innerHTML = cancelled.slice(0, 8).map(b => `
-        <div class="top-item" style="padding:10px 12px;">
-            <div class="top-info">
-                <div class="top-name">${escapeHtml(b.client_name)} · ${escapeHtml(b.booking_code)}</div>
-                <div class="top-meta">
-                    <span>${escapeHtml(b.service_name || '—')}</span>
-                    <span>${b.booking_date} ${(b.booking_time || '').substring(0, 5)}</span>
-                </div>
-            </div>
-        </div>
-    `).join('');
 }
 
 // ============================================
@@ -5302,13 +5240,15 @@ let lastReportsData = null;
 
 async function loadReports() {
     try {
-        const res = await fetch('/api/admin/analytics.php?period=' + reportsCurrentPeriod, { credentials: 'include' });
+        const res = await fetch('/api/admin/analytics.php?period=' + reportsPeriod, { credentials: 'include' });
         const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        lastReportsData = data;
-        renderReports(data);
+        console.log('Reports response:', data);
+        if (!data.success) throw new Error(data.error || 'Помилка');
+        // API повертає stats/timeline/top_masters одразу на верхньому рівні
+        const payload = data.data || data;
+        renderReports(payload);
     } catch (err) {
-        console.error('Reports load:', err);
+        console.error('Reports error:', err);
     }
 }
 
