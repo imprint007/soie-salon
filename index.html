@@ -6221,6 +6221,7 @@ window.loadReports = async function() {
 
 window.renderReports = function(d) {
     const s = d.stats || {};
+    window.salaryPeriod = 'today';  // ← добавили
     
     window.fillStatCards('reportsStats', [
         { label: 'Виручка', value: window.fmtMoneyShort(parseFloat(s.total_revenue) || 0) },
