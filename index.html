@@ -6409,7 +6409,7 @@ window.loadMasterSalary = async function() {
     container.innerHTML = '<div style="padding:24px;text-align:center;color:#9e968a;font-size:12px;">Завантаження...</div>';
     
     try {
-        const period = window.salaryPeriod || window.reportsPeriod || 'month';
+        const period = window.salaryPeriod || 'today';
         const res = await fetch('/api/admin/salary-calculate.php?period=' + period, { 
             credentials: 'include' 
         });
