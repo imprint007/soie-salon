@@ -5052,21 +5052,6 @@ function renderBookings() {
     `).join('');
 }
 
-// Окремий обробник для кнопок зарплати — НЕ конфліктує з reports-фільтром
-document.addEventListener('click', function(e) {
-    const btn = e.target.closest('[data-salary-period]');
-    if (!btn) return;
-    
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const period = btn.dataset.salaryPeriod;
-    window.salaryPeriod = period;
-    
-    if (typeof window.loadMasterSalary === 'function') {
-        window.loadMasterSalary();
-    }
-}, true); // true = capture phase, спрацьовує перш ніж інші
 
 document.addEventListener('click', e => {
     if (e.target.matches('#bookingsFilters .filter-chip')) {
@@ -6533,6 +6518,16 @@ if (masters.length === 0) {
     });
     
     container.innerHTML = html;
+    // Привʼязуємо кліки до кнопок періоду
+    container.querySelectorAll('[data-salary-period]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            window.salaryPeriod = btn.dataset.salaryPeriod;
+            window.loadMasterSalary();
+        });
+    });
+    
     console.log('✅ renderMasterSalary КОНЕЦ, children:', container.children.length);
 }
 
