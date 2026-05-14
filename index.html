@@ -4668,25 +4668,124 @@ async function loadDashboard() {
     }
 }
 
-function renderDashboard(d) {
-    // Stats cards
-    const grid = document.getElementById('dashStats');
-    const s = d.summary;
-    grid.innerHTML = `
-        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">${fmtMoney(s.revenue)}</div><div class="stat-delta">${s.done_count} виконано</div></div>
-        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">${s.total_bookings}</div><div class="stat-delta">${s.confirmed_count} активних</div></div>
-        <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-value">${fmtMoney(s.avg_check)}</div></div>
-        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">${s.cancelled_count}</div><div class="stat-delta down">${s.cancellation_rate}% від усіх</div></div>
+function renderDashboard(data) {
+    const s = data.stats || {};
+    
+    // Карточки зверху
+    setText('dashTotalBookings', s.total_bookings || 0);
+    setText('dashTotalRevenue', fmtMoney(s.total_revenue || 0));
+    setText('dashTotalExpenses', fmtMoney(s.total_expenses || 0));
+    setText('dashProfit', fmtMoney(s.profit || 0));
+    
+    // Статус-розбивка (якщо є відповідні елементи в HTML)
+    setText('dashPending', s.pending_count || 0);
+    setText('dashConfirmed', s.confirmed_count || 0);
+    setText('dashDone', s.done_count || 0);
+    setText('dashCancelled', s.cancelled_count || 0);
+    setText('dashDeposits', fmtMoney(s.deposits_collected || 0));
+    
+    // Таймлайн
+    renderDashboardTimeline(data.timeline || []);
+    
+    // Топ майстри
+    renderDashboardMasters(data.top_masters || []);
+    
+    // Топ послуги
+    renderDashboardServices(data.top_services || []);
+    
+    // Останні заявки
+    renderDashboardLatest(data.latest_bookings || []);
+}
+
+function renderDashboardTimeline(timeline) {
+    const container = document.getElementById('dashTimeline');
+    if (!container) return;
+    
+    if (timeline.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
+        return;
+    }
+    
+    const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
+    
+    container.innerHTML = `
+        <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:10px 0;">
+            ${timeline.map(t => {
+                const h = ((parseFloat(t.revenue) || 0) / maxRevenue) * 100;
+                const day = new Date(t.date).getDate();
+                return `
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                        <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
+                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:0.85;" title="${fmtMoney(t.revenue)}"></div>
+                        </div>
+                        <div style="font-size:10px;color:var(--ink-mute);">${day}</div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
     `;
+}
+
+function renderDashboardMasters(masters) {
+    const container = document.getElementById('dashTopMasters');
+    if (!container) return;
     
-    // Timeline
-    renderTimeline(document.getElementById('dashTimeline'), d.timeline, 'revenue');
+    if (masters.length === 0) {
+        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
+    }
     
-    // Top masters
-    renderTopList(document.getElementById('dashTopMasters'), d.top_masters);
+    container.innerHTML = masters.map(m => `
+        <div class="topitem-row">
+            <div class="topitem-thumb" style="background-image:url('${m.photo_url || ''}')"></div>
+            <div class="topitem-info">
+                <div class="topitem-name">${escapeHtml(m.name)}</div>
+                <div class="topitem-meta">${m.bookings_count || 0} заявок · ${fmtMoney(m.revenue || 0)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderDashboardServices(services) {
+    const container = document.getElementById('dashTopServices');
+    if (!container) return;
     
-    // Top services
-    renderTopList(document.getElementById('dashTopServices'), d.top_services);
+    if (services.length === 0) {
+        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
+    }
+    
+    container.innerHTML = services.map(s => `
+        <div class="topitem-row">
+            <div class="topitem-thumb" style="background-image:url('${s.image_url || ''}')"></div>
+            <div class="topitem-info">
+                <div class="topitem-name">${escapeHtml(s.name)}</div>
+                <div class="topitem-meta">${s.bookings_count || 0} замовлень · ${fmtMoney(s.revenue || 0)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderDashboardLatest(bookings) {
+    const container = document.getElementById('dashLatestBookings');
+    if (!container) return;
+    
+    if (bookings.length === 0) {
+        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Заявок поки немає</div>';
+        return;
+    }
+    
+    container.innerHTML = bookings.map(b => `
+        <div class="latest-row">
+            <div class="latest-code">${escapeHtml(b.booking_code)}</div>
+            <div class="latest-info">
+                <div class="latest-client">${escapeHtml(b.client_name)}</div>
+                <div class="latest-meta">${escapeHtml(b.service_name || '—')} · ${b.booking_date} ${b.booking_time}</div>
+            </div>
+            <div class="latest-price">${fmtMoney(b.total_price)}</div>
+            <div class="latest-status">${statusBadge(b.status)}</div>
+        </div>
+    `).join('');
 }
 
 // Кликаем по фильтрам периода
@@ -5042,91 +5141,131 @@ async function loadReports() {
     }
 }
 
-function renderReports(d) {
-    const s = d.summary;
+function renderReports(data) {
+    const s = data.stats || {};
     
-    // Stats
-    document.getElementById('reportsStats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">${fmtMoney(s.revenue)}</div><div class="stat-delta">${s.done_count} виконано</div></div>
-        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">${s.total_bookings}</div></div>
-        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">${s.cancelled_count}</div><div class="stat-delta down">${s.cancellation_rate}% від усіх</div></div>
-        <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">${fmtMoney(s.profit)}</div><div class="stat-delta">${s.margin}% маржа</div></div>
+    setText('reportTotalBookings', s.total_bookings || 0);
+    setText('reportTotalRevenue', fmtMoney(s.total_revenue || 0));
+    setText('reportTotalExpenses', fmtMoney(s.total_expenses || 0));
+    setText('reportProfit', fmtMoney(s.profit || 0));
+    setText('reportCancelled', s.cancelled_count || 0);
+    setText('reportDeposits', fmtMoney(s.deposits_collected || 0));
+    
+    // Статус-розбивка
+    setText('reportPending', s.pending_count || 0);
+    setText('reportConfirmed', s.confirmed_count || 0);
+    setText('reportDone', s.done_count || 0);
+    
+    // Таймлайн (якщо рендериться окремо в звітах)
+    const tl = document.getElementById('reportTimeline');
+    if (tl) {
+        renderTimelineInto(tl, data.timeline || []);
+    }
+    
+    // Топ майстрів — таблиця
+    renderReportMasters(data.top_masters || []);
+    
+    // Топ послуг — таблиця
+    renderReportServices(data.top_services || []);
+}
+
+function renderTimelineInto(container, timeline) {
+    if (!timeline || timeline.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних</div>';
+        return;
+    }
+    const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
+    container.innerHTML = `
+        <div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding:10px 0;">
+            ${timeline.map(t => {
+                const h = ((parseFloat(t.revenue) || 0) / maxRevenue) * 100;
+                const day = new Date(t.date).getDate();
+                return `
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:8px;">
+                        <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
+                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:0.85;" title="${fmtMoney(t.revenue)} · ${t.date}"></div>
+                        </div>
+                        <div style="font-size:9px;color:var(--ink-mute);">${day}</div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
     `;
+}
+
+function renderReportMasters(masters) {
+    const container = document.getElementById('reportMasters');
+    if (!container) return;
     
-    // Timeline
-    renderTimeline(document.getElementById('reportsTimeline'), d.timeline, 'revenue');
-    
-    // Master statistics — главная фича
-    const mastersEl = document.getElementById('reportsMasters');
-    if (!d.top_masters || d.top_masters.length === 0) {
-        mastersEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
-    } else {
-        const maxRevenue = Math.max(...d.top_masters.map(m => Number(m.revenue) || 0)) || 1;
-        mastersEl.innerHTML = d.top_masters.map(m => {
-            const revenue = Number(m.revenue) || 0;
-            const w = revenue / maxRevenue * 100;
-            return `
-                <div class="master-stat-row">
-                    <div class="ms-avatar" style="background-image:url('${m.photo_url || ''}')"></div>
-                    <div class="ms-info">
-                        <div class="ms-name">${escapeHtml(m.name)}</div>
-                        <div class="ms-role">${escapeHtml(m.role || '—')}</div>
-                        <div class="ms-bar"><div class="ms-bar-fill" style="width:${w}%"></div></div>
-                    </div>
-                    <div class="ms-metric"><div class="v">${m.bookings_count}</div><div class="l">робіт</div></div>
-                    <div class="ms-metric"><div class="v">${m.done_count}</div><div class="l">виконано</div></div>
-                    <div class="ms-metric"><div class="v">${fmtMoneyShort(revenue)} ₴</div><div class="l">виручка</div></div>
-                </div>
-            `;
-        }).join('');
+    if (masters.length === 0) {
+        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
     }
     
-    // Master services breakdown
-    const msEl = document.getElementById('reportsMasterServices');
-    if (!d.master_services || d.master_services.length === 0) {
-        msEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);">Немає даних за період</div>';
-    } else {
-        msEl.innerHTML = d.master_services.map(m => {
-            const totalRevenue = m.services.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
-            const totalCount = m.services.reduce((sum, s) => sum + Number(s.times_done || 0), 0);
-            return `
-                <div class="ms-services-block">
-                    <div class="ms-block-head">
-                        <div class="ms-name">${escapeHtml(m.master_name)}</div>
-                        <div class="ms-total">${totalCount} робіт · ${fmtMoney(totalRevenue)}</div>
-                    </div>
-                    <div class="ms-services-grid">
-                        ${m.services.map(s => `
-                            <div class="row">
-                                <div>${escapeHtml(s.service_name)}</div>
-                                <div class="v">${s.times_done}×</div>
-                                <div class="v rev">${fmtMoney(s.revenue)}</div>
+    container.innerHTML = `
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--line);">
+                    <th style="text-align:left;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Майстер</th>
+                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Заявок</th>
+                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Виручка</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${masters.map(m => `
+                    <tr style="border-bottom:1px solid var(--line-2);">
+                        <td style="padding:10px 4px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:32px;height:32px;border-radius:50%;background-image:url('${m.photo_url || ''}');background-size:cover;background-color:var(--bg-3);"></div>
+                                <div>
+                                    <div style="font-weight:500;">${escapeHtml(m.name)}</div>
+                                    <div style="font-size:11px;color:var(--ink-mute);">${escapeHtml(m.role || '')}</div>
+                                </div>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }).join('');
+                        </td>
+                        <td style="padding:10px 4px;text-align:right;">${m.bookings_count || 0}</td>
+                        <td style="padding:10px 4px;text-align:right;font-weight:600;color:var(--beige);">${fmtMoney(m.revenue || 0)}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function renderReportServices(services) {
+    const container = document.getElementById('reportServices');
+    if (!container) return;
+    
+    if (services.length === 0) {
+        container.innerHTML = '<div style="padding:14px;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
     }
     
-    // Top services
-    renderTopList(document.getElementById('reportsTopServices'), d.top_services);
-    
-    // Cancellations
-    const cancelEl = document.getElementById('reportsCancellations');
-    if (!d.cancellations || d.cancellations.length === 0) {
-        cancelEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Скасувань немає</div>';
-    } else {
-        const maxCancel = Math.max(...d.cancellations.map(c => Number(c.cnt) || 0)) || 1;
-        cancelEl.innerHTML = '<div class="top-list">' + d.cancellations.map(c => `
-            <div class="top-row">
-                <div class="tr-num"></div>
-                <div class="tr-name">${c.month}</div>
-                <div class="tr-bar"><div class="tr-bar-fill" style="width:${c.cnt / maxCancel * 100}%; background:var(--danger);"></div></div>
-                <div class="tr-value" style="color:var(--danger);">${c.cnt}</div>
-            </div>
-        `).join('') + '</div>';
-    }
+    container.innerHTML = `
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--line);">
+                    <th style="text-align:left;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Послуга</th>
+                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Замовлень</th>
+                    <th style="text-align:right;padding:8px 4px;color:var(--ink-mute);font-weight:500;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Виручка</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${services.map(s => `
+                    <tr style="border-bottom:1px solid var(--line-2);">
+                        <td style="padding:10px 4px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:36px;height:36px;background-image:url('${s.image_url || ''}');background-size:cover;background-color:var(--bg-3);"></div>
+                                <div style="font-weight:500;">${escapeHtml(s.name)}</div>
+                            </div>
+                        </td>
+                        <td style="padding:10px 4px;text-align:right;">${s.bookings_count || 0}</td>
+                        <td style="padding:10px 4px;text-align:right;font-weight:600;color:var(--beige);">${fmtMoney(s.revenue || 0)}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 document.addEventListener('click', e => {
