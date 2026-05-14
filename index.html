@@ -6047,39 +6047,31 @@ window.renderTimeline = function(container, timeline) {
         return;
     }
     
-    // Сортуємо за датою
+    // Сортуємо
     const sorted = [...timeline].sort((a, b) => new Date(a.date) - new Date(b.date));
     
-    // Заповнюємо пропуски між датами
+    // Заповнюємо пропуски
     const filled = [];
     const startDate = new Date(sorted[0].date);
     const endDate = new Date(sorted[sorted.length - 1].date);
-    
-    // Map для швидкого пошуку
     const dataMap = {};
     sorted.forEach(t => { dataMap[t.date] = t; });
     
     let current = new Date(startDate);
     while (current <= endDate) {
-        const dateStr = current.toISOString().split('T')[0]; // YYYY-MM-DD
-        if (dataMap[dateStr]) {
-            filled.push(dataMap[dateStr]);
-        } else {
-            filled.push({ date: dateStr, bookings: 0, revenue: 0 });
-        }
+        const dateStr = current.toISOString().split('T')[0];
+        filled.push(dataMap[dateStr] || { date: dateStr, bookings: 0, revenue: 0 });
         current.setDate(current.getDate() + 1);
     }
     
-    // Якщо діапазон занадто великий — групуємо по тижням
+    // Групуємо
     let displayData = filled;
     let groupMode = 'day';
     if (filled.length > 60) {
-        // Групуємо по тижням
         groupMode = 'week';
         const weekMap = {};
         filled.forEach(d => {
             const dt = new Date(d.date);
-            // Знаходимо понеділок цього тижня
             const day = dt.getDay() || 7;
             const monday = new Date(dt);
             monday.setDate(dt.getDate() - day + 1);
@@ -6095,48 +6087,49 @@ window.renderTimeline = function(container, timeline) {
     
     const maxRev = Math.max(...displayData.map(t => parseFloat(t.revenue) || 0), 1);
     const maxCnt = Math.max(...displayData.map(t => parseInt(t.bookings) || 0), 1);
+    const CHART_HEIGHT = 180; // фіксована висота в px
     
-    // Скільки підписів показувати (не все, щоб не злипались)
     const labelStep = displayData.length <= 20 ? 1 
                     : displayData.length <= 40 ? 2 
                     : Math.ceil(displayData.length / 20);
-    
     const monthNames = ['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
     
     container.innerHTML = `
-        <div style="display:flex;align-items:flex-end;gap:3px;height:200px;padding:10px 0;">
+        <div style="display:flex;align-items:flex-end;gap:3px;height:${CHART_HEIGHT}px;padding:10px 0;border-bottom:1px solid var(--line-2);">
             ${displayData.map((t, i) => {
                 const rev = parseFloat(t.revenue) || 0;
                 const cnt = parseInt(t.bookings) || 0;
-                let h, op;
+                let heightPx, op;
                 if (rev > 0) {
-                    h = Math.max((rev / maxRev) * 100, 15);
+                    heightPx = Math.max((rev / maxRev) * CHART_HEIGHT, 25);
                     op = 0.9;
                 } else if (cnt > 0) {
-                    h = Math.max((cnt / maxCnt) * 50, 20);
+                    heightPx = Math.max((cnt / maxCnt) * (CHART_HEIGHT * 0.4), 25);
                     op = 0.4;
                 } else {
-                    h = 3;
+                    heightPx = 4;
                     op = 0.08;
                 }
                 const dt = new Date(t.date);
                 const day = dt.getDate();
                 const month = monthNames[dt.getMonth()];
-                
-                // Показуємо підпис тільки на кожному N-му стовпчику
                 const showLabel = (i % labelStep === 0) || i === displayData.length - 1;
-                const label = groupMode === 'week' 
-                    ? `${day} ${month}` 
-                    : `${day}`;
-                
+                const label = groupMode === 'week' ? `${day} ${month}` : `${day}`;
                 return `
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:6px;">
-                        <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
-                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${op};" title="${t.date} · ${cnt} заявок · ${Math.round(rev).toLocaleString('uk-UA')} ₴"></div>
-                        </div>
-                        <div style="font-size:9px;color:var(--ink-mute);height:12px;">${showLabel ? label : ''}</div>
+                    <div style="flex:1;min-width:6px;display:flex;flex-direction:column;justify-content:flex-end;height:${CHART_HEIGHT}px;">
+                        <div style="width:100%;height:${heightPx}px;background:var(--beige);border-radius:2px 2px 0 0;opacity:${op};" title="${t.date} · ${cnt} заявок · ${Math.round(rev).toLocaleString('uk-UA')} ₴"></div>
                     </div>
                 `;
+            }).join('')}
+        </div>
+        <div style="display:flex;gap:3px;padding:6px 0 0;">
+            ${displayData.map((t, i) => {
+                const dt = new Date(t.date);
+                const day = dt.getDate();
+                const month = monthNames[dt.getMonth()];
+                const showLabel = (i % labelStep === 0) || i === displayData.length - 1;
+                const label = groupMode === 'week' ? `${day} ${month}` : `${day}`;
+                return `<div style="flex:1;min-width:6px;text-align:center;font-size:9px;color:var(--ink-mute);height:14px;">${showLabel ? label : ''}</div>`;
             }).join('')}
         </div>
         <div style="margin-top:8px;font-size:10px;color:var(--ink-mute);text-align:right;">
