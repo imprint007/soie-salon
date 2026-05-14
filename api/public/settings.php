@@ -23,7 +23,7 @@ try {
         'font_heading','font_body','theme_mode',
         'seo_title','seo_description','seo_keywords',
         'currency_symbol','language','timezone',
-        'privacy_policy_url','terms_of_service_url',
+        'privacy_policy_url','terms_of_service_url','hero_video_url', 'hero_video_speed',
     ];
     
     $placeholders = str_repeat('?,', count($publicKeys) - 1) . '?';
