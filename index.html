@@ -4725,7 +4725,8 @@ function renderDashboard(d) {
     const s = d.stats || {};
     const bookings = s.total_bookings || 0;
     const revenue = parseFloat(s.total_revenue) || 0;
-    const avgCheck = bookings > 0 ? Math.round(revenue / bookings) : 0;
+    const paidBookings = (s.done_count || 0) + (s.confirmed_count || 0);
+    const avgCheck = paidBookings > 0 ? Math.round(revenue / paidBookings) : 0;
     
     fillStatCards('dashStats', [
         { label: 'Виручка', value: fmtMoneyShort(revenue) },
@@ -4827,17 +4828,27 @@ function renderTimeline(container, timeline) {
     }
     
     const maxRevenue = Math.max(...timeline.map(t => parseFloat(t.revenue) || 0), 1);
+    const maxBookings = Math.max(...timeline.map(t => parseInt(t.bookings) || 0), 1);
     
     container.innerHTML = `
         <div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding:10px 0;">
             ${timeline.map(t => {
                 const rev = parseFloat(t.revenue) || 0;
-                const h = Math.max((rev / maxRevenue) * 100, 2);
+                const cnt = parseInt(t.bookings) || 0;
+                // Якщо є виручка — рахуємо по виручці, інакше по кількості заявок
+                let h = 2;
+                if (rev > 0) {
+                    h = Math.max((rev / maxRevenue) * 100, 8);
+                } else if (cnt > 0) {
+                    h = Math.max((cnt / maxBookings) * 40, 8);
+                }
                 const day = new Date(t.date).getDate();
+                const opacity = rev > 0 ? 0.9 : (cnt > 0 ? 0.4 : 0.1);
+                const tooltip = `${t.date} · ${cnt} заявок · ${fmtMoney(rev)}`;
                 return `
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:8px;">
                         <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
-                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${rev > 0 ? 0.85 : 0.15};" title="${fmtMoney(rev)} · ${t.date}"></div>
+                            <div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${opacity};" title="${tooltip}"></div>
                         </div>
                         <div style="font-size:9px;color:var(--ink-mute);">${day}</div>
                     </div>
@@ -5428,11 +5439,22 @@ function renderReportServices(services) {
     `;
 }
 
-document.addEventListener('click', e => {
-    if (e.target.matches('#reportsFilters .filter-chip')) {
-        document.querySelectorAll('#reportsFilters .filter-chip').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        reportsCurrentPeriod = e.target.dataset.period;
+document.addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    
+    const parent = chip.closest('#dashFilters, #reportsFilters');
+    if (!parent) return;
+    
+    parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    
+    const period = chip.dataset.period;
+    if (parent.id === 'dashFilters') {
+        dashboardPeriod = period;
+        loadDashboard();
+    } else if (parent.id === 'reportsFilters') {
+        reportsPeriod = period;
         loadReports();
     }
 });
