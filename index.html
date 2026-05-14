@@ -6051,11 +6051,18 @@ window.renderTimeline = function(container, timeline) {
     container.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding:10px 0;">${timeline.map(t => {
         const rev = parseFloat(t.revenue) || 0;
         const cnt = parseInt(t.bookings) || 0;
-        let h = 2;
-        if (rev > 0) h = Math.max((rev / maxRev) * 100, 8);
-        else if (cnt > 0) h = Math.max((cnt / maxCnt) * 40, 8);
+        let h, op;
+        if (rev > 0) {
+            h = Math.max((rev / maxRev) * 100, 15);
+            op = 0.9;
+        } else if (cnt > 0) {
+            h = Math.max((cnt / maxCnt) * 50, 20);
+            op = 0.35;
+        } else {
+            h = 4;
+            op = 0.1;
+        }
         const day = new Date(t.date).getDate();
-        const op = rev > 0 ? 0.9 : (cnt > 0 ? 0.4 : 0.1);
         return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:8px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:${h}%;background:var(--beige);border-radius:2px 2px 0 0;opacity:${op};" title="${t.date} · ${cnt} заявок · ${rev} ₴"></div></div><div style="font-size:9px;color:var(--ink-mute);">${day}</div></div>`;
     }).join('')}</div>`;
 };
@@ -6080,8 +6087,7 @@ window.renderTopList = function(container, items, type) {
 
 window.fmtMoneyShort = function(n) {
     n = Number(n) || 0;
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0','') + ' млн ₴';
-    if (n >= 10000) return Math.round(n / 1000) + 'k ₴';
+    if (n < 0) return '-' + Math.abs(n).toLocaleString('uk-UA') + ' ₴';
     return n.toLocaleString('uk-UA') + ' ₴';
 };
 
