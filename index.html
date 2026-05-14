@@ -2258,11 +2258,14 @@
         <div id="reportsMasters" class="masters-stats"></div>
     </div>
 
-    <!-- Какие услуги делал каждый мастер -->
-    <div class="chart-card">
-        <div class="chart-card-head"><h3>Послуги майстрів</h3></div>
-        <div id="reportsMasterServices"></div>
+    <!-- Заробіток майстрів -->
+<div class="chart-card">
+    <div class="chart-card-head">
+        <h3>Заробіток майстрів</h3>
+        <span style="font-size:11px;color:var(--ink-mute);">% від послуг та опцій</span>
     </div>
+    <div id="reportsMasterSalary"></div>
+</div>
 
     <div class="two-col">
         <div class="chart-card" style="margin-bottom:0;">
@@ -6390,6 +6393,133 @@ document.addEventListener('click', (e) => {
         window.loadReports();
     }
 });
+
+// ============================================
+// ЗАРОБІТОК МАЙСТРІВ
+// ============================================
+window.loadMasterSalary = async function() {
+    const container = document.getElementById('reportsMasterSalary');
+    if (!container) return;
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/salary-calculate.php?period=' + (window.reportsPeriod || 'month'), { 
+            credentials: 'include' 
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        renderMasterSalary(data.data || data);
+    } catch (err) {
+        container.innerHTML = `<div style="padding:20px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+};
+
+function renderMasterSalary(data) {
+    const container = document.getElementById('reportsMasterSalary');
+    if (!container) return;
+    
+    const masters = data.masters || [];
+    if (masters.length === 0) {
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає даних</div>';
+        return;
+    }
+    
+    // Сортуємо за зарплатою спадаюче
+    const sorted = [...masters].sort((a, b) => b.total_salary - a.total_salary);
+    const totalAll = data.total || 0;
+    
+    container.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-2);border:1px solid var(--line-2);margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Загалом до виплати</div>
+            <div style="font-family:'Fraunces',serif;font-size:24px;color:var(--beige);">${totalAll.toLocaleString('uk-UA')} ₴</div>
+        </div>
+        
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            ${sorted.map((m, i) => {
+                const rank = String(i + 1).padStart(2, '0');
+                const avg = m.bookings_count > 0 ? Math.round(m.total_salary / m.bookings_count) : 0;
+                const noRules = !m.has_rules && m.bookings_count > 0;
+                
+                return `
+                    <div class="salary-master-row" data-master-id="${m.master_id}" style="background:var(--bg-2);border:1px solid var(--line-2);">
+                        <div style="display:flex;align-items:center;gap:14px;padding:14px;cursor:pointer;" onclick="toggleSalaryDetails(${m.master_id})">
+                            <div class="top-rank" style="width:36px;">${rank}</div>
+                            <div class="top-thumb" style="background-image:url('${m.master_photo || ''}');width:48px;height:48px;flex-shrink:0;"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:14px;font-weight:500;color:var(--ink);">${escapeHtml(m.master_name)}</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">
+                                    <span><strong style="color:var(--ink);">${m.bookings_count}</strong> заявок</span>
+                                    <span style="margin:0 10px;">·</span>
+                                    <span><strong style="color:var(--ink);">${Number(m.total_revenue).toLocaleString('uk-UA')} ₴</strong> виручка</span>
+                                    ${m.bookings_count > 0 ? `<span style="margin:0 10px;">·</span><span><strong style="color:var(--ink);">${avg.toLocaleString('uk-UA')} ₴</strong> сер.</span>` : ''}
+                                </div>
+                                ${noRules ? '<div style="font-size:11px;color:var(--danger);margin-top:6px;">⚠ Налаштуйте % зарплати для цього майстра</div>' : ''}
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--beige);">${Number(m.total_salary).toLocaleString('uk-UA')} ₴</div>
+                                <div style="font-size:10px;color:var(--ink-mute);margin-top:2px;letter-spacing:0.1em;text-transform:uppercase;">До виплати</div>
+                            </div>
+                            <div style="width:24px;color:var(--ink-mute);font-size:18px;" id="salaryChevron_${m.master_id}">▼</div>
+                        </div>
+                        
+                        <div class="salary-master-details" id="salaryDetails_${m.master_id}" style="display:none;border-top:1px solid var(--line-2);padding:0;">
+                            ${renderSalaryDetailsHTML(m)}
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function renderSalaryDetailsHTML(m) {
+    if (!m.bookings || m.bookings.length === 0) {
+        return '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає виконаних робіт</div>';
+    }
+    
+    return `
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:var(--bg-1);">
+                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Дата</th>
+                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Клієнт</th>
+                        <th style="text-align:left;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Послуга</th>
+                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Сума</th>
+                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">%</th>
+                        <th style="text-align:right;padding:10px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Заробіток</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${m.bookings.map(b => `
+                        <tr style="border-top:1px solid var(--line-2);">
+                            <td style="padding:10px 14px;color:var(--ink);">${b.date}<br><span style="font-size:10px;color:var(--ink-mute);">${b.time}</span></td>
+                            <td style="padding:10px 14px;color:var(--ink);">${escapeHtml(b.client_name)}<br><span style="font-size:10px;color:var(--ink-mute);">${escapeHtml(b.booking_code)}</span></td>
+                            <td style="padding:10px 14px;color:var(--ink);">${escapeHtml(b.service_name || '—')}</td>
+                            <td style="padding:10px 14px;text-align:right;color:var(--ink);">${Number(b.total_price).toLocaleString('uk-UA')} ₴</td>
+                            <td style="padding:10px 14px;text-align:right;color:var(--ink-mute);">${b.service_percent}%</td>
+                            <td style="padding:10px 14px;text-align:right;color:var(--beige);font-weight:600;">${Number(b.salary_total).toLocaleString('uk-UA')} ₴</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function toggleSalaryDetails(masterId) {
+    const details = document.getElementById('salaryDetails_' + masterId);
+    const chevron = document.getElementById('salaryChevron_' + masterId);
+    if (!details) return;
+    
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+        if (chevron) chevron.textContent = '▲';
+    } else {
+        details.style.display = 'none';
+        if (chevron) chevron.textContent = '▼';
+    }
+}
 
 </script>
 
