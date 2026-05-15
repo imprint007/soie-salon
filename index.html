@@ -1507,6 +1507,76 @@
     }
   }
 
+  /* Тимчасовий фікс для модалки товарів */
+#productModal.modal-overlay,
+#productCategoriesModal.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+#productModal.modal-overlay.show,
+#productCategoriesModal.modal-overlay.show {
+    display: flex;
+}
+
+#productModal .modal,
+#productCategoriesModal .modal {
+    width: 100%;
+    max-width: 640px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin: 40px 0;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+#productModal .modal-head,
+#productCategoriesModal .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+#productModal .modal-title,
+#productCategoriesModal .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--beige);
+}
+
+#productModal .modal-close,
+#productCategoriesModal .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--ink-mute);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+#productModal .modal-body,
+#productCategoriesModal .modal-body {
+    padding: 24px;
+}
+
+#productModal .modal-footer,
+#productCategoriesModal .modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+}
+
 </style>
 </head>
 <body>
