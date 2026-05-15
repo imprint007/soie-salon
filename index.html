@@ -2597,17 +2597,18 @@
                 </div>
             </div>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Закупочна ціна за одиницю (₴)</label>
-                    <input type="number" id="pCostPrice" step="0.01" min="0" value="0" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Ціна продажу (₴)</label>
-                    <input type="number" id="pSellPrice" step="0.01" min="0" value="0" placeholder="0">
-                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">0 = не продається</div>
-                </div>
-            </div>
+<div class="form-row">
+    <div class="form-group">
+        <label>Закупочна ціна за <span id="pCostUnit">шт</span> (₴)</label>
+        <input type="number" id="pCostPrice" step="0.01" min="0" value="0" placeholder="0" readonly style="cursor:not-allowed;background:var(--bg-2);">
+        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Автоматично рахується при закупці</div>
+    </div>
+    <div class="form-group">
+        <label>Ціна продажу <span id="pSellPriceLabel">за упаковку</span> (₴)</label>
+        <input type="number" id="pSellPrice" step="0.01" min="0" value="0" placeholder="0">
+        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">0 = не продається. Якщо одиниця "шт" — це ціна за 1 шт</div>
+    </div>
+</div>
             
             <div class="form-group">
                 <label>Поріг низького залишку</label>
@@ -4337,6 +4338,7 @@ function openProductModal() {
     document.getElementById('pName').value = '';
     document.getElementById('pDescription').value = '';
     document.getElementById('pUnit').value = 'ml';
+    updateUnitLabels();
     document.getElementById('pCurrentStock').value = 0;
     document.getElementById('pCurrentStock').disabled = false;
     document.getElementById('pCostPrice').value = 0;
@@ -4361,6 +4363,18 @@ function openProductModal() {
     document.getElementById('productModal').classList.add('show');
 }
 
+function updateUnitLabels() {
+    const unit = document.getElementById('pUnit')?.value || 'pcs';
+    const label = getUnitLabel(unit);
+    const costUnitEl = document.getElementById('pCostUnit');
+    if (costUnitEl) costUnitEl.textContent = label;
+}
+
+// Обновляем подпись при смене единицы
+document.addEventListener('change', (e) => {
+    if (e.target.id === 'pUnit') updateUnitLabels();
+});
+
 function closeProductModal() {
     document.getElementById('productModal').classList.remove('show');
 }
@@ -4380,6 +4394,7 @@ async function editProduct(id) {
     document.getElementById('pName').value = p.name || '';
     document.getElementById('pDescription').value = p.description || '';
     document.getElementById('pUnit').value = p.unit || 'pcs';
+    updateUnitLabels();
     document.getElementById('pCurrentStock').value = p.current_stock || 0;
     document.getElementById('pCurrentStock').disabled = true; // редактируется через корректировку
     document.getElementById('pCostPrice').value = p.cost_price || 0;
