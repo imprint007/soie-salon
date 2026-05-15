@@ -4253,11 +4253,11 @@ function openProductModal() {
         });
     }
     
-    document.getElementById('productModal').classList.add('active');
+    document.getElementById('productModal').classList.add('show');
 }
 
 function closeProductModal() {
-    document.getElementById('productModal').classList.remove('active');
+    document.getElementById('productModal').classList.remove('show');
 }
 
 function fillProductCategoriesSelect() {
@@ -4296,7 +4296,7 @@ async function editProduct(id) {
         });
     }
     
-    document.getElementById('productModal').classList.add('active');
+    document.getElementById('productModal').classList.add('show');
 }
 
 async function saveProduct() {
@@ -4377,11 +4377,11 @@ async function deleteProduct() {
 // ============ КАТЕГОРИИ ТОВАРОВ ============
 function openProductCategoriesModal() {
     renderProductCategories();
-    document.getElementById('productCategoriesModal').classList.add('active');
+    document.getElementById('productCategoriesModal').classList.add('show');
 }
 
 function closeProductCategoriesModal() {
-    document.getElementById('productCategoriesModal').classList.remove('active');
+    document.getElementById('productCategoriesModal').classList.remove('show');
     loadProducts(); // перезагрузим товары
 }
 
