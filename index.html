@@ -4417,7 +4417,7 @@ async function saveProduct() {
         id: id || 0,
         name,
         description: document.getElementById('pDescription').value.trim(),
-        image_url: pImageUploader ? pImageUploader.getUrl() : '',
+        image_url: pImageUploader ? pImageUploader.getValue() : '',
         category_id: document.getElementById('pCategory').value || null,
         unit: document.getElementById('pUnit').value,
         sell_price: parseFloat(document.getElementById('pSellPrice').value) || 0,
@@ -5968,14 +5968,18 @@ async function fillExpenseProductsSelect() {
     };
     
     // Обробник зміни кількості і суми — оновлюємо ціну за одиницю
-    document.getElementById('exQuantity').oninput = updatePricePerUnit;
-    document.getElementById('exAmount').oninput = updatePricePerUnit;
+    const qtyEl = document.getElementById('exQuantity');
+    if (qtyEl) qtyEl.oninput = updatePricePerUnit;
+
+    const amountEl = document.getElementById('expAmount');
+    if (amountEl) amountEl.oninput = updatePricePerUnit;
 }
 
 function updatePricePerUnit() {
-    const qty = parseFloat(document.getElementById('exQuantity').value) || 0;
-    const amount = parseFloat(document.getElementById('exAmount').value) || 0;
+    const qty = parseFloat(document.getElementById('exQuantity')?.value) || 0;
+    const amount = parseFloat(document.getElementById('expAmount')?.value) || 0;
     const el = document.getElementById('exPricePerUnit');
+    if (!el) return;
     if (qty > 0 && amount > 0) {
         el.textContent = (amount / qty).toFixed(2) + ' ₴';
     } else {
