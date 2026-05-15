@@ -5832,7 +5832,6 @@ function renderExpenses(data) {
         <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">${fmtMoney(data.total)}</div></div>
         <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">${(data.by_category || []).length}</div></div>
         <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">${currentExpenses.length}</div></div>
-        ${e.product_id ? `<div style="font-size:11px;color:var(--beige);margin-top:4px;">📦 ${e.product_quantity} ${getUnitLabel(e.product_unit)} • ${escapeHtml(e.product_name)}</div>` : ''}
     `;
     
     // Rows
@@ -5845,7 +5844,10 @@ function renderExpenses(data) {
     tbody.innerHTML = currentExpenses.map(e => `
         <tr onclick="editExpense(${e.id})" style="cursor:pointer;">
             <td class="mono">${fmtDateShort(e.expense_date)}</td>
-            <td>${escapeHtml(e.category)}</td>
+            <td>
+                ${escapeHtml(e.category)}
+                ${e.product_id ? `<div style="font-size:11px;color:var(--beige);margin-top:4px;">📦 ${e.product_quantity} ${getUnitLabel(e.product_unit)} • ${escapeHtml(e.product_name)}</div>` : ''}
+            </td>
             <td class="hide-mobile">${escapeHtml(e.description || '')}</td>
             <td class="mono" style="color:var(--danger);">— ${fmtMoney(e.amount)}</td>
             <td style="color:var(--ink-mute);">→</td>
