@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Особистий кабінет майстра</title>
+<link rel="icon" type="image/png" href="/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --bg: #0d0c0b;
+    --bg-1: #15130f;
+    --bg-2: #1a1917;
+    --beige: #e0c9a8;
+    --ink: #ede6d9;
+    --ink-mute: #9e968a;
+    --line: rgba(224, 201, 168, 0.18);
+    --danger: #e89999;
+}
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
+
+/* ===== LOGIN ===== */
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 48px 32px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+
+.login-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: var(--beige);
+    text-align: center;
+}
+
+.login-sub {
+    font-size: 12px;
+    color: var(--ink-mute);
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.login-field {
+    margin-bottom: 16px;
+}
+
+.login-field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.login-field input:focus {
+    outline: none;
+    border-color: var(--beige);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 12px;
+    background: var(--beige);
+    color: var(--bg);
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+}
+
+.login-btn:hover { opacity: 0.9; }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.login-error {
+    padding: 12px;
+    background: rgba(232, 153, 153, 0.1);
+    border: 1px solid rgba(232, 153, 153, 0.3);
+    color: var(--danger);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ===== DASHBOARD ===== */
+.dash-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.dash-master {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dash-photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-2);
+}
+
+.dash-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--ink);
+}
+
+.dash-role {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 4px;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.logout-btn:hover { border-color: var(--beige); }
+
+.period-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.period-tab {
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.period-tab.active {
+    background: var(--beige);
+    color: var(--bg);
+    border-color: var(--beige);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    padding: 20px 22px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    position: relative;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--beige);
+}
+
+.stat-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--ink);
+}
+
+.stat-value.accent { color: var(--beige); }
+
+.block {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.block-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--beige);
+    margin-bottom: 16px;
+}
+
+.booking-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(224, 201, 168, 0.08);
+}
+
+.booking-row:last-child { border-bottom: none; }
+
+.booking-date {
+    width: 80px;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.booking-time {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 4px;
+}
+
+.booking-client {
+    flex: 1;
+    min-width: 0;
+}
+
+.booking-name {
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.booking-svc {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 4px;
+}
+
+.booking-status {
+    padding: 4px 10px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: rgba(224, 201, 168, 0.1);
+    color: var(--beige);
+}
+
+.booking-status.confirmed { background: rgba(125, 200, 125, 0.15); color: #a0d4a0; }
+.booking-status.done { background: rgba(224, 201, 168, 0.15); color: var(--beige); }
+.booking-status.pending { background: rgba(232, 213, 153, 0.15); color: #e8d599; }
+.booking-status.cancelled { background: rgba(232, 153, 153, 0.15); color: var(--danger); }
+
+.booking-price {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--ink);
+    text-align: right;
+}
+
+.booking-salary {
+    font-size: 11px;
+    color: var(--beige);
+    margin-top: 4px;
+}
+
+.empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--ink-mute);
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .booking-row { flex-wrap: wrap; }
+    .booking-date { width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-wrap" id="loginScreen">
+    <div class="login-card">
+        <h1 class="login-title">Особистий кабінет</h1>
+        <div class="login-sub">Майстра</div>
+        
+        <div id="loginError" class="login-error" style="display:none;"></div>
+        
+        <form id="loginForm" autocomplete="on">
+            <div class="login-field">
+                <label>Логін</label>
+                <input type="text" id="loginUsername" name="username" autocomplete="username" required>
+            </div>
+            <div class="login-field">
+                <label>Пароль</label>
+                <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">Увійти</button>
+        </form>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash-wrap" id="dashScreen" style="display:none;">
+    <div class="dash-header">
+        <div class="dash-master">
+            <div class="dash-photo" id="masterPhoto"></div>
+            <div>
+                <div class="dash-name" id="masterName">—</div>
+                <div class="dash-role" id="masterRole">—</div>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Вийти</button>
+    </div>
+    
+    <div class="period-tabs" id="periodTabs">
+        <button class="period-tab active" data-period="today">Сьогодні</button>
+        <button class="period-tab" data-period="week">Тиждень</button>
+        <button class="period-tab" data-period="month">Місяць</button>
+        <button class="period-tab" data-period="3months">3 місяці</button>
+        <button class="period-tab" data-period="6months">Півроку</button>
+        <button class="period-tab" data-period="year">Рік</button>
+    </div>
+    
+    <div class="stats-grid" id="statsGrid"></div>
+    
+    <div class="block">
+        <div class="block-title">Найближчі записи</div>
+        <div id="upcomingList"></div>
+    </div>
+    
+    <div class="block">
+        <div class="block-title">Усі записи за період</div>
+        <div id="bookingsList"></div>
+    </div>
+</div>
+
+<script>
+let currentPeriod = 'today';
+let currentMaster = null;
+
+// ============= LOGIN =============
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Вхід...';
+    
+    try {
+        const res = await fetch('/api/master/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        
+        if (!data.success) {
+            errEl.textContent = data.error || 'Помилка входу';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Увійти';
+            return;
+        }
+        
+        currentMaster = data.master;
+        showDashboard();
+    } catch (err) {
+        errEl.textContent = 'Помилка зʼєднання';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Увійти';
+    }
+});
+
+// ============= CHECK SESSION ON LOAD =============
+async function checkSession() {
+    try {
+        const res = await fetch('/api/master/me.php', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            currentMaster = data.master;
+            showDashboard();
+        }
+    } catch (err) {}
+}
+
+// ============= LOGOUT =============
+async function logout() {
+    try {
+        await fetch('/api/master/logout.php', { credentials: 'include' });
+    } catch (err) {}
+    currentMaster = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashScreen').style.display = 'none';
+    document.getElementById('loginPassword').value = '';
+}
+
+// ============= DASHBOARD =============
+function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashScreen').style.display = 'block';
+    
+    document.getElementById('masterName').textContent = currentMaster.name;
+    document.getElementById('masterRole').textContent = currentMaster.role || '';
+    
+    const photo = currentMaster.photo_url;
+    if (photo) {
+        document.getElementById('masterPhoto').style.backgroundImage = `url('${photo}')`;
+    }
+    
+    loadStats();
+}
+
+async function loadStats() {
+    try {
+        const res = await fetch('/api/master/stats.php?period=' + currentPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) {
+            if (res.status === 401) {
+                logout();
+                return;
+            }
+            throw new Error(data.error);
+        }
+        renderStats(data.data || data);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function renderStats(data) {
+    const s = data.stats;
+    
+    // Карточки статистики
+    const statsGrid = document.getElementById('statsGrid');
+    statsGrid.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-label">До виплати</div>
+            <div class="stat-value accent">${Number(s.total_salary).toLocaleString('uk-UA')} ₴</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Виручка</div>
+            <div class="stat-value">${Number(s.total_revenue).toLocaleString('uk-UA')} ₴</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Виконано</div>
+            <div class="stat-value">${s.total_done}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">В очікуванні</div>
+            <div class="stat-value">${s.total_pending}</div>
+        </div>
+    `;
+    
+    // Найближчі
+    const upcomingEl = document.getElementById('upcomingList');
+    if (!data.upcoming || data.upcoming.length === 0) {
+        upcomingEl.innerHTML = '<div class="empty">Поки немає майбутніх записів</div>';
+    } else {
+        upcomingEl.innerHTML = data.upcoming.map(b => renderBooking(b)).join('');
+    }
+    
+    // Всі за період
+    const bookingsEl = document.getElementById('bookingsList');
+    if (!data.bookings || data.bookings.length === 0) {
+        bookingsEl.innerHTML = '<div class="empty">За цей період записів немає</div>';
+    } else {
+        bookingsEl.innerHTML = data.bookings.map(b => renderBooking(b, true)).join('');
+    }
+}
+
+function renderBooking(b, showSalary = false) {
+    const date = b.booking_date.split('-').reverse().join('.');
+    const time = b.booking_time.substring(0, 5);
+    const status = b.status;
+    const statusLabels = {
+        pending: 'Очікує',
+        confirmed: 'Підтверджено',
+        done: 'Виконано',
+        cancelled: 'Скасовано'
+    };
+    
+    return `
+        <div class="booking-row">
+            <div class="booking-date">
+                ${date}
+                <div class="booking-time">${time}</div>
+            </div>
+            <div class="booking-client">
+                <div class="booking-name">${escapeHtml(b.client_name)}</div>
+                <div class="booking-svc">${escapeHtml(b.service_name || '—')}</div>
+            </div>
+            <div class="booking-status ${status}">${statusLabels[status] || status}</div>
+            <div class="booking-price">
+                ${Number(b.total_price).toLocaleString('uk-UA')} ₴
+                ${showSalary && b.my_salary > 0 ? `<div class="booking-salary">+${Number(b.my_salary).toLocaleString('uk-UA')} ₴ мені</div>` : ''}
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============= PERIOD TABS =============
+document.getElementById('periodTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.period-tab');
+    if (!btn) return;
+    
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    
+    currentPeriod = btn.dataset.period;
+    loadStats();
+});
+
+// ============= INIT =============
+checkSession();
+</script>
+</body>
+</html>
