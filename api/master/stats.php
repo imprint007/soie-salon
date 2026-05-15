@@ -19,14 +19,13 @@ try {
         default:         $startDate = $endDate;
     }
     
-    // Бронювання майстра за період
+    // Бронювання
     $stmt = $pdo->prepare("
-        SELECT 
-            b.id, b.booking_code, b.booking_date, b.booking_time, b.status,
-            b.client_name, b.client_phone, b.client_email,
-            b.service_id, b.total_price, b.deposit_amount, b.deposit_paid,
-            b.selected_options, b.duration_min,
-            s.name AS service_name, s.base_price AS service_base_price
+        SELECT b.id, b.booking_code, b.booking_date, b.booking_time, b.status,
+               b.client_name, b.client_phone, b.client_email,
+               b.service_id, b.total_price, b.deposit_amount, b.deposit_paid,
+               b.selected_options, b.duration_min,
+               s.name AS service_name, s.base_price AS service_base_price
         FROM bookings b
         LEFT JOIN services s ON s.id = b.service_id
         WHERE b.master_id = ?
@@ -36,27 +35,18 @@ try {
     $stmt->execute([$masterId, $startDate, $endDate]);
     $bookings = $stmt->fetchAll();
     
-    // Завантажуємо правила зарплат майстра
-    $rulesStmt = $pdo->prepare("
-        SELECT rule_type, service_id, option_id, percent 
-        FROM master_salary_rules 
-        WHERE master_id = ?
-    ");
+    // Правила зарплат
+    $rulesStmt = $pdo->prepare("SELECT rule_type, service_id, option_id, percent FROM master_salary_rules WHERE master_id = ?");
     $rulesStmt->execute([$masterId]);
     $allRules = $rulesStmt->fetchAll();
     
     $rules = ['all' => null, 'services' => [], 'options' => []];
     foreach ($allRules as $r) {
-        if ($r['rule_type'] === 'all') {
-            $rules['all'] = (float)$r['percent'];
-        } elseif ($r['rule_type'] === 'service' && $r['service_id']) {
-            $rules['services'][$r['service_id']] = (float)$r['percent'];
-        } elseif ($r['rule_type'] === 'option' && $r['option_id']) {
-            $rules['options'][$r['option_id']] = (float)$r['percent'];
-        }
+        if ($r['rule_type'] === 'all') $rules['all'] = (float)$r['percent'];
+        elseif ($r['rule_type'] === 'service' && $r['service_id']) $rules['services'][$r['service_id']] = (float)$r['percent'];
+        elseif ($r['rule_type'] === 'option' && $r['option_id']) $rules['options'][$r['option_id']] = (float)$r['percent'];
     }
     
-    // Рахуємо статистику
     $totalRevenue = 0;
     $totalSalary = 0;
     $totalDone = 0;
@@ -76,16 +66,13 @@ try {
             $totalDone++;
             $totalRevenue += $price;
             
-            // Рахуємо зарплату
             $basePrice = (float)$b['service_base_price'];
             $servicePercent = $rules['services'][$b['service_id']] ?? $rules['all'] ?? 0;
             
             $optionsTotal = 0;
             $tmpOpts = !empty($b['selected_options']) ? json_decode($b['selected_options'], true) : [];
             if (is_array($tmpOpts)) {
-                foreach ($tmpOpts as $tmpOpt) {
-                    $optionsTotal += (float)($tmpOpt['price'] ?? 0);
-                }
+                foreach ($tmpOpts as $tmpOpt) $optionsTotal += (float)($tmpOpt['price'] ?? 0);
             }
             $servicePart = max(0, $price - $optionsTotal);
             $salaryFromService = $servicePart * $servicePercent / 100;
@@ -110,13 +97,16 @@ try {
     }
     unset($b);
     
-    // Найближчі бронювання (майбутні)
+    // Витрати майстра за період
+    $expStmt = $pdo->prepare("SELECT SUM(amount) AS total FROM master_expenses WHERE master_id = ? AND expense_date BETWEEN ? AND ?");
+    $expStmt->execute([$masterId, $startDate, $endDate]);
+    $totalExpenses = (float)($expStmt->fetch()['total'] ?? 0);
+    
+    // Майбутні
     $upcomingStmt = $pdo->prepare("
-        SELECT 
-            b.id, b.booking_code, b.booking_date, b.booking_time, b.status,
-            b.client_name, b.client_phone,
-            b.total_price, b.duration_min,
-            s.name AS service_name
+        SELECT b.id, b.booking_code, b.booking_date, b.booking_time, b.status,
+               b.client_name, b.client_phone, b.total_price, b.duration_min,
+               s.name AS service_name
         FROM bookings b
         LEFT JOIN services s ON s.id = b.service_id
         WHERE b.master_id = ?
@@ -135,6 +125,8 @@ try {
         'stats' => [
             'total_revenue' => round($totalRevenue, 2),
             'total_salary' => round($totalSalary, 2),
+            'total_expenses' => round($totalExpenses, 2),
+            'net_income' => round($totalSalary - $totalExpenses, 2),
             'total_done' => $totalDone,
             'total_cancelled' => $totalCancelled,
             'total_pending' => $totalPending,
