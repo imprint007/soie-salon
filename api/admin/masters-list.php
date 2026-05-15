@@ -6,7 +6,14 @@ requireAdmin();
 try {
     $pdo = getDb();
     
-    $masters = $pdo->query("SELECT * FROM masters ORDER BY sort_order, id DESC")->fetchAll();
+    // Явно перечисляем поля, password_hash НЕ отдаём
+    $masters = $pdo->query("
+        SELECT id, name, role, phone, email, bio, photo_url, experience_years, 
+               is_active, sort_order, username, last_login 
+        FROM masters 
+        ORDER BY sort_order, id DESC
+    ")->fetchAll();
+    
     $links = $pdo->query("SELECT master_id, service_id FROM master_services")->fetchAll();
     
     // Прикрепляем к каждому мастеру список ID услуг

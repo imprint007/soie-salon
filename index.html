@@ -2031,6 +2031,25 @@
                 </div>
             </div>
 
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label>Логін</label>
+            <input type="text" id="mUsername" placeholder="anna_voronova" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Пароль <span style="color:var(--ink-mute);font-size:11px;">(залиш пустим щоб не міняти)</span></label>
+            <input type="password" id="mPassword" placeholder="••••••••" autocomplete="new-password">
+        </div>
+    </div>
+    
+    <div style="font-size:11px;color:var(--ink-mute);line-height:1.5;">
+        Майстер зможе зайти в особистий кабінет за адресою <strong style="color:var(--ink);">/master.html</strong>
+    </div>
+</div>
+
             <div class="form-group">
                 <label>Біографія / опис</label>
                 <textarea id="mstBio" rows="3" placeholder="Коротко про майстра"></textarea>
@@ -4515,6 +4534,8 @@ async function openMasterModal() {
     document.getElementById('mstActive').checked = true;
     document.getElementById('mstError').style.display = 'none';
     document.getElementById('mstDeleteBtn').style.display = 'none';
+    document.getElementById('mUsername').value = '';
+    document.getElementById('mPassword').value = '';
 
     // Аплоадер фото
     const uploaderContainer = document.getElementById('mstPhotoUploader');
@@ -4548,6 +4569,8 @@ async function editMaster(id) {
     document.getElementById('mstActive').checked = m.is_active == 1;
     document.getElementById('mstError').style.display = 'none';
     document.getElementById('mstDeleteBtn').style.display = 'inline-block';
+    document.getElementById('mUsername').value = m.username || '';
+    document.getElementById('mPassword').value = ''; // никогда не показываем пароль
 
     const uploaderContainer = document.getElementById('mstPhotoUploader');
     uploaderContainer.className = '';
@@ -4616,9 +4639,12 @@ async function saveMaster() {
         email: document.getElementById('mstEmail').value.trim(),
         bio: document.getElementById('mstBio').value.trim(),
         photo_url: mstPhotoUploader ? mstPhotoUploader.getValue() : '',
+        username: document.getElementById('mUsername').value.trim() || null,
+        password: document.getElementById('mPassword').value || null, // только если ввели — отправим
         experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
         is_active: document.getElementById('mstActive').checked ? 1 : 0,
         service_ids
+        
     };
 
     if (!payload.name) { showMstError('Введіть імʼя'); return; }
