@@ -19,6 +19,7 @@
     --ink: #ede6d9;
     --ink-mute: #9e968a;
     --line: rgba(224, 201, 168, 0.18);
+    --line-soft: rgba(224, 201, 168, 0.08);
     --danger: #e89999;
 }
 
@@ -30,318 +31,123 @@ body {
 }
 
 /* ===== LOGIN ===== */
-.login-wrap {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-}
-
-.login-card {
-    width: 100%;
-    max-width: 420px;
-    padding: 48px 32px;
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-}
-
-.login-title {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    margin-bottom: 8px;
-    color: var(--beige);
-    text-align: center;
-}
-
-.login-sub {
-    font-size: 12px;
-    color: var(--ink-mute);
-    text-align: center;
-    margin-bottom: 32px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-
-.login-field {
-    margin-bottom: 16px;
-}
-
-.login-field label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin-bottom: 8px;
-}
-
-.login-field input {
-    width: 100%;
-    padding: 14px 16px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    border-radius: 4px;
-}
-
-.login-field input:focus {
-    outline: none;
-    border-color: var(--beige);
-}
-
-.login-btn {
-    width: 100%;
-    padding: 16px;
-    margin-top: 12px;
-    background: var(--beige);
-    color: var(--bg);
-    border: none;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: opacity 0.2s;
-}
-
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.login-card { width: 100%; max-width: 420px; padding: 48px 32px; background: var(--bg-1); border: 1px solid var(--line); border-radius: 4px; }
+.login-title { font-family: 'Fraunces', serif; font-size: 28px; margin-bottom: 8px; color: var(--beige); text-align: center; }
+.login-sub { font-size: 12px; color: var(--ink-mute); text-align: center; margin-bottom: 32px; letter-spacing: 0.1em; text-transform: uppercase; }
+.login-field { margin-bottom: 16px; }
+.login-field label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+.login-field input { width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--line); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14px; border-radius: 4px; }
+.login-field input:focus { outline: none; border-color: var(--beige); }
+.login-btn { width: 100%; padding: 16px; margin-top: 12px; background: var(--beige); color: var(--bg); border: none; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; }
 .login-btn:hover { opacity: 0.9; }
 .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.login-error {
-    padding: 12px;
-    background: rgba(232, 153, 153, 0.1);
-    border: 1px solid rgba(232, 153, 153, 0.3);
-    color: var(--danger);
-    border-radius: 4px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    text-align: center;
-}
+.login-error { padding: 12px; background: rgba(232, 153, 153, 0.1); border: 1px solid rgba(232, 153, 153, 0.3); color: var(--danger); border-radius: 4px; margin-bottom: 16px; font-size: 13px; text-align: center; }
 
 /* ===== DASHBOARD ===== */
-.dash-wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-}
-
-.dash-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--line);
-}
-
-.dash-master {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.dash-photo {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    background-color: var(--bg-2);
-}
-
-.dash-name {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    color: var(--ink);
-}
-
-.dash-role {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin-top: 4px;
-}
-
-.logout-btn {
-    padding: 10px 20px;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
+.dash-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--line); gap: 16px; flex-wrap: wrap; }
+.dash-master { display: flex; align-items: center; gap: 16px; }
+.dash-photo { width: 56px; height: 56px; border-radius: 50%; background-size: cover; background-position: center; background-color: var(--bg-2); }
+.dash-name { font-family: 'Fraunces', serif; font-size: 22px; color: var(--ink); }
+.dash-role { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-top: 4px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.icon-btn { width: 44px; height: 44px; background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.icon-btn:hover { border-color: var(--beige); color: var(--beige); }
+.icon-btn svg { width: 20px; height: 20px; }
+.logout-btn { padding: 10px 20px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 4px; }
 .logout-btn:hover { border-color: var(--beige); }
 
-.period-tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-}
+.period-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; transition: opacity 0.25s; }
+.period-tab { padding: 10px 18px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 4px; }
+.period-tab.active { background: var(--beige); color: var(--bg); border-color: var(--beige); }
 
-.period-tab {
-    padding: 10px 18px;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.period-tab.active {
-    background: var(--beige);
-    color: var(--bg);
-    border-color: var(--beige);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin-bottom: 32px;
-}
-
-.stat-card {
-    padding: 20px 22px;
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    position: relative;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 60px;
-    height: 2px;
-    background: var(--beige);
-}
-
-.stat-label {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin-bottom: 12px;
-}
-
-.stat-value {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    color: var(--ink);
-}
-
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 32px; transition: opacity 0.25s; }
+.stat-card { padding: 20px 22px; background: var(--bg-1); border: 1px solid var(--line); border-radius: 4px; position: relative; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 60px; height: 2px; background: var(--beige); }
+.stat-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px; }
+.stat-value { font-family: 'Fraunces', serif; font-size: 28px; color: var(--ink); }
 .stat-value.accent { color: var(--beige); }
+.stat-value.danger { color: var(--danger); }
+.stat-value.income { color: #a0d4a0; }
 
-.block {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    margin-bottom: 24px;
-    padding: 24px;
-}
+.block { background: var(--bg-1); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 24px; padding: 24px; transition: opacity 0.25s; }
+.block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+.block-title { font-family: 'Fraunces', serif; font-size: 18px; color: var(--beige); }
 
-.block-title {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    color: var(--beige);
-    margin-bottom: 16px;
-}
-
-.booking-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(224, 201, 168, 0.08);
-}
-
+.booking-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
 .booking-row:last-child { border-bottom: none; }
-
-.booking-date {
-    width: 80px;
-    font-size: 13px;
-    color: var(--ink);
-}
-
-.booking-time {
-    font-size: 11px;
-    color: var(--ink-mute);
-    margin-top: 4px;
-}
-
-.booking-client {
-    flex: 1;
-    min-width: 0;
-}
-
-.booking-name {
-    font-size: 14px;
-    color: var(--ink);
-}
-
-.booking-svc {
-    font-size: 11px;
-    color: var(--ink-mute);
-    margin-top: 4px;
-}
-
-.booking-status {
-    padding: 4px 10px;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border-radius: 999px;
-    background: rgba(224, 201, 168, 0.1);
-    color: var(--beige);
-}
-
+.booking-date { width: 80px; font-size: 13px; color: var(--ink); flex-shrink: 0; }
+.booking-time { font-size: 11px; color: var(--ink-mute); margin-top: 4px; }
+.booking-client { flex: 1; min-width: 0; }
+.booking-name { font-size: 14px; color: var(--ink); }
+.booking-svc { font-size: 11px; color: var(--ink-mute); margin-top: 4px; }
+.booking-status { padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 999px; background: rgba(224, 201, 168, 0.1); color: var(--beige); flex-shrink: 0; }
 .booking-status.confirmed { background: rgba(125, 200, 125, 0.15); color: #a0d4a0; }
 .booking-status.done { background: rgba(224, 201, 168, 0.15); color: var(--beige); }
 .booking-status.pending { background: rgba(232, 213, 153, 0.15); color: #e8d599; }
 .booking-status.cancelled { background: rgba(232, 153, 153, 0.15); color: var(--danger); }
+.booking-price { font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink); text-align: right; flex-shrink: 0; }
+.booking-salary { font-size: 11px; color: var(--beige); margin-top: 4px; }
 
-.booking-price {
-    font-family: 'Fraunces', serif;
-    font-size: 16px;
-    color: var(--ink);
-    text-align: right;
-}
+.empty { padding: 32px; text-align: center; color: var(--ink-mute); font-size: 12px; }
 
-.booking-salary {
-    font-size: 11px;
-    color: var(--beige);
-    margin-top: 4px;
-}
+/* ===== MODAL ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; overflow-y: auto; }
+.modal-overlay.active { display: flex; }
+.modal { width: 100%; max-width: 560px; background: var(--bg-1); border: 1px solid var(--line); border-radius: 4px; max-height: 92vh; overflow-y: auto; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--line); }
+.modal-title { font-family: 'Fraunces', serif; font-size: 22px; color: var(--beige); }
+.modal-close { background: transparent; border: none; color: var(--ink-mute); font-size: 24px; cursor: pointer; padding: 0 8px; }
+.modal-body { padding: 24px; }
+.modal-footer { display: flex; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--line); }
 
-.empty {
-    padding: 32px;
-    text-align: center;
-    color: var(--ink-mute);
-    font-size: 12px;
-}
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+.field input, .field textarea, .field select { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14px; border-radius: 4px; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--beige); }
+.field textarea { min-height: 80px; resize: vertical; }
+.field-hint { font-size: 11px; color: var(--ink-mute); margin-top: 6px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn { padding: 12px 20px; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 4px; border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.btn:hover { border-color: var(--beige); }
+.btn.primary { background: var(--beige); color: var(--bg); border-color: var(--beige); }
+.btn.primary:hover { opacity: 0.9; }
+.btn.danger { color: var(--danger); border-color: rgba(232, 153, 153, 0.3); }
+.btn-flex { flex: 1; }
+
+.section-divider { margin: 24px 0 16px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--beige); }
+
+/* Категории */
+.cat-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 999px; font-size: 12px; margin-right: 6px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; }
+.cat-tag:hover { border-color: var(--beige); }
+.cat-tag.active { background: var(--beige); color: var(--bg); border-color: var(--beige); }
+.cat-tag-x { color: var(--ink-mute); cursor: pointer; font-size: 14px; padding: 0 4px; }
+.cat-tag-x:hover { color: var(--danger); }
+
+/* Витрати list */
+.exp-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+.exp-row:last-child { border-bottom: none; }
+.exp-date { width: 80px; font-size: 12px; color: var(--ink-mute); flex-shrink: 0; }
+.exp-cat { padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 999px; background: rgba(224, 201, 168, 0.1); color: var(--beige); flex-shrink: 0; }
+.exp-desc { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
+.exp-amount { font-family: 'Fraunces', serif; font-size: 16px; color: var(--danger); flex-shrink: 0; }
+.exp-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.exp-actions button { background: transparent; border: none; color: var(--ink-mute); cursor: pointer; padding: 4px 8px; font-size: 14px; }
+.exp-actions button:hover { color: var(--beige); }
+.exp-actions button.del:hover { color: var(--danger); }
+
+.success-msg { padding: 10px 14px; background: rgba(125, 200, 125, 0.1); border: 1px solid rgba(125, 200, 125, 0.3); color: #a0d4a0; border-radius: 4px; margin-bottom: 16px; font-size: 13px; }
+.error-msg { padding: 10px 14px; background: rgba(232, 153, 153, 0.1); border: 1px solid rgba(232, 153, 153, 0.3); color: var(--danger); border-radius: 4px; margin-bottom: 16px; font-size: 13px; }
+
+.updating { opacity: 0.35; }
 
 @media (max-width: 600px) {
-    .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-    .booking-row { flex-wrap: wrap; }
-    .booking-date { width: auto; }
+    .dash-header { flex-direction: column; align-items: flex-start; }
+    .booking-row, .exp-row { flex-wrap: wrap; }
+    .booking-date, .exp-date { width: auto; }
+    .field-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -352,9 +158,7 @@ body {
     <div class="login-card">
         <h1 class="login-title">Особистий кабінет</h1>
         <div class="login-sub">Майстра</div>
-        
         <div id="loginError" class="login-error" style="display:none;"></div>
-        
         <form id="loginForm" autocomplete="on">
             <div class="login-field">
                 <label>Логін</label>
@@ -379,7 +183,15 @@ body {
                 <div class="dash-role" id="masterRole">—</div>
             </div>
         </div>
-        <button class="logout-btn" onclick="logout()">Вийти</button>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="openExpenses()" title="Витрати">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 14h4"/></svg>
+            </button>
+            <button class="icon-btn" onclick="openSettings()" title="Налаштування">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <button class="logout-btn" onclick="logout()">Вийти</button>
+        </div>
     </div>
     
     <div class="period-tabs" id="periodTabs">
@@ -393,25 +205,153 @@ body {
     
     <div class="stats-grid" id="statsGrid"></div>
     
-    <div class="block">
-        <div class="block-title">Найближчі записи</div>
+    <div class="block" id="upcomingBlock">
+        <div class="block-head"><div class="block-title">Найближчі записи</div></div>
         <div id="upcomingList"></div>
     </div>
     
-    <div class="block">
-        <div class="block-title">Усі записи за період</div>
+    <div class="block" id="bookingsBlock">
+        <div class="block-head"><div class="block-title">Усі записи за період</div></div>
         <div id="bookingsList"></div>
+    </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <div class="modal-head">
+            <div class="modal-title">Налаштування профілю</div>
+            <button class="modal-close" onclick="closeSettings()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="settingsSuccess" class="success-msg" style="display:none;">Збережено</div>
+            <div id="settingsError" class="error-msg" style="display:none;"></div>
+            
+            <div class="field">
+                <label>Фото (URL)</label>
+                <input type="text" id="sPhoto" placeholder="https://...">
+                <div class="field-hint">Поки що тільки посилання. Завантаження файлу додамо пізніше.</div>
+            </div>
+            
+            <div class="field">
+                <label>Імʼя *</label>
+                <input type="text" id="sName" required>
+            </div>
+            
+            <div class="field-row">
+                <div class="field">
+                    <label>Телефон</label>
+                    <input type="tel" id="sPhone">
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" id="sEmail">
+                </div>
+            </div>
+            
+            <div class="field">
+                <label>Біографія</label>
+                <textarea id="sBio" placeholder="Кілька слів про себе..."></textarea>
+            </div>
+            
+            <div class="section-divider">Доступ</div>
+            
+            <div class="field">
+                <label>Логін</label>
+                <input type="text" id="sUsername" autocomplete="username">
+            </div>
+            
+            <div class="field">
+                <label>Поточний пароль</label>
+                <input type="password" id="sCurrentPassword" autocomplete="current-password">
+                <div class="field-hint">Потрібен лише для зміни паролю</div>
+            </div>
+            
+            <div class="field">
+                <label>Новий пароль</label>
+                <input type="password" id="sNewPassword" autocomplete="new-password">
+                <div class="field-hint">Залиш пустим щоб не міняти</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-flex" onclick="closeSettings()">Скасувати</button>
+            <button class="btn primary btn-flex" onclick="saveSettings()">Зберегти</button>
+        </div>
+    </div>
+</div>
+
+<!-- EXPENSES MODAL -->
+<div class="modal-overlay" id="expensesModal">
+    <div class="modal" style="max-width: 720px;">
+        <div class="modal-head">
+            <div class="modal-title">Витрати</div>
+            <button class="modal-close" onclick="closeExpenses()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="expensesError" class="error-msg" style="display:none;"></div>
+            
+            <!-- Форма додавання -->
+            <div style="padding: 16px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 20px;">
+                <div class="field-row">
+                    <div class="field" style="margin-bottom: 12px;">
+                        <label>Сума *</label>
+                        <input type="number" id="eAmount" step="0.01" min="0" placeholder="0">
+                    </div>
+                    <div class="field" style="margin-bottom: 12px;">
+                        <label>Дата</label>
+                        <input type="date" id="eDate">
+                    </div>
+                </div>
+                
+                <div class="field" style="margin-bottom: 12px;">
+                    <label>Категорія</label>
+                    <div id="catTagsList" style="margin-bottom: 8px;"></div>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="newCatName" placeholder="Нова категорія (наприклад: Проїзд)" style="flex:1;">
+                        <button class="btn" onclick="addCategory()" type="button">+</button>
+                    </div>
+                </div>
+                
+                <div class="field" style="margin-bottom: 12px;">
+                    <label>Опис (необовʼязково)</label>
+                    <input type="text" id="eDescription" placeholder="Наприклад: бензин до салону">
+                </div>
+                
+                <button class="btn primary" onclick="saveExpense()" style="width:100%;">+ Додати витрату</button>
+            </div>
+            
+            <!-- Фільтр період -->
+            <div class="period-tabs" id="expPeriodTabs" style="margin-bottom: 16px;">
+                <button class="period-tab" data-exp-period="today">Сьогодні</button>
+                <button class="period-tab" data-exp-period="week">Тиждень</button>
+                <button class="period-tab active" data-exp-period="month">Місяць</button>
+                <button class="period-tab" data-exp-period="3months">3 місяці</button>
+                <button class="period-tab" data-exp-period="6months">Півроку</button>
+                <button class="period-tab" data-exp-period="all">Все</button>
+            </div>
+            
+            <!-- Підсумок -->
+            <div style="padding: 14px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-mute);">Всього за період</div>
+                <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--danger);" id="expTotal">0 ₴</div>
+            </div>
+            
+            <div id="expList"></div>
+        </div>
     </div>
 </div>
 
 <script>
 let currentPeriod = 'today';
 let currentMaster = null;
+let currentExpPeriod = 'month';
+let expenseCategories = [];
+let selectedCategoryId = null;
+let editingExpenseId = null;
 
 // ============= LOGIN =============
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     const errEl = document.getElementById('loginError');
@@ -448,7 +388,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 });
 
-// ============= CHECK SESSION ON LOAD =============
 async function checkSession() {
     try {
         const res = await fetch('/api/master/me.php', { credentials: 'include' });
@@ -460,11 +399,8 @@ async function checkSession() {
     } catch (err) {}
 }
 
-// ============= LOGOUT =============
 async function logout() {
-    try {
-        await fetch('/api/master/logout.php', { credentials: 'include' });
-    } catch (err) {}
+    try { await fetch('/api/master/logout.php', { credentials: 'include' }); } catch (err) {}
     currentMaster = null;
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('dashScreen').style.display = 'none';
@@ -475,60 +411,66 @@ async function logout() {
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashScreen').style.display = 'block';
-    
     document.getElementById('masterName').textContent = currentMaster.name;
     document.getElementById('masterRole').textContent = currentMaster.role || '';
-    
-    const photo = currentMaster.photo_url;
-    if (photo) {
-        document.getElementById('masterPhoto').style.backgroundImage = `url('${photo}')`;
+    if (currentMaster.photo_url) {
+        document.getElementById('masterPhoto').style.backgroundImage = `url('${currentMaster.photo_url}')`;
     }
-    
     loadStats();
 }
 
 async function loadStats() {
+    const grid = document.getElementById('statsGrid');
+    const upBlk = document.getElementById('upcomingBlock');
+    const bkBlk = document.getElementById('bookingsBlock');
+    
+    grid.classList.add('updating');
+    upBlk.classList.add('updating');
+    bkBlk.classList.add('updating');
+    
     try {
         const res = await fetch('/api/master/stats.php?period=' + currentPeriod, { credentials: 'include' });
         const data = await res.json();
         if (!data.success) {
-            if (res.status === 401) {
-                logout();
-                return;
-            }
+            if (res.status === 401) { logout(); return; }
             throw new Error(data.error);
         }
         renderStats(data.data || data);
+        requestAnimationFrame(() => {
+            grid.classList.remove('updating');
+            upBlk.classList.remove('updating');
+            bkBlk.classList.remove('updating');
+        });
     } catch (err) {
         console.error(err);
+        grid.classList.remove('updating');
+        upBlk.classList.remove('updating');
+        bkBlk.classList.remove('updating');
     }
 }
 
 function renderStats(data) {
     const s = data.stats;
     
-    // Карточки статистики
-    const statsGrid = document.getElementById('statsGrid');
-    statsGrid.innerHTML = `
+    document.getElementById('statsGrid').innerHTML = `
         <div class="stat-card">
             <div class="stat-label">До виплати</div>
             <div class="stat-value accent">${Number(s.total_salary).toLocaleString('uk-UA')} ₴</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Виручка</div>
-            <div class="stat-value">${Number(s.total_revenue).toLocaleString('uk-UA')} ₴</div>
+            <div class="stat-label">Витрати</div>
+            <div class="stat-value danger">${Number(s.total_expenses).toLocaleString('uk-UA')} ₴</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Чистий дохід</div>
+            <div class="stat-value income">${Number(s.net_income).toLocaleString('uk-UA')} ₴</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Виконано</div>
             <div class="stat-value">${s.total_done}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">В очікуванні</div>
-            <div class="stat-value">${s.total_pending}</div>
-        </div>
     `;
     
-    // Найближчі
     const upcomingEl = document.getElementById('upcomingList');
     if (!data.upcoming || data.upcoming.length === 0) {
         upcomingEl.innerHTML = '<div class="empty">Поки немає майбутніх записів</div>';
@@ -536,7 +478,6 @@ function renderStats(data) {
         upcomingEl.innerHTML = data.upcoming.map(b => renderBooking(b)).join('');
     }
     
-    // Всі за період
     const bookingsEl = document.getElementById('bookingsList');
     if (!data.bookings || data.bookings.length === 0) {
         bookingsEl.innerHTML = '<div class="empty">За цей період записів немає</div>';
@@ -548,25 +489,16 @@ function renderStats(data) {
 function renderBooking(b, showSalary = false) {
     const date = b.booking_date.split('-').reverse().join('.');
     const time = b.booking_time.substring(0, 5);
-    const status = b.status;
-    const statusLabels = {
-        pending: 'Очікує',
-        confirmed: 'Підтверджено',
-        done: 'Виконано',
-        cancelled: 'Скасовано'
-    };
+    const statusLabels = { pending: 'Очікує', confirmed: 'Підтверджено', done: 'Виконано', cancelled: 'Скасовано' };
     
     return `
         <div class="booking-row">
-            <div class="booking-date">
-                ${date}
-                <div class="booking-time">${time}</div>
-            </div>
+            <div class="booking-date">${date}<div class="booking-time">${time}</div></div>
             <div class="booking-client">
-                <div class="booking-name">${escapeHtml(b.client_name)}</div>
-                <div class="booking-svc">${escapeHtml(b.service_name || '—')}</div>
+                <div class="booking-name">${esc(b.client_name)}</div>
+                <div class="booking-svc">${esc(b.service_name || '—')}</div>
             </div>
-            <div class="booking-status ${status}">${statusLabels[status] || status}</div>
+            <div class="booking-status ${b.status}">${statusLabels[b.status] || b.status}</div>
             <div class="booking-price">
                 ${Number(b.total_price).toLocaleString('uk-UA')} ₴
                 ${showSalary && b.my_salary > 0 ? `<div class="booking-salary">+${Number(b.my_salary).toLocaleString('uk-UA')} ₴ мені</div>` : ''}
@@ -575,7 +507,7 @@ function renderBooking(b, showSalary = false) {
     `;
 }
 
-function escapeHtml(s) {
+function esc(s) {
     if (!s) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -584,12 +516,273 @@ function escapeHtml(s) {
 document.getElementById('periodTabs').addEventListener('click', (e) => {
     const btn = e.target.closest('.period-tab');
     if (!btn) return;
-    
-    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#periodTabs .period-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    
     currentPeriod = btn.dataset.period;
     loadStats();
+});
+
+// ============= SETTINGS MODAL =============
+async function openSettings() {
+    document.getElementById('settingsModal').classList.add('active');
+    document.getElementById('settingsSuccess').style.display = 'none';
+    document.getElementById('settingsError').style.display = 'none';
+    
+    try {
+        const res = await fetch('/api/master/profile-get.php', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            const p = data.profile;
+            document.getElementById('sName').value = p.name || '';
+            document.getElementById('sPhone').value = p.phone || '';
+            document.getElementById('sEmail').value = p.email || '';
+            document.getElementById('sBio').value = p.bio || '';
+            document.getElementById('sPhoto').value = p.photo_url || '';
+            document.getElementById('sUsername').value = p.username || '';
+            document.getElementById('sCurrentPassword').value = '';
+            document.getElementById('sNewPassword').value = '';
+        }
+    } catch (err) {}
+}
+
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('active');
+}
+
+async function saveSettings() {
+    const payload = {
+        name: document.getElementById('sName').value.trim(),
+        phone: document.getElementById('sPhone').value.trim(),
+        email: document.getElementById('sEmail').value.trim(),
+        bio: document.getElementById('sBio').value.trim(),
+        photo_url: document.getElementById('sPhoto').value.trim(),
+        username: document.getElementById('sUsername').value.trim(),
+        current_password: document.getElementById('sCurrentPassword').value,
+        new_password: document.getElementById('sNewPassword').value,
+    };
+    
+    document.getElementById('settingsSuccess').style.display = 'none';
+    document.getElementById('settingsError').style.display = 'none';
+    
+    try {
+        const res = await fetch('/api/master/profile-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) {
+            const err = document.getElementById('settingsError');
+            err.textContent = data.error;
+            err.style.display = 'block';
+            return;
+        }
+        // Обновляем шапку
+        currentMaster.name = payload.name;
+        if (payload.photo_url) {
+            currentMaster.photo_url = payload.photo_url;
+            document.getElementById('masterPhoto').style.backgroundImage = `url('${payload.photo_url}')`;
+        }
+        document.getElementById('masterName').textContent = payload.name;
+        
+        document.getElementById('settingsSuccess').style.display = 'block';
+        // Сброс паролей
+        document.getElementById('sCurrentPassword').value = '';
+        document.getElementById('sNewPassword').value = '';
+        setTimeout(() => {
+            document.getElementById('settingsSuccess').style.display = 'none';
+        }, 2500);
+    } catch (err) {
+        const errEl = document.getElementById('settingsError');
+        errEl.textContent = 'Помилка зʼєднання';
+        errEl.style.display = 'block';
+    }
+}
+
+// ============= EXPENSES MODAL =============
+async function openExpenses() {
+    document.getElementById('expensesModal').classList.add('active');
+    document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
+    await loadCategories();
+    await loadExpenses();
+}
+
+function closeExpenses() {
+    document.getElementById('expensesModal').classList.remove('active');
+    editingExpenseId = null;
+    selectedCategoryId = null;
+    document.getElementById('eAmount').value = '';
+    document.getElementById('eDescription').value = '';
+}
+
+async function loadCategories() {
+    try {
+        const res = await fetch('/api/master/expense-categories-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            expenseCategories = data.categories;
+            renderCategories();
+        }
+    } catch (err) { console.error(err); }
+}
+
+function renderCategories() {
+    const list = document.getElementById('catTagsList');
+    if (expenseCategories.length === 0) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--ink-mute);padding:8px 0;">Поки немає категорій. Додайте першу нижче.</div>';
+        return;
+    }
+    list.innerHTML = expenseCategories.map(c => `
+        <span class="cat-tag ${selectedCategoryId == c.id ? 'active' : ''}" onclick="selectCategory(${c.id})">
+            ${esc(c.name)}
+            <span class="cat-tag-x" onclick="event.stopPropagation();deleteCategory(${c.id})" title="Видалити">✕</span>
+        </span>
+    `).join('');
+}
+
+function selectCategory(id) {
+    selectedCategoryId = selectedCategoryId == id ? null : id;
+    renderCategories();
+}
+
+async function addCategory() {
+    const input = document.getElementById('newCatName');
+    const name = input.value.trim();
+    if (!name) return;
+    
+    try {
+        const res = await fetch('/api/master/expense-category-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (data.success) {
+            input.value = '';
+            selectedCategoryId = data.id;
+            await loadCategories();
+        } else {
+            alert(data.error);
+        }
+    } catch (err) { alert('Помилка'); }
+}
+
+async function deleteCategory(id) {
+    if (!confirm('Видалити цю категорію? Витрати з цією категорією залишаться, але без привʼязки.')) return;
+    try {
+        await fetch('/api/master/expense-category-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        if (selectedCategoryId == id) selectedCategoryId = null;
+        await loadCategories();
+        await loadExpenses();
+    } catch (err) { alert('Помилка'); }
+}
+
+async function loadExpenses() {
+    try {
+        const res = await fetch('/api/master/expenses-list.php?period=' + currentExpPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) return;
+        const d = data.data || data;
+        renderExpenses(d);
+    } catch (err) { console.error(err); }
+}
+
+function renderExpenses(d) {
+    document.getElementById('expTotal').textContent = Number(d.total).toLocaleString('uk-UA') + ' ₴';
+    
+    const list = document.getElementById('expList');
+    if (!d.expenses || d.expenses.length === 0) {
+        list.innerHTML = '<div class="empty">Витрат за цей період немає</div>';
+        return;
+    }
+    
+    list.innerHTML = d.expenses.map(e => {
+        const date = e.expense_date.split('-').reverse().join('.');
+        const cat = e.display_category || 'Без категорії';
+        return `
+            <div class="exp-row">
+                <div class="exp-date">${date}</div>
+                <div class="exp-cat">${esc(cat)}</div>
+                <div class="exp-desc">${esc(e.description || '')}</div>
+                <div class="exp-amount">${Number(e.amount).toLocaleString('uk-UA')} ₴</div>
+                <div class="exp-actions">
+                    <button class="del" onclick="deleteExpense(${e.id})" title="Видалити">✕</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function saveExpense() {
+    const amount = parseFloat(document.getElementById('eAmount').value);
+    const expenseDate = document.getElementById('eDate').value;
+    const description = document.getElementById('eDescription').value.trim();
+    
+    if (!amount || amount <= 0) {
+        alert('Введіть суму');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/master/expense-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                category_id: selectedCategoryId,
+                expense_date: expenseDate,
+                description,
+                amount
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('eAmount').value = '';
+            document.getElementById('eDescription').value = '';
+            await loadExpenses();
+            // Обновляем дашборд тоже
+            loadStats();
+        } else {
+            alert(data.error);
+        }
+    } catch (err) { alert('Помилка'); }
+}
+
+async function deleteExpense(id) {
+    if (!confirm('Видалити цю витрату?')) return;
+    try {
+        await fetch('/api/master/expense-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        await loadExpenses();
+        loadStats();
+    } catch (err) { alert('Помилка'); }
+}
+
+document.getElementById('expPeriodTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.period-tab');
+    if (!btn) return;
+    document.querySelectorAll('#expPeriodTabs .period-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentExpPeriod = btn.dataset.expPeriod;
+    loadExpenses();
+});
+
+// Закрытие модалок по клику вне
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => {
+        if (e.target === m) m.classList.remove('active');
+    });
 });
 
 // ============= INIT =============
