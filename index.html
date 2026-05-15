@@ -2352,6 +2352,22 @@
                 <div class="options-hint">Наприклад: «Довжина волосся» з варіантами «Короткі / Середні / Довгі». Ціна опції додається до базової ціни послуги.</div>
                 <div id="optionGroupsList"></div>
             </div>
+
+            <!-- ===== РОЗХІДНИКИ ПОСЛУГИ ===== -->
+<div class="form-group" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <label style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Розхідники базові</label>
+        <button type="button" class="admin-cta ghost" onclick="addServiceConsumable()" style="padding:6px 14px;font-size:11px;">+ Товар</button>
+    </div>
+    
+    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+        Що витрачається при кожній цій послузі. Списується при статусі "Виконано".
+    </div>
+    
+    <div id="serviceConsumablesList" style="display:flex;flex-direction:column;gap:8px;">
+        <!-- буде заповнено через JS -->
+    </div>
+</div>
             
             <div id="svcError" class="auth-error" style="display:none;"></div>
         </div>
@@ -3145,6 +3161,124 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadPublicSettings);
 } else {
     loadPublicSettings();
+}
+
+// ============================================
+// РОЗХІДНИКИ ПОСЛУГИ
+// ============================================
+let currentServiceConsumables = [];
+
+async function loadServiceConsumables(serviceId) {
+    currentServiceConsumables = [];
+    if (!serviceId) {
+        renderServiceConsumables();
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/service-consumables-list.php?service_id=' + serviceId, { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            currentServiceConsumables = data.data || [];
+        }
+    } catch (err) {
+        console.error('Consumables load error:', err);
+    }
+    
+    // Также загружаем товары если ещё не загружены
+    if (!allProducts || allProducts.length === 0) {
+        try {
+            const res = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) allProducts = data.data || [];
+        } catch (err) {}
+    }
+    
+    renderServiceConsumables();
+}
+
+function renderServiceConsumables() {
+    const list = document.getElementById('serviceConsumablesList');
+    if (!list) return;
+    
+    if (currentServiceConsumables.length === 0) {
+        list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;">Розхідників немає. Додайте якщо при послузі щось витрачається.</div>';
+        return;
+    }
+    
+    const activeProducts = (allProducts || []).filter(p => parseInt(p.is_active));
+    
+    list.innerHTML = currentServiceConsumables.map((c, i) => {
+        const product = activeProducts.find(p => p.id == c.product_id);
+        const unit = product?.unit ? getUnitLabel(product.unit) : '';
+        
+        return `
+            <div style="display:flex;gap:8px;align-items:center;padding:10px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;">
+                <select class="consumable-product" data-index="${i}" style="flex:1;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;border-radius:4px;">
+                    <option value="">— Оберіть товар —</option>
+                    ${activeProducts.map(p => `<option value="${p.id}" ${c.product_id == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (${getUnitLabel(p.unit)})</option>`).join('')}
+                </select>
+                
+                <div style="display:flex;align-items:center;gap:4px;width:140px;">
+                    <input type="number" class="consumable-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="0.001" style="width:100px;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                    <span style="color:var(--ink-mute);font-size:12px;min-width:24px;" id="cons-unit-${i}">${unit}</span>
+                </div>
+                
+                <button type="button" onclick="removeServiceConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+            </div>
+        `;
+    }).join('');
+    
+    // Обработчики
+    list.querySelectorAll('.consumable-product').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            const pid = parseInt(e.target.value);
+            currentServiceConsumables[i].product_id = pid || 0;
+            
+            // Обновляем подпись единицы
+            const product = activeProducts.find(p => p.id == pid);
+            const unitSpan = document.getElementById(`cons-unit-${i}`);
+            if (unitSpan) unitSpan.textContent = product?.unit ? getUnitLabel(product.unit) : '';
+        });
+    });
+    
+    list.querySelectorAll('.consumable-qty').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            currentServiceConsumables[i].quantity = parseFloat(e.target.value) || 0;
+        });
+    });
+}
+
+function addServiceConsumable() {
+    currentServiceConsumables.push({
+        product_id: 0,
+        quantity: 0
+    });
+    renderServiceConsumables();
+}
+
+function removeServiceConsumable(index) {
+    currentServiceConsumables.splice(index, 1);
+    renderServiceConsumables();
+}
+
+async function saveServiceConsumables(serviceId) {
+    if (!serviceId) return;
+    try {
+        await fetch('/api/admin/service-consumables-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                service_id: serviceId,
+                consumables: currentServiceConsumables.filter(c => c.product_id > 0 && c.quantity > 0)
+            })
+        });
+    } catch (err) {
+        console.error('Save consumables error:', err);
+    }
 }
 
 // ============================================
@@ -4671,9 +4805,12 @@ document.addEventListener('input', (e) => {
     });
 
     document.getElementById('serviceModal').classList.add('show');
+
+    currentServiceConsumables = [];
+    renderServiceConsumables();
   }
 
-  function editService(id) {
+  async function editService(id) {
     const s = currentServices.find(x => x.id == id);
     if (!s) return;
 
@@ -4697,7 +4834,7 @@ document.addEventListener('input', (e) => {
 
     document.getElementById('optionGroupsList').innerHTML = '';
     (s.option_groups || []).forEach(g => addOptionGroup(g));
-
+    await loadServiceConsumables(id);
     document.getElementById('serviceModal').classList.add('show');
   }
 
@@ -4816,6 +4953,11 @@ document.addEventListener('input', (e) => {
       if (!data.success) throw new Error(data.error);
       closeServiceModal();
       await loadServices();
+      // Сохранить расходники
+        const savedServiceId = data.id || parseInt(document.getElementById('sId')?.value);
+        if (savedServiceId) {
+        await saveServiceConsumables(savedServiceId);
+    }
     } catch (err) {
       showSvcError(err.message);
     } finally {
