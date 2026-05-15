@@ -2473,6 +2473,41 @@
             <button class="modal-close" onclick="closeExpenseModal()">×</button>
         </div>
         <div class="modal-body">
+            <div class="form-group">
+    <label>Тип витрати</label>
+    <div style="display:flex;gap:8px;">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
+            <input type="radio" name="expType" value="regular" checked onchange="toggleExpenseType()" style="width:auto;">
+            <span style="font-size:13px;">Звичайна</span>
+        </label>
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
+            <input type="radio" name="expType" value="purchase" onchange="toggleExpenseType()" style="width:auto;">
+            <span style="font-size:13px;">Закупка товару</span>
+        </label>
+    </div>
+</div>
+
+<!-- Блок закупки — показується тільки якщо обрано "Закупка" -->
+<div id="purchaseBlock" style="display:none;padding:14px;background:var(--bg-2);border:1px solid var(--beige);border-radius:4px;margin-bottom:16px;">
+    <div class="form-group">
+        <label>Товар *</label>
+        <select id="exProduct">
+            <option value="">— Оберіть товар —</option>
+        </select>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label>Кількість *</label>
+            <input type="number" id="exQuantity" step="0.001" min="0" placeholder="0">
+            <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;" id="exUnitHint"></div>
+        </div>
+        <div class="form-group">
+            <label>Ціна за одиницю</label>
+            <div id="exPricePerUnit" style="padding:12px 14px;font-size:14px;color:var(--beige);font-family:'Fraunces',serif;">— ₴</div>
+        </div>
+    </div>
+</div>
             <input type="hidden" id="expId" value="">
             <div class="form-group">
                 <label>Дата</label>
@@ -5797,6 +5832,7 @@ function renderExpenses(data) {
         <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">${fmtMoney(data.total)}</div></div>
         <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">${(data.by_category || []).length}</div></div>
         <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">${currentExpenses.length}</div></div>
+        ${e.product_id ? `<div style="font-size:11px;color:var(--beige);margin-top:4px;">📦 ${e.product_quantity} ${getUnitLabel(e.product_unit)} • ${escapeHtml(e.product_name)}</div>` : ''}
     `;
     
     // Rows
@@ -5846,9 +5882,16 @@ function openExpenseModal() {
     document.getElementById('expError').style.display = 'none';
     document.getElementById('expDeleteBtn').style.display = 'none';
     document.getElementById('expenseModal').classList.add('show');
+    // Сбрасываем тип на "звичайна"
+    const reg = document.querySelector('input[name="expType"][value="regular"]');
+    if (reg) reg.checked = true;
+    document.getElementById('purchaseBlock').style.display = 'none';
+    if (document.getElementById('exProduct')) document.getElementById('exProduct').value = '';
+    if (document.getElementById('exQuantity')) document.getElementById('exQuantity').value = '';
+    if (document.getElementById('exPricePerUnit')) document.getElementById('exPricePerUnit').textContent = '— ₴';
 }
 
-function editExpense(id) {
+async function editExpense(id) {
     const e = currentExpenses.find(x => x.id == id);
     if (!e) return;
     document.getElementById('expenseModalTitle').textContent = 'Редагувати витрату';
@@ -5860,6 +5903,87 @@ function editExpense(id) {
     document.getElementById('expError').style.display = 'none';
     document.getElementById('expDeleteBtn').style.display = 'inline-block';
     document.getElementById('expenseModal').classList.add('show');
+    // Если расход был закупкой — показываем но в режиме только чтения
+    if (e.product_id) {
+        const purchase = document.querySelector('input[name="expType"][value="purchase"]');
+        if (purchase) {
+            purchase.checked = true;
+            purchase.disabled = true;
+            document.querySelector('input[name="expType"][value="regular"]').disabled = true;
+        }
+        document.getElementById('purchaseBlock').style.display = 'block';
+        await fillExpenseProductsSelect();
+        document.getElementById('exProduct').value = e.product_id;
+        document.getElementById('exProduct').disabled = true;
+        document.getElementById('exQuantity').value = e.product_quantity;
+        document.getElementById('exQuantity').disabled = true;
+        updatePricePerUnit();
+    } else {
+        document.querySelectorAll('input[name="expType"]').forEach(r => r.disabled = false);
+        if (document.getElementById('exProduct')) document.getElementById('exProduct').disabled = false;
+        if (document.getElementById('exQuantity')) document.getElementById('exQuantity').disabled = false;
+    }
+}
+
+// ============ ЗАКУПКА ТОВАРУ В ВИТРАТАХ ============
+function toggleExpenseType() {
+    const purchaseRadio = document.querySelector('input[name="expType"]:checked');
+    if (!purchaseRadio) return;
+    
+    const isPurchase = purchaseRadio.value === 'purchase';
+    const block = document.getElementById('purchaseBlock');
+    block.style.display = isPurchase ? 'block' : 'none';
+    
+    if (isPurchase) {
+        // Заповнюємо список товарів
+        fillExpenseProductsSelect();
+    }
+}
+
+async function fillExpenseProductsSelect() {
+    const sel = document.getElementById('exProduct');
+    if (!sel) return;
+    
+    // Якщо товарів немає в кеші — завантажимо
+    if (!allProducts || allProducts.length === 0) {
+        try {
+            const res = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) allProducts = data.data || [];
+        } catch (err) {}
+    }
+    
+    const activeProducts = allProducts.filter(p => parseInt(p.is_active));
+    sel.innerHTML = '<option value="">— Оберіть товар —</option>' +
+        activeProducts.map(p => `<option value="${p.id}" data-unit="${p.unit}">${escapeHtml(p.name)} (залишок: ${p.current_stock} ${getUnitLabel(p.unit)})</option>`).join('');
+    
+    // Обробник зміни товара
+    sel.onchange = () => {
+        const opt = sel.options[sel.selectedIndex];
+        const unit = opt?.dataset?.unit;
+        document.getElementById('exUnitHint').textContent = unit ? 'Одиниця: ' + getUnitLabel(unit) : '';
+        updatePricePerUnit();
+    };
+    
+    // Обробник зміни кількості і суми — оновлюємо ціну за одиницю
+    document.getElementById('exQuantity').oninput = updatePricePerUnit;
+    document.getElementById('exAmount').oninput = updatePricePerUnit;
+}
+
+function updatePricePerUnit() {
+    const qty = parseFloat(document.getElementById('exQuantity').value) || 0;
+    const amount = parseFloat(document.getElementById('exAmount').value) || 0;
+    const el = document.getElementById('exPricePerUnit');
+    if (qty > 0 && amount > 0) {
+        el.textContent = (amount / qty).toFixed(2) + ' ₴';
+    } else {
+        el.textContent = '— ₴';
+    }
+}
+
+function getUnitLabel(unit) {
+    const labels = { ml: 'мл', l: 'л', gr: 'гр', kg: 'кг', pcs: 'шт', pack: 'уп', m: 'м' };
+    return labels[unit] || unit;
 }
 
 async function saveExpense() {
@@ -5867,16 +5991,31 @@ async function saveExpense() {
     const btn = document.getElementById('expSaveBtn');
     errorEl.style.display = 'none';
     
+    // Тип витрати — звичайна або закупка
+    const expType = document.querySelector('input[name="expType"]:checked')?.value || 'regular';
+    
     const payload = {
         id: parseInt(document.getElementById('expId').value) || 0,
         expense_date: document.getElementById('expDate').value,
         category: document.getElementById('expCategory').value,
         description: document.getElementById('expDescription').value.trim(),
-        amount: parseInt(document.getElementById('expAmount').value) || 0
+        amount: parseFloat(document.getElementById('expAmount').value) || 0
     };
     
     if (!payload.expense_date) { showExpError('Введіть дату'); return; }
     if (payload.amount <= 0) { showExpError('Невірна сума'); return; }
+    
+    // Якщо це закупка товару — додаємо поля
+    if (expType === 'purchase') {
+        const productId = parseInt(document.getElementById('exProduct')?.value) || 0;
+        const quantity = parseFloat(document.getElementById('exQuantity')?.value) || 0;
+        
+        if (!productId) { showExpError('Оберіть товар'); return; }
+        if (quantity <= 0) { showExpError('Введіть кількість'); return; }
+        
+        payload.product_id = productId;
+        payload.product_quantity = quantity;
+    }
     
     btn.disabled = true;
     btn.textContent = 'Збереження...';
@@ -5892,6 +6031,10 @@ async function saveExpense() {
         if (!data.success) throw new Error(data.error);
         closeExpenseModal();
         await loadExpenses();
+        // Якщо це була закупка — оновимо кеш товарів
+        if (expType === 'purchase' && typeof loadProducts === 'function') {
+            loadProducts();
+        }
     } catch (err) {
         showExpError(err.message);
     } finally {

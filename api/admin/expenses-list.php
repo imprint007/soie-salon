@@ -7,19 +7,26 @@ try {
     $pdo = getDb();
     $period = $_GET['period'] ?? 'month';
     
-    $sql = "SELECT * FROM expenses WHERE 1=1";
+    $sql = "
+        SELECT e.id, e.expense_date, e.category, e.description, e.amount,
+               e.product_id, e.product_quantity,
+               p.name AS product_name, p.unit AS product_unit
+        FROM expenses e
+        LEFT JOIN products p ON p.id = e.product_id
+        WHERE 1=1
+    ";
     if ($period === 'month') {
-        $sql .= " AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+        $sql .= " AND e.expense_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
     } elseif ($period === '3months') {
-        $sql .= " AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)";
+        $sql .= " AND e.expense_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)";
     } elseif ($period === 'year') {
-        $sql .= " AND expense_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)";
+        $sql .= " AND e.expense_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)";
     }
-    $sql .= " ORDER BY expense_date DESC LIMIT 500";
+    $sql .= " ORDER BY e.expense_date DESC LIMIT 500";
     
     $expenses = $pdo->query($sql)->fetchAll();
     
-    // Сумма по категориям
+    // Сума по категоріям
     $byCategory = $pdo->query("
         SELECT category, SUM(amount) AS total, COUNT(*) AS cnt
         FROM expenses
@@ -28,7 +35,7 @@ try {
         ORDER BY total DESC
     ")->fetchAll();
     
-    $totalAll = array_sum(array_map(fn($e) => (int)$e['amount'], $expenses));
+    $totalAll = array_sum(array_map(fn($e) => (float)$e['amount'], $expenses));
     
     jsonOk([
         'data' => $expenses,
