@@ -1851,6 +1851,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7h-7l-2-3H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
       Пакети
     </a>
+    <a onclick="setAdminSection('products', this)">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+  Товари
+    </a>
     <a onclick="setAdminSection('reports', this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Звіти
@@ -2184,6 +2188,34 @@
     </div>
 </div>
 
+<!-- ============ ТОВАРИ ============ -->
+<div class="admin-section" id="ad-products" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <h2 style="font-family:'Fraunces',serif;font-size:32px;color:var(--ink);margin:0;">Товари <span style="color:var(--beige);font-style:italic;">складу</span></h2>
+        <div style="display:flex;gap:8px;">
+            <button class="admin-cta ghost" onclick="openProductCategoriesModal()" style="padding:10px 18px;font-size:11px;">Категорії</button>
+            <button class="admin-cta" onclick="openProductModal()" style="padding:10px 22px;font-size:11px;">+ Товар</button>
+        </div>
+    </div>
+    
+    <!-- Фильтры -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="productFilters">
+        <button class="filter-chip active" data-product-filter="all">Усі</button>
+        <button class="filter-chip" data-product-filter="low">Закінчуються</button>
+        <button class="filter-chip" data-product-filter="out">Немає в наявності</button>
+        <button class="filter-chip" data-product-filter="for-sale">Продаються</button>
+    </div>
+    
+    <!-- Поиск -->
+    <div style="margin-bottom:20px;">
+        <input type="text" id="productSearch" placeholder="Пошук товару..." 
+               style="width:100%;max-width:400px;padding:12px 16px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+    </div>
+    
+    <!-- Сетка товаров -->
+    <div id="productsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+</div>
+
   <!-- SERVICES -->
 <div class="admin-section" id="ad-services">
     <div class="admin-head">
@@ -2402,6 +2434,111 @@
             <button class="admin-cta ghost" onclick="closeExpenseModal()">Скасувати</button>
             <button class="admin-cta" id="expSaveBtn" onclick="saveExpense()">Зберегти</button>
             <button class="admin-cta danger" id="expDeleteBtn" onclick="deleteExpense()" style="display:none;">Видалити</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ МОДАЛКА ТОВАРА ============ -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal" style="max-width: 640px;">
+        <div class="modal-head">
+            <div class="modal-title" id="productModalTitle">Новий товар</div>
+            <button class="modal-close" onclick="closeProductModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="productError" style="display:none;padding:10px 14px;background:rgba(232,153,153,0.1);border:1px solid rgba(232,153,153,0.3);color:var(--danger);border-radius:4px;margin-bottom:16px;font-size:13px;"></div>
+            
+            <input type="hidden" id="pId">
+            
+            <div class="form-group">
+                <label>Фото</label>
+                <div id="pImageUploader"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Назва *</label>
+                <input type="text" id="pName" placeholder="Лосьйон Wella для біозавивки" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Категорія</label>
+                <select id="pCategory">
+                    <option value="">— Без категорії —</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Опис</label>
+                <textarea id="pDescription" rows="2" placeholder="Коротко про товар..."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Одиниця виміру *</label>
+                    <select id="pUnit">
+                        <option value="ml">мл (мілілітри)</option>
+                        <option value="l">л (літри)</option>
+                        <option value="gr">гр (грами)</option>
+                        <option value="kg">кг (кілограми)</option>
+                        <option value="pcs">шт (штуки)</option>
+                        <option value="pack">уп (упаковки)</option>
+                        <option value="m">м (метри)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Початковий залишок</label>
+                    <input type="number" id="pCurrentStock" step="0.001" min="0" value="0" placeholder="0">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Тільки при створенні</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Закупочна ціна за одиницю (₴)</label>
+                    <input type="number" id="pCostPrice" step="0.01" min="0" value="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Ціна продажу (₴)</label>
+                    <input type="number" id="pSellPrice" step="0.01" min="0" value="0" placeholder="0">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">0 = не продається</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Поріг низького залишку</label>
+                <input type="number" id="pMinStock" step="0.001" min="0" value="0" placeholder="0">
+                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Коли залишок ≤ цього значення — попередження</div>
+            </div>
+            
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <input type="checkbox" id="pIsActive" checked style="width:auto;">
+                    <span>Активний</span>
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeProductModal()" style="flex:1;">Скасувати</button>
+            <button class="admin-cta danger" id="pDeleteBtn" onclick="deleteProduct()" style="display:none;">Видалити</button>
+            <button class="admin-cta" onclick="saveProduct()" style="flex:1;">Зберегти</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ МОДАЛКА КАТЕГОРИЙ ТОВАРОВ ============ -->
+<div class="modal-overlay" id="productCategoriesModal">
+    <div class="modal" style="max-width: 500px;">
+        <div class="modal-head">
+            <div class="modal-title">Категорії товарів</div>
+            <button class="modal-close" onclick="closeProductCategoriesModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <input type="text" id="newProductCatName" placeholder="Нова категорія" 
+                       style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+                <button class="admin-cta" onclick="saveNewProductCategory()" style="padding:8px 16px;">+ Додати</button>
+            </div>
+            <div id="productCategoriesList"></div>
         </div>
     </div>
 </div>
@@ -3278,6 +3415,7 @@ async function assignRandomMaster() {
     if (name === 'masters') loadMasters();
     if (name === 'packages') loadPackages();
     if (name === 'bookings') loadBookings();
+    if (name === 'products') loadProducts();
     if (name === 'expenses') loadExpenses();
     if (name === 'reports') loadReports();
     if (name === 'dashboard') loadDashboard();
@@ -3967,6 +4105,367 @@ async function deletePackage() {
     }
 }
 
+
+// ============================================
+// ТОВАРИ
+// ============================================
+let allProducts = [];
+let allProductCategories = [];
+let productFilter = 'all';
+let productSearchQuery = '';
+let pImageUploader = null;
+
+async function loadProducts() {
+    try {
+        // Сначала категории
+        const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
+        const catData = await catRes.json();
+        if (catData.success) {
+            allProductCategories = catData.data || [];
+        }
+        
+        // Потом товары
+        const res = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        allProducts = data.data || [];
+        renderProducts();
+    } catch (err) {
+        console.error('Products load error:', err);
+    }
+}
+
+function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
+    let filtered = allProducts;
+    
+    // Фильтры
+    if (productFilter === 'low') {
+        filtered = filtered.filter(p => p.low_stock && !p.out_of_stock);
+    } else if (productFilter === 'out') {
+        filtered = filtered.filter(p => p.out_of_stock);
+    } else if (productFilter === 'for-sale') {
+        filtered = filtered.filter(p => parseFloat(p.sell_price) > 0);
+    }
+    
+    // Поиск
+    if (productSearchQuery) {
+        const q = productSearchQuery.toLowerCase();
+        filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(q) ||
+            (p.description || '').toLowerCase().includes(q) ||
+            (p.category_name || '').toLowerCase().includes(q)
+        );
+    }
+    
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:48px;text-align:center;color:var(--ink-mute);font-size:13px;">Товарів не знайдено</div>';
+        return;
+    }
+    
+    const unitLabels = { ml: 'мл', l: 'л', gr: 'гр', kg: 'кг', pcs: 'шт', pack: 'уп', m: 'м' };
+    
+    grid.innerHTML = filtered.map(p => {
+        const stock = parseFloat(p.current_stock) || 0;
+        const minStock = parseFloat(p.min_stock) || 0;
+        const sellPrice = parseFloat(p.sell_price) || 0;
+        const unit = unitLabels[p.unit] || p.unit;
+        
+        let stockColor = '#a0d4a0'; // зеленый
+        let stockLabel = 'В наявності';
+        if (p.out_of_stock) {
+            stockColor = '#e89999';
+            stockLabel = 'Немає';
+        } else if (p.low_stock) {
+            stockColor = '#e8d599';
+            stockLabel = 'Закінчується';
+        }
+        
+        const inactive = !parseInt(p.is_active);
+        
+        return `
+            <div class="product-card" onclick="editProduct(${p.id})" style="
+                background:var(--bg-1);
+                border:1px solid var(--line);
+                border-radius:4px;
+                padding:14px;
+                cursor:pointer;
+                transition:all 0.2s;
+                ${inactive ? 'opacity:0.5;' : ''}
+            " onmouseover="this.style.borderColor='var(--beige)'" onmouseout="this.style.borderColor='var(--line)'">
+                <div style="width:100%;aspect-ratio:1.5/1;background:var(--bg-2);background-image:url('${p.image_url || ''}');background-size:cover;background-position:center;border-radius:4px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-mute);font-size:11px;">
+                    ${!p.image_url ? '— БЕЗ ФОТО —' : ''}
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;margin-bottom:8px;">
+                    <div style="font-size:14px;font-weight:500;color:var(--ink);flex:1;min-width:0;">${escapeHtml(p.name)}</div>
+                    <div style="font-size:10px;color:${stockColor};letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0;">${stockLabel}</div>
+                </div>
+                
+                ${p.category_name ? `<div style="font-size:11px;color:var(--ink-mute);margin-bottom:8px;">${escapeHtml(p.category_name)}</div>` : ''}
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+                    <div>
+                        <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--ink);">${stock.toLocaleString('uk-UA')} ${unit}</div>
+                        ${minStock > 0 ? `<div style="font-size:10px;color:var(--ink-mute);">Поріг: ${minStock} ${unit}</div>` : ''}
+                    </div>
+                    ${sellPrice > 0 ? `
+                        <div style="text-align:right;">
+                            <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--beige);">${sellPrice.toLocaleString('uk-UA')} ₴</div>
+                            <div style="font-size:10px;color:var(--ink-mute);">Продаж</div>
+                        </div>
+                    ` : `
+                        <div style="font-size:10px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Тільки розхідник</div>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Открыть модалку нового товара
+function openProductModal() {
+    document.getElementById('productModalTitle').textContent = 'Новий товар';
+    document.getElementById('pId').value = '';
+    document.getElementById('pName').value = '';
+    document.getElementById('pDescription').value = '';
+    document.getElementById('pUnit').value = 'ml';
+    document.getElementById('pCurrentStock').value = 0;
+    document.getElementById('pCurrentStock').disabled = false;
+    document.getElementById('pCostPrice').value = 0;
+    document.getElementById('pSellPrice').value = 0;
+    document.getElementById('pMinStock').value = 0;
+    document.getElementById('pIsActive').checked = true;
+    document.getElementById('productError').style.display = 'none';
+    document.getElementById('pDeleteBtn').style.display = 'none';
+    
+    fillProductCategoriesSelect();
+    
+    // Инициализируем загрузчик фото
+    if (typeof createImageUploader === 'function') {
+        pImageUploader = createImageUploader({
+            container: document.getElementById('pImageUploader'),
+            folder: 'products',
+            currentUrl: '',
+            onChange: () => {}
+        });
+    }
+    
+    document.getElementById('productModal').classList.add('active');
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').classList.remove('active');
+}
+
+function fillProductCategoriesSelect() {
+    const sel = document.getElementById('pCategory');
+    sel.innerHTML = '<option value="">— Без категорії —</option>' + 
+        allProductCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+}
+
+async function editProduct(id) {
+    const p = allProducts.find(x => x.id == id);
+    if (!p) return;
+    
+    document.getElementById('productModalTitle').textContent = 'Редагування товару';
+    document.getElementById('pId').value = p.id;
+    document.getElementById('pName').value = p.name || '';
+    document.getElementById('pDescription').value = p.description || '';
+    document.getElementById('pUnit').value = p.unit || 'pcs';
+    document.getElementById('pCurrentStock').value = p.current_stock || 0;
+    document.getElementById('pCurrentStock').disabled = true; // редактируется через корректировку
+    document.getElementById('pCostPrice').value = p.cost_price || 0;
+    document.getElementById('pSellPrice').value = p.sell_price || 0;
+    document.getElementById('pMinStock').value = p.min_stock || 0;
+    document.getElementById('pIsActive').checked = parseInt(p.is_active);
+    document.getElementById('productError').style.display = 'none';
+    document.getElementById('pDeleteBtn').style.display = 'block';
+    
+    fillProductCategoriesSelect();
+    document.getElementById('pCategory').value = p.category_id || '';
+    
+    if (typeof createImageUploader === 'function') {
+        pImageUploader = createImageUploader({
+            container: document.getElementById('pImageUploader'),
+            folder: 'products',
+            currentUrl: p.image_url || '',
+            onChange: () => {}
+        });
+    }
+    
+    document.getElementById('productModal').classList.add('active');
+}
+
+async function saveProduct() {
+    const id = document.getElementById('pId').value;
+    const name = document.getElementById('pName').value.trim();
+    
+    if (!name) {
+        showProductError('Введіть назву');
+        return;
+    }
+    
+    const payload = {
+        id: id || 0,
+        name,
+        description: document.getElementById('pDescription').value.trim(),
+        image_url: pImageUploader ? pImageUploader.getUrl() : '',
+        category_id: document.getElementById('pCategory').value || null,
+        unit: document.getElementById('pUnit').value,
+        sell_price: parseFloat(document.getElementById('pSellPrice').value) || 0,
+        cost_price: parseFloat(document.getElementById('pCostPrice').value) || 0,
+        min_stock: parseFloat(document.getElementById('pMinStock').value) || 0,
+        is_active: document.getElementById('pIsActive').checked ? 1 : 0,
+    };
+    
+    if (!id) {
+        payload.current_stock = parseFloat(document.getElementById('pCurrentStock').value) || 0;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/product-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) {
+            showProductError(data.error);
+            return;
+        }
+        closeProductModal();
+        await loadProducts();
+    } catch (err) {
+        showProductError('Помилка зʼєднання');
+    }
+}
+
+function showProductError(msg) {
+    const err = document.getElementById('productError');
+    err.textContent = msg;
+    err.style.display = 'block';
+}
+
+async function deleteProduct() {
+    const id = document.getElementById('pId').value;
+    if (!id) return;
+    if (!confirm('Видалити цей товар? Усі привʼязки до послуг і опцій також зникнуть.')) return;
+    
+    try {
+        const res = await fetch('/api/admin/product-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        closeProductModal();
+        await loadProducts();
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+// ============ КАТЕГОРИИ ТОВАРОВ ============
+function openProductCategoriesModal() {
+    renderProductCategories();
+    document.getElementById('productCategoriesModal').classList.add('active');
+}
+
+function closeProductCategoriesModal() {
+    document.getElementById('productCategoriesModal').classList.remove('active');
+    loadProducts(); // перезагрузим товары
+}
+
+function renderProductCategories() {
+    const list = document.getElementById('productCategoriesList');
+    if (allProductCategories.length === 0) {
+        list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає категорій</div>';
+        return;
+    }
+    list.innerHTML = allProductCategories.map(c => `
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:8px;">
+            <div style="flex:1;font-size:14px;">${escapeHtml(c.name)}</div>
+            <button onclick="deleteProductCategory(${c.id})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+        </div>
+    `).join('');
+}
+
+async function saveNewProductCategory() {
+    const input = document.getElementById('newProductCatName');
+    const name = input.value.trim();
+    if (!name) return;
+    
+    try {
+        const res = await fetch('/api/admin/product-category-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (data.success) {
+            input.value = '';
+            // Перезагружаем категории
+            const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
+            const catData = await catRes.json();
+            if (catData.success) {
+                allProductCategories = catData.data || [];
+                renderProductCategories();
+            }
+        } else {
+            alert(data.error);
+        }
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+async function deleteProductCategory(id) {
+    if (!confirm('Видалити категорію? Товари залишаться, але без категорії.')) return;
+    try {
+        await fetch('/api/admin/product-category-delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id })
+        });
+        const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
+        const catData = await catRes.json();
+        if (catData.success) {
+            allProductCategories = catData.data || [];
+            renderProductCategories();
+        }
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+// Фильтры товаров
+document.addEventListener('click', (e) => {
+    const chip = e.target.closest('#productFilters .filter-chip');
+    if (!chip) return;
+    document.querySelectorAll('#productFilters .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    productFilter = chip.dataset.productFilter;
+    renderProducts();
+});
+
+// Поиск
+document.addEventListener('input', (e) => {
+    if (e.target.id === 'productSearch') {
+        productSearchQuery = e.target.value;
+        renderProducts();
+    }
+});
 
   // ============================================
   // АДМИНКА — управление услугами
