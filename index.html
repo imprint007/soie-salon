@@ -5181,16 +5181,7 @@ async function saveService() {
       await loadServices();
       
       // 2. Якщо це нова послуга — перезавантажуємо модалку щоб опції отримали ID
-      const wasNew = !payload.id;
-      if (wasNew && savedServiceId) {
-        // Закриваємо і знов відкриваємо
-        closeServiceModal();
-        setTimeout(() => editService(savedServiceId), 100);
-        showInfoToast('Послуга збережена. Тепер можна додавати розхідники до опцій.');
-      } else if (savedServiceId) {
-        // Для редагування — теж перезавантажуємо модалку (щоб нові опції отримали ID)
-        await refreshServiceModalOptions(savedServiceId);
-      }
+      closeServiceModal();
       
     } catch (err) {
       showSvcError(err.message);
