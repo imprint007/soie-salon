@@ -4135,10 +4135,7 @@ async function assignRandomMaster() {
     if (name === 'expenses') loadExpenses();
     if (name === 'reports') loadReports();
     if (name === 'dashboard') loadDashboard();
-    if (name === 'settings') {
-    loadSettings();
-    loadGoogleConfig();
-}
+    if (name === 'settings') loadSettings();
 }
 
   async function checkSession() {
@@ -7911,32 +7908,6 @@ function renderIntegrationsSettings() {
     setTimeout(loadGoogleStatus, 100);
 }
 
-// ============================================
-// GOOGLE CALENDAR INTEGRATION
-// ============================================
-async function loadGoogleConfig() {
-    try {
-        const res = await fetch('/api/admin/google-config-get.php', { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success) return;
-        const d = data.data || data;
-        
-        document.getElementById('googleClientId').value = d.google_client_id || '';
-        document.getElementById('googleRedirectUri').value = d.google_redirect_uri || '';
-        
-        const secretEl = document.getElementById('googleClientSecret');
-        if (d.google_client_secret_set) {
-            secretEl.placeholder = '••••••••• (вже задано)';
-        } else {
-            secretEl.placeholder = 'GOCSPX-...';
-        }
-    } catch (err) {
-        console.error(err);
-    }
-    
-    // Завантажуємо статус підключення
-    loadGoogleStatus();
-}
 
 async function saveGoogleCredentials() {
     const clientId = document.getElementById('googleClientId').value.trim();
@@ -8010,29 +7981,37 @@ async function loadGoogleStatus() {
 }
 
 function connectGoogle() {
-    // Відкриваємо OAuth у новому вікні
     const w = window.open('/api/admin/google-oauth-start.php', 'google_oauth', 'width=500,height=700');
     
-    // Слухаємо повідомлення з callback
+    let received = false;
+    
+    // Слухаємо повідомлення з callback (основний шлях)
     window.addEventListener('message', function handler(e) {
         if (e.data?.google_oauth) {
+            received = true;
             window.removeEventListener('message', handler);
-            if (e.data.google_oauth === 'success') {
-                showToast('Google підключено');
-            } else {
-                showToast('Помилка підключення');
-            }
             setTimeout(() => loadGoogleStatus(), 500);
         }
     });
     
-    // На всяк випадок — перевіримо через 3 сек якщо вікно закрилось
-    const checkInterval = setInterval(() => {
-        if (w.closed) {
-            clearInterval(checkInterval);
-            setTimeout(() => loadGoogleStatus(), 500);
+    // Резервний поллінг кожні 2 сек — перевіряємо статус
+    // (на випадок якщо message не дойшов через COOP)
+    let attempts = 0;
+    const poll = setInterval(async () => {
+        attempts++;
+        if (received || attempts > 60) {
+            clearInterval(poll);
+            return;
         }
-    }, 1000);
+        try {
+            const res = await fetch('/api/admin/google-status.php', { credentials: 'include' });
+            const data = await res.json();
+            if (data.connected || (data.data && data.data.connected)) {
+                clearInterval(poll);
+                loadGoogleStatus();
+            }
+        } catch (err) {}
+    }, 2000);
 }
 
 async function disconnectGoogle() {
