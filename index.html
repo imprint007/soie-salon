@@ -7594,7 +7594,29 @@ function renderBookingSettings() {
             <div class="settings-card">
                 <div class="settings-card-head">
                     <h3>Скасування та перенесення</h3>
+                    <p>Налаштування для управління броню клієнтом через посилання з email</p>
                 </div>
+                
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Дозволити клієнту відміняти</div>
+                        <div class="sr-hint">Клієнт зможе відмінити бронь через посилання з email</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <div class="toggle ${s('allow_client_cancel') == '1' ? 'on' : ''}" id="toggle-allow_client_cancel" onclick="toggleSetting(this, 'allow_client_cancel')"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <div class="sr-name">Дозволити клієнту переносити</div>
+                        <div class="sr-hint">Клієнт зможе змінити дату/час через посилання з email</div>
+                    </div>
+                    <div class="settings-row-control">
+                        <div class="toggle ${s('allow_client_reschedule') == '1' ? 'on' : ''}" id="toggle-allow_client_reschedule" onclick="toggleSetting(this, 'allow_client_reschedule')"></div>
+                    </div>
+                </div>
+                
                 <div class="settings-row">
                     <div class="settings-row-info">
                         <div class="sr-name">Скасування дозволено за</div>
