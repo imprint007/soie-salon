@@ -1,39 +1,44 @@
 <?php
-<?php
+// Спочатку ставимо правильний Content-Type
 header('Content-Type: text/html; charset=utf-8');
-session_start();
+
+// Стартуємо сесію (потрібна для state перевірки)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/../lib/google_api.php';
-
-session_start();
 
 $code = $_GET['code'] ?? null;
 $state = $_GET['state'] ?? null;
 $error = $_GET['error'] ?? null;
 
-function showResult($success, $message) {
-    $bg = $success ? '#a0d4a0' : '#e89999';
+function showResultPage($success, $message) {
+    $color = $success ? '#a0d4a0' : '#e89999';
     $emoji = $success ? '✅' : '❌';
-    echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Google</title></head><body style='font-family:sans-serif;background:#0d0c0b;color:#ede6d9;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;'>";
+    $oauthStatus = $success ? 'success' : 'error';
+    
+    echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Google</title></head>";
+    echo "<body style='font-family:sans-serif;background:#0d0c0b;color:#ede6d9;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;'>";
     echo "<div style='text-align:center;padding:40px;'>";
     echo "<div style='font-size:64px;margin-bottom:20px;'>$emoji</div>";
-    echo "<h1 style='color:$bg;margin:0 0 12px;'>" . htmlspecialchars($message) . "</h1>";
+    echo "<h1 style='color:$color;margin:0 0 12px;'>" . htmlspecialchars($message) . "</h1>";
     echo "<p style='color:#9e968a;margin:0 0 24px;'>Це вікно можна закрити</p>";
-    echo "<script>setTimeout(function(){ if(window.opener){window.opener.postMessage({google_oauth:'" . ($success?'success':'error') . "'}, '*');window.close();}}, 1500);</script>";
+    echo "<script>setTimeout(function(){ if(window.opener){window.opener.postMessage({google_oauth:'$oauthStatus'}, '*');window.close();}}, 1500);</script>";
     echo "</div></body></html>";
     exit;
 }
 
 if ($error) {
-    showResult(false, "Помилка: " . $error);
+    showResultPage(false, "Помилка: " . $error);
 }
 
 if (!$code || !$state) {
-    showResult(false, "Невірний запит");
+    showResultPage(false, "Невірний запит");
 }
 
 if ($state !== ($_SESSION['google_oauth_state'] ?? '')) {
-    showResult(false, "Невірний state (CSRF)");
+    showResultPage(false, "Невірний state (CSRF)");
 }
 
 try {
@@ -41,7 +46,7 @@ try {
     $tokens = googleExchangeCode($code);
     
     if (empty($tokens['access_token'])) {
-        showResult(false, "Не отримали токен");
+        showResultPage(false, "Не отримали токен");
     }
     
     // Беремо інфо про користувача
@@ -50,8 +55,8 @@ try {
     // Зберігаємо
     googleSaveTokens($tokens, $userInfo);
     
-    showResult(true, "Підключено: " . ($userInfo['email'] ?? 'OK'));
+    showResultPage(true, "Підключено: " . ($userInfo['email'] ?? 'OK'));
     
 } catch (Throwable $e) {
-    showResult(false, "Помилка: " . $e->getMessage());
+    showResultPage(false, "Помилка: " . $e->getMessage());
 }
