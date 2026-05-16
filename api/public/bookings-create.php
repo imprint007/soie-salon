@@ -69,7 +69,12 @@ try {
         $realServiceId = (int)$serviceId;
     }
     
-    $deposit = (int)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'deposit_amount'")->fetchColumn() ?: 600;
+    // Депозит враховуємо тільки якщо увімкнений
+$depositRequired = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'deposit_required'")->fetchColumn();
+$deposit = 0;
+if ($depositRequired === '1') {
+    $deposit = (int)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'deposit_amount'")->fetchColumn();
+}
     $prefix = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'booking_code_prefix'")->fetchColumn() ?: 'UC';
     
     $code = $prefix . '-' . date('Y') . '-' . str_pad((string)random_int(1000, 9999), 4, '0', STR_PAD_LEFT);

@@ -3911,7 +3911,7 @@ if (document.readyState === 'loading') {
     if (idx > 0) goScreen(order[idx - 1]);
 }
 
-  function updateReview() {
+function updateReview() {
     if (!state.service) return;
     
     const total = state.totalPrice;
@@ -3923,7 +3923,10 @@ if (document.readyState === 'loading') {
     });
     
     const svc = state.service.name + (optionNames.length ? ' · ' + optionNames.join(', ') : '');
-    const deposit = parseInt(ps('deposit_amount', '600')) || 600;
+    
+    // Депозит: дивимось чи увімкнений в адмінці
+    const depositRequired = ps('deposit_required', '0') === '1';
+    const deposit = depositRequired ? (parseInt(ps('deposit_amount', '0')) || 0) : 0;
     
     // Екран Контакти
     setText('reviewService', svc);
@@ -3935,10 +3938,24 @@ if (document.readyState === 'loading') {
         setText('reviewDate', `${state.selectedDate} · ${state.selectedTime}`);
     }
     
+    // Блок з підказкою про депозит
     const depositNote = document.getElementById('depositNote');
     if (depositNote) {
         const cancelHours = parseInt(ps('cancel_hours_before', '24')) || 24;
-        depositNote.innerHTML = `<strong>Депозит ${deposit.toLocaleString('uk-UA')} ₴</strong> буде утримано для підтвердження бронювання. Залишок сплачується в салоні. Скасування безкоштовно за ${cancelHours} годин до візиту.`;
+        
+        if (depositRequired && deposit > 0) {
+            depositNote.style.display = '';
+            depositNote.innerHTML = `<strong>Депозит ${deposit.toLocaleString('uk-UA')} ₴</strong> буде утримано для підтвердження бронювання. Залишок сплачується в салоні. Скасування безкоштовно за ${cancelHours} годин до візиту.`;
+        } else {
+            depositNote.style.display = 'none';
+            depositNote.innerHTML = '';
+        }
+    }
+    
+    // Кнопка: «Сплатити» якщо депозит, «Записатися» якщо без депозиту
+    const submitBtn = document.getElementById('bookingSubmitBtn');
+    if (submitBtn) {
+        submitBtn.textContent = depositRequired ? 'Сплатити' : 'Записатися';
     }
     
     // Екран Успіху
@@ -3946,7 +3963,7 @@ if (document.readyState === 'loading') {
     setText('succMaster', state.masterName || 'Будь-який');
     setText('succEmail', document.getElementById('clientEmail')?.value || '—');
     setText('succCode', state.bookingCode || '—');
-    setText('succDeposit', deposit.toLocaleString('uk-UA') + ' ₴ · сплачено');
+    setText('succDeposit', deposit > 0 ? deposit.toLocaleString('uk-UA') + ' ₴ · сплачено' : '—');
     setText('succPayable', Math.max(0, total - deposit).toLocaleString('uk-UA') + ' ₴');
     
     // Дата + час з межами
