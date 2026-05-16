@@ -2688,6 +2688,35 @@
     </div>
 </div>
 
+<!-- ============ МОДАЛКА ВИКОНАННЯ БРОНІ ============ -->
+<div class="modal-overlay" id="completeModal" style="display:none;">
+    <div class="modal" style="max-width: 680px;">
+        <div class="modal-head">
+            <div class="modal-title">Підтвердження виконання</div>
+            <button class="modal-close" onclick="closeCompleteModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="padding:14px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:16px;">
+                <div style="font-size:11px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Послуга</div>
+                <div id="completeServiceName" style="font-family:'Fraunces',serif;font-size:18px;color:var(--ink);margin-top:4px;">—</div>
+            </div>
+            
+            <div id="completeWarning" style="display:none;padding:12px;background:rgba(232,213,153,0.1);border:1px solid rgba(232,213,153,0.3);color:#e8d599;border-radius:4px;margin-bottom:16px;font-size:13px;"></div>
+            
+            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:12px;">Розхідники до списання</div>
+            
+            <div id="completeConsumablesList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+            
+            <button type="button" class="admin-cta ghost" onclick="addCompleteConsumable()" style="width:100%;padding:10px;font-size:11px;">+ Додати товар</button>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-cta ghost" onclick="closeCompleteModal()" style="flex:1;">Скасувати</button>
+            <button class="admin-cta ghost" onclick="confirmCompleteWithoutConsumption()" style="flex:1;">Без списання</button>
+            <button class="admin-cta" onclick="confirmCompleteWithConsumption()" style="flex:1.5;">Виконати і списати</button>
+        </div>
+    </div>
+</div>
+
 <!-- ============ МОДАЛКА РОЗХІДНИКІВ ОПЦІЇ ============ -->
 <div class="modal-overlay" id="optionConsumablesModal" style="display:none;">
     <div class="modal" style="max-width: 640px;">
@@ -3207,6 +3236,218 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadPublicSettings);
 } else {
     loadPublicSettings();
+}
+
+// ============================================
+// ЗАВЕРШЕННЯ БРОНІ З СПИСАННЯМ
+// ============================================
+let currentCompleteBookingId = null;
+let currentCompleteConsumables = [];
+
+async function openCompleteModal(bookingId) {
+    currentCompleteBookingId = bookingId;
+    currentCompleteConsumables = [];
+    
+    const modal = document.getElementById('completeModal');
+    const list = document.getElementById('completeConsumablesList');
+    const warning = document.getElementById('completeWarning');
+    
+    list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    warning.style.display = 'none';
+    
+    modal.style.display = 'flex';
+    
+    try {
+        const res = await fetch('/api/admin/booking-consumables-preview.php?booking_id=' + bookingId, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        const d = data.data || data;
+        
+        if (d.already_consumed) {
+            warning.textContent = '⚠ Розхідники по цій броні вже списані раніше';
+            warning.style.display = 'block';
+        }
+        
+        document.getElementById('completeServiceName').textContent = d.service_name || '—';
+        
+        // Загрузим товары для добавления вручную
+        if (!allProducts || allProducts.length === 0) {
+            const pRes = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+            const pData = await pRes.json();
+            if (pData.success) allProducts = pData.data || [];
+        }
+        
+        currentCompleteConsumables = (d.consumables || []).map(c => ({
+            product_id: c.product_id,
+            product_name: c.product_name,
+            unit: c.unit,
+            current_stock: c.current_stock,
+            quantity: c.quantity,
+            sources: c.sources,
+            auto: true
+        }));
+        
+        renderCompleteConsumables();
+        
+    } catch (err) {
+        list.innerHTML = `<div style="padding:14px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function closeCompleteModal() {
+    document.getElementById('completeModal').style.display = 'none';
+    currentCompleteBookingId = null;
+    currentCompleteConsumables = [];
+}
+
+function renderCompleteConsumables() {
+    const list = document.getElementById('completeConsumablesList');
+    
+    if (currentCompleteConsumables.length === 0) {
+        list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;border-radius:4px;">Немає прив\'язаних розхідників. Можна додати вручну.</div>';
+        return;
+    }
+    
+    const activeProducts = (allProducts || []).filter(p => parseInt(p.is_active));
+    
+    list.innerHTML = currentCompleteConsumables.map((c, i) => {
+        const unit = c.unit ? getUnitLabel(c.unit) : (c.product_id ? getUnitLabel(activeProducts.find(p => p.id == c.product_id)?.unit) : '');
+        const shortage = (c.current_stock !== undefined) ? Math.max(0, c.quantity - c.current_stock) : 0;
+        const shortageWarning = shortage > 0 ? `<div style="font-size:10px;color:#e8d599;margin-top:4px;">⚠ Не вистачає: ${shortage} ${unit}</div>` : '';
+        
+        if (c.auto && c.product_name) {
+            // Авто-расходник (привязан к услуге/опции) — показываем по-другому
+            return `
+                <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13px;color:var(--ink);">${escapeHtml(c.product_name)}</div>
+                            <div style="font-size:10px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(c.sources || '')} · залишок: ${c.current_stock} ${unit}</div>
+                            ${shortageWarning}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
+                            <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity}" min="0" step="${getStepForUnit(c.unit)}" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                            <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;">${unit}</span>
+                        </div>
+                        <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Ручной — selector товара
+            return `
+                <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;gap:10px;">
+                    <select class="complete-product" data-index="${i}" style="flex:1;min-width:0;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;border-radius:4px;">
+                        <option value="">— Оберіть товар —</option>
+                        ${activeProducts.map(p => `<option value="${p.id}" data-unit="${p.unit}" ${c.product_id == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (залишок: ${p.current_stock} ${getUnitLabel(p.unit)})</option>`).join('')}
+                    </select>
+                    <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
+                        <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="0.1" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                        <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;" id="complete-unit-${i}">${unit}</span>
+                    </div>
+                    <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+                </div>
+            `;
+        }
+    }).join('');
+    
+    // Обработчики
+    list.querySelectorAll('.complete-qty').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            currentCompleteConsumables[i].quantity = parseFloat(e.target.value) || 0;
+        });
+    });
+    
+    list.querySelectorAll('.complete-product').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+            const i = parseInt(e.target.dataset.index);
+            const pid = parseInt(e.target.value);
+            const product = activeProducts.find(p => p.id == pid);
+            currentCompleteConsumables[i].product_id = pid;
+            currentCompleteConsumables[i].product_name = product?.name || '';
+            currentCompleteConsumables[i].unit = product?.unit;
+            currentCompleteConsumables[i].current_stock = parseFloat(product?.current_stock) || 0;
+            
+            const unitSpan = document.getElementById(`complete-unit-${i}`);
+            if (unitSpan) unitSpan.textContent = product?.unit ? getUnitLabel(product.unit) : '';
+        });
+    });
+}
+
+function addCompleteConsumable() {
+    currentCompleteConsumables.push({
+        product_id: 0,
+        quantity: 0,
+        auto: false
+    });
+    renderCompleteConsumables();
+}
+
+function removeCompleteConsumable(index) {
+    currentCompleteConsumables.splice(index, 1);
+    renderCompleteConsumables();
+}
+
+async function confirmCompleteWithConsumption() {
+    if (!currentCompleteBookingId) return;
+    
+    const consumables = currentCompleteConsumables
+        .filter(c => c.product_id > 0 && c.quantity > 0)
+        .map(c => ({
+            product_id: c.product_id,
+            quantity: c.quantity
+        }));
+    
+    try {
+        const res = await fetch('/api/admin/booking-complete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                booking_id: currentCompleteBookingId,
+                consumables,
+                skip_consumption: false
+            })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        closeCompleteModal();
+        // Перезавантажуємо заявки
+        if (typeof loadBookings === 'function') loadBookings();
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+async function confirmCompleteWithoutConsumption() {
+    if (!currentCompleteBookingId) return;
+    if (!confirm('Завершити бронь без списання товарів зі складу?')) return;
+    
+    try {
+        const res = await fetch('/api/admin/booking-complete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                booking_id: currentCompleteBookingId,
+                skip_consumption: true
+            })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        closeCompleteModal();
+        if (typeof loadBookings === 'function') loadBookings();
+    } catch (err) {
+        alert('Помилка');
+    }
 }
 
 // ============================================
@@ -6210,6 +6451,17 @@ function closeBookingModal() {
 
 async function updateBookingStatus(newStatus) {
     if (!currentBookingId) return;
+    
+    // Якщо статус "Виконано" — відкриваємо модалку списання
+    if (newStatus === 'done') {
+        const bookingId = currentBookingId;
+        closeBookingModal();
+        // Невелика затримка щоб модалка брони закрилась
+        setTimeout(() => openCompleteModal(bookingId), 150);
+        return;
+    }
+    
+    // Інші статуси — звичайна логіка
     try {
         const res = await fetch('/api/admin/bookings-update-status.php', {
             method: 'POST',
