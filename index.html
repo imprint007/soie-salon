@@ -1599,20 +1599,7 @@
 }
 #optionConsumablesModal.modal-overlay.show { display: flex !important; }
 
-/* Скрываем стандартные стрелки у number input в расходниках */
-.consumable-qty::-webkit-inner-spin-button,
-.consumable-qty::-webkit-outer-spin-button,
-.opt-cons-qty::-webkit-inner-spin-button,
-.opt-cons-qty::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
 
-.consumable-qty,
-.opt-cons-qty {
-    -moz-appearance: textfield;
-    text-align: center !important;
-}
 </style>
 </head>
 <body>
@@ -3279,7 +3266,7 @@ function renderServiceConsumables() {
                 </select>
                 
                 <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
-    <input type="number" class="consumable-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="${getStepForUnit(product?.unit)}" style="flex:1;min-width:0;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+    <input type="number" class="consumable-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="${getStepForUnit(product?.unit)}" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
     <span style="color:var(--ink-mute);font-size:12px;width:32px;text-align:left;flex-shrink:0;" id="cons-unit-${i}">${unit}</span>
 </div>
                 
@@ -3449,7 +3436,7 @@ function renderOptionConsumables() {
                 
 <div style="display:flex;align-items:center;gap:6px;width:180px;flex-shrink:0;">
     <span style="color:${isPositive ? '#a0d4a0' : 'var(--danger)'};font-size:14px;font-weight:600;width:10px;text-align:center;">${isPositive ? '+' : ''}</span>
-    <input type="number" class="opt-cons-qty" data-index="${i}" value="${c.quantity_delta || 0}" step="${getStepForUnit(product?.unit)}" style="flex:1;min-width:0;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+    <input type="number" class="opt-cons-qty" data-index="${i}" value="${c.quantity_delta || 0}" step="${getStepForUnit(product?.unit)}" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
     <span style="color:var(--ink-mute);font-size:12px;width:32px;text-align:left;flex-shrink:0;" id="opt-cons-unit-${i}">${unit}</span>
 </div>
                 
