@@ -33,7 +33,7 @@ $allowedKeys = [
     'liqpay_public_key','liqpay_private_key','fondy_merchant_id','fondy_secret_key',
     'privacy_policy_url','terms_of_service_url','legal_entity','tax_id',
     'seo_title','seo_description','seo_keywords',
-    'language','timezone','currency_symbol','booking_code_prefix','hero_video_url', 'hero_video_speed',
+    'language','timezone','currency_symbol','booking_code_prefix','hero_video_url','hero_video_speed','google_client_id','google_client_secret','google_redirect_uri',
 ];
 
 $pdo = getDb();
