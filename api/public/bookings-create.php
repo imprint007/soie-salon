@@ -94,6 +94,16 @@ try {
     $bookingId = (int)$pdo->lastInsertId();
     
     // ============================================
+// GOOGLE CALENDAR SYNC
+// ============================================
+try {
+    require_once __DIR__ . '/../lib/google_booking_sync.php';
+    googleSyncBookingCreate($bookingId);
+} catch (Throwable $gErr) {
+    error_log('Google sync error: ' . $gErr->getMessage());
+}
+
+    // ============================================
     // EMAIL УВЕДОМЛЕНИЯ
     // ============================================
     $emailLog = ['client' => null, 'admin' => null];

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_helper.php';
+require_once __DIR__ . '/../lib/google_booking_sync.php';
 setupAdminApi();
 requireAdmin();
 
@@ -10,14 +11,14 @@ try {
     $input = jsonInput();
     
     $bookingId = (int)($input['booking_id'] ?? 0);
-    $consumables = $input['consumables'] ?? [];  // [{ product_id, quantity }]
+    $consumables = $input['consumables'] ?? [];
     $skipConsumption = !empty($input['skip_consumption']);
     
     if ($bookingId <= 0) jsonError('Невірний booking_id');
     
     $pdo->beginTransaction();
     
-    // Перевіряємо що бронь існує і не виконана
+    // Перевіряємо що бронь існує
     $stmt = $pdo->prepare("SELECT id, status FROM bookings WHERE id = ?");
     $stmt->execute([$bookingId]);
     $booking = $stmt->fetch();
@@ -42,7 +43,6 @@ try {
             
             if ($productId <= 0 || $quantity <= 0) continue;
             
-            // Беремо поточний stock з FOR UPDATE
             $pStmt = $pdo->prepare("SELECT current_stock, name FROM products WHERE id = ? FOR UPDATE");
             $pStmt->execute([$productId]);
             $product = $pStmt->fetch();
@@ -50,7 +50,6 @@ try {
             
             $stockBefore = (float)$product['current_stock'];
             $stockAfter = $stockBefore - $quantity;
-            // Дозволяємо в мінус, але попереджаємо в журналі
             
             $pdo->prepare("UPDATE products SET current_stock = ? WHERE id = ?")
                 ->execute([$stockAfter, $productId]);
@@ -60,7 +59,7 @@ try {
                 VALUES (?, 'consumption', ?, ?, ?, ?, ?)")
                 ->execute([
                     $productId, 
-                    -$quantity,  // мінус — це списання
+                    -$quantity,
                     $stockBefore, 
                     $stockAfter,
                     'Виконання послуги · бронь #' . $bookingId,
@@ -73,6 +72,14 @@ try {
     $pdo->prepare("UPDATE bookings SET status = 'done' WHERE id = ?")->execute([$bookingId]);
     
     $pdo->commit();
+    
+    // Синхронізація з Google (ПІСЛЯ commit, щоб не блокувала транзакцію)
+    try {
+        googleSyncBookingUpdate($bookingId);
+    } catch (Throwable $gErr) {
+        error_log('Google sync error: ' . $gErr->getMessage());
+    }
+    
     jsonOk(['message' => 'Готово']);
     
 } catch (Throwable $e) {
