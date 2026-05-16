@@ -1598,6 +1598,21 @@
     border-top: 1px solid var(--line);
 }
 #optionConsumablesModal.modal-overlay.show { display: flex !important; }
+
+/* Скрываем стандартные стрелки у number input в расходниках */
+.consumable-qty::-webkit-inner-spin-button,
+.consumable-qty::-webkit-outer-spin-button,
+.opt-cons-qty::-webkit-inner-spin-button,
+.opt-cons-qty::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.consumable-qty,
+.opt-cons-qty {
+    -moz-appearance: textfield;
+    text-align: center !important;
+}
 </style>
 </head>
 <body>
