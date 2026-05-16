@@ -242,6 +242,21 @@
   }
   .icon-btn:hover { border-color: var(--beige); color: var(--beige); }
 
+  .info-icons .ic.ic-action {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.info-icons .ic.ic-action:hover {
+    color: var(--beige);
+    transform: translateY(-2px);
+}
+.info-icons .ic.ic-action:hover svg {
+    stroke: var(--beige);
+}
+.info-icons .ic.ic-info {
+    opacity: 0.85;
+}
+
   .progress { display: flex; gap: 6px; padding: 0 24px 20px; }
   .progress span { flex: 1; height: 2px; background: var(--bg-3); overflow: hidden; position: relative; }
   .progress span.active::after, .progress span.done::after {
@@ -1843,19 +1858,19 @@
   </div>
 
   <div class="info-icons">
-    <div class="ic">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Google<br>Calendar
+    <div class="ic ic-action" id="succAddToCalendar" onclick="addToClientCalendar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Додати в<br>календар
     </div>
-    <div class="ic">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      Email<br>надіслано
+    <div class="ic ic-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        Email<br>надіслано
     </div>
-    <div class="ic">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.5 15a2.5 2.5 0 01-2.5 2.5H7l-4 4V5.5A2.5 2.5 0 015.5 3h13a2.5 2.5 0 012.5 2.5z"/></svg>
-      Telegram<br>сповіщення
+    <div class="ic ic-action" id="succShareTelegram" onclick="shareToTelegram()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.5 4.5l-19 7.5 6.5 2.5 2 6 3.5-4 5 4z"></path></svg>
+        Поділитись в<br>Telegram
     </div>
-  </div>
+</div>
 
   <div class="cta">
     <button class="btn" onclick="resetAndGoHome()">На головну</button>
@@ -5861,6 +5876,146 @@ function showInfoToast(msg) {
       btn.textContent = 'Видалити';
     }
   }
+
+  // ============================================
+// ДОБАВИТЬ В КАЛЕНДАР КЛИЕНТА (Apple/Google/Outlook)
+// ============================================
+function addToClientCalendar() {
+    if (!state.bookingCode || !state.selectedDate || !state.selectedTime) {
+        alert('Дані брони неповні');
+        return;
+    }
+    
+    const svc = state.service?.name || 'Послуга';
+    const optionNames = [];
+    Object.entries(state.selections || {}).forEach(([gName, sels]) => {
+        sels.forEach(s => optionNames.push(s.name));
+    });
+    const fullSvc = svc + (optionNames.length ? ' · ' + optionNames.join(', ') : '');
+    
+    const master = state.masterName || 'Будь-який';
+    const salonName = ps('site_name', 'Salon');
+    const salonAddress = ps('address', '');
+    const salonPhone = ps('phone', '');
+    
+    // Час
+    const [year, month, day] = state.selectedDate.split('-').map(Number);
+    const [hh, mm] = state.selectedTime.split(':').map(Number);
+    const totalTime = state.totalDuration || 60;
+    
+    const startDate = new Date(year, month - 1, day, hh, mm, 0);
+    const endDate = new Date(startDate.getTime() + totalTime * 60000);
+    
+    // Опис
+    const total = state.totalPrice;
+    const deposit = parseInt(ps('deposit_amount', '600')) || 600;
+    const payable = Math.max(0, total - deposit);
+    const manageUrl = window.location.origin + '/manage.html?code=' + encodeURIComponent(state.bookingCode);
+    
+    const description = [
+        'Бронь: ' + state.bookingCode,
+        'Послуга: ' + fullSvc,
+        'Майстер: ' + master,
+        'До сплати в салоні: ' + payable + ' ₴',
+        '',
+        'Депозит ' + deposit + ' ₴ — сплачено',
+        '',
+        'Управління броню: ' + manageUrl
+    ].join('\n');
+    
+    // .ics формат
+    const formatDateICS = (d) => {
+        return d.getUTCFullYear() + 
+            String(d.getUTCMonth() + 1).padStart(2, '0') + 
+            String(d.getUTCDate()).padStart(2, '0') + 'T' +
+            String(d.getUTCHours()).padStart(2, '0') + 
+            String(d.getUTCMinutes()).padStart(2, '0') + '00Z';
+    };
+    
+    const uid = 'booking-' + state.bookingCode + '@' + window.location.hostname;
+    
+    const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//' + salonName + '//Booking//UA',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        'UID:' + uid,
+        'DTSTAMP:' + formatDateICS(new Date()),
+        'DTSTART:' + formatDateICS(startDate),
+        'DTEND:' + formatDateICS(endDate),
+        'SUMMARY:' + escapeICS(fullSvc + ' — ' + salonName),
+        'DESCRIPTION:' + escapeICS(description),
+        'LOCATION:' + escapeICS(salonAddress),
+        'STATUS:CONFIRMED',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT24H',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Завтра візит в ' + escapeICS(salonName),
+        'END:VALARM',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT2H',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Через 2 години візит в ' + escapeICS(salonName),
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+    ].join('\r\n');
+    
+    // Завантажуємо файл
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = state.bookingCode + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Экранирование для .ics
+function escapeICS(str) {
+    return String(str || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\n/g, '\\n');
+}
+
+// ============================================
+// ПОДЕЛИТЬСЯ В TELEGRAM
+// ============================================
+function shareToTelegram() {
+    if (!state.bookingCode) return;
+    
+    const svc = state.service?.name || 'Послуга';
+    const salonName = ps('site_name', 'Salon');
+    const dateStr = state.selectedDate || '';
+    const timeStr = state.selectedTime || '';
+    
+    const manageUrl = window.location.origin + '/manage.html?code=' + encodeURIComponent(state.bookingCode);
+    
+    // Дата форматування
+    let dateFormatted = dateStr;
+    try {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        const months = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+        dateFormatted = d + ' ' + months[m - 1];
+    } catch(e) {}
+    
+    const message = `📌 Моя бронь в ${salonName}\n\n` +
+                    `Послуга: ${svc}\n` +
+                    `Дата: ${dateFormatted}\n` +
+                    `Час: ${timeStr}\n` +
+                    `Код: ${state.bookingCode}\n\n` +
+                    `Управління: ${manageUrl}`;
+    
+    const url = 'https://t.me/share/url?url=' + encodeURIComponent(manageUrl) + '&text=' + encodeURIComponent(message);
+    window.open(url, '_blank');
+}
 
 // ============================================
 // КАЛЕНДАРЬ И СЛОТЫ ВРЕМЕНИ
