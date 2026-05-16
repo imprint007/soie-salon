@@ -514,20 +514,10 @@
                 <button class="btn ghost" onclick="closeRescheduleModal()">Скасувати</button>
                 <button class="btn" id="confirmReschedule" onclick="confirmReschedule()" disabled>Підтвердити перенос</button>
             </div>
-
-            <!-- Плашки добавления в личный календарь -->
-            <div id="manageActions" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
-                <div class="action-tile" onclick="addToClientCalendarFromManage()">
-                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                 <div>Додати в<br>календар</div>
-            </div>
-    <div class="action-tile" onclick="shareToTelegramFromManage()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.5 4.5l-19 7.5 6.5 2.5 2 6 3.5-4 5 4z"></path></svg>
-        <div>Поділитись в<br>Telegram</div>
-    </div>
-</div>
+          </div>
         </div>
     </div>
+</div>
     
     <script>
     const code = new URLSearchParams(window.location.search).get('code');
@@ -704,7 +694,15 @@
                 
                 ${actionsHtml}
             </div>
-            
+            <!-- Плашки добавления в личный календарь -->
+            <div id="manageActions" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+                <div class="action-tile" onclick="addToClientCalendarFromManage()">
+                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div>Додати в<br>календар</div>
+            </div>
+            <div class="action-tile" onclick="shareToTelegramFromManage()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.5 4.5l-19 7.5 6.5 2.5 2 6 3.5-4 5 4z"></path></svg>
+            <div>Поділитись в<br>Telegram</div>
             <div class="footer">
                 ${s.phone ? `Зателефонуйте: <a href="tel:${escapeHtml(s.phone)}">${escapeHtml(s.phone)}</a><br>` : ''}
                 ${s.address ? escapeHtml(s.address) : ''}
