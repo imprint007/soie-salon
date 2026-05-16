@@ -2782,6 +2782,8 @@
     <div id="settingsStatus" class="settings-status"></div>
 </div>
 
+
+
 </main>
 
 </div>
@@ -4133,7 +4135,10 @@ async function assignRandomMaster() {
     if (name === 'expenses') loadExpenses();
     if (name === 'reports') loadReports();
     if (name === 'dashboard') loadDashboard();
-    if (name === 'settings') loadSettings();
+    if (name === 'settings') {
+    loadSettings();
+    loadGoogleConfig();
+}
 }
 
   async function checkSession() {
@@ -7803,34 +7808,51 @@ function renderTelegramSettings() {
     `;
 }
 
+
+
 // ====== ІНТЕГРАЦІЇ ======
 function renderIntegrationsSettings() {
     document.getElementById('settingsContent').innerHTML = `
         <div class="settings-panel active">
+            <!-- ===== GOOGLE CALENDAR ===== -->
             <div class="settings-card">
                 <div class="settings-card-head">
                     <h3>Google Calendar</h3>
-                    <p>Інтеграція додається пізніше. Поки можна зберегти ID календаря.</p>
+                    <p>Автоматичне створення подій у Google Календарі для кожної брони. Кожен майстер має свій календар.</p>
                 </div>
-                <div class="form-group">
-                    <label>ID календаря</label>
-                    <input type="text" id="set-google_calendar_id" value="${escapeHtml(s('google_calendar_id'))}" placeholder="example@group.calendar.google.com">
-                </div>
+                
+                <!-- OAuth ключі -->
                 <div class="settings-grid">
                     <div class="form-group">
                         <label>OAuth Client ID</label>
-                        <input type="text" id="set-google_oauth_client_id" value="${escapeHtml(s('google_oauth_client_id'))}">
+                        <input type="text" id="set-google_oauth_client_id" value="${escapeHtml(s('google_oauth_client_id'))}" placeholder="123456-xxx.apps.googleusercontent.com">
                     </div>
                     <div class="form-group">
                         <label>OAuth Client Secret</label>
                         <div class="password-wrap">
-                            <input type="password" id="set-google_oauth_client_secret" value="${escapeHtml(s('google_oauth_client_secret'))}">
+                            <input type="password" id="set-google_oauth_client_secret" value="${escapeHtml(s('google_oauth_client_secret'))}" placeholder="GOCSPX-...">
                             <button type="button" class="pw-toggle" onclick="togglePw('set-google_oauth_client_secret', this)">👁</button>
                         </div>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label>Redirect URI</label>
+                    <input type="text" id="set-google_oauth_redirect_uri" value="${escapeHtml(s('google_oauth_redirect_uri') || ('https://' + window.location.host + '/api/admin/google-oauth-callback.php'))}" placeholder="https://yourdomain.com/api/admin/google-oauth-callback.php">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:6px;line-height:1.5;">
+                        Цей URL потрібно додати в Authorized redirect URIs на 
+                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--beige);">Google Cloud Console</a>.
+                        Збережіть налаштування, потім натисніть «Підключити Google» нижче.
+                    </div>
+                </div>
+                
+                <!-- Статус підключення -->
+                <div id="googleStatusBlock" style="margin-top:20px;padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;">
+                    <div style="color:var(--ink-mute);font-size:12px;text-align:center;">Натисніть «Зберегти» нижче, потім перевірте статус...</div>
+                </div>
             </div>
 
+            <!-- ===== ПЛАТЕЖІ ===== -->
             <div class="settings-card">
                 <div class="settings-card-head">
                     <h3>Платежі</h3>
@@ -7884,6 +7906,162 @@ function renderIntegrationsSettings() {
             </div>
         </div>
     `;
+    
+    // Завантажуємо статус Google
+    setTimeout(loadGoogleStatus, 100);
+}
+
+// ============================================
+// GOOGLE CALENDAR INTEGRATION
+// ============================================
+async function loadGoogleConfig() {
+    try {
+        const res = await fetch('/api/admin/google-config-get.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) return;
+        const d = data.data || data;
+        
+        document.getElementById('googleClientId').value = d.google_client_id || '';
+        document.getElementById('googleRedirectUri').value = d.google_redirect_uri || '';
+        
+        const secretEl = document.getElementById('googleClientSecret');
+        if (d.google_client_secret_set) {
+            secretEl.placeholder = '••••••••• (вже задано)';
+        } else {
+            secretEl.placeholder = 'GOCSPX-...';
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    
+    // Завантажуємо статус підключення
+    loadGoogleStatus();
+}
+
+async function saveGoogleCredentials() {
+    const clientId = document.getElementById('googleClientId').value.trim();
+    const clientSecret = document.getElementById('googleClientSecret').value;
+    const redirectUri = document.getElementById('googleRedirectUri').value.trim();
+    
+    if (!clientId) {
+        alert('Введіть Client ID');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/google-config-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                google_client_id: clientId,
+                google_client_secret: clientSecret || null,
+                google_redirect_uri: redirectUri,
+            })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        // Очистим поле пароля
+        document.getElementById('googleClientSecret').value = '';
+        await loadGoogleConfig();
+        showToast('Ключі збережено');
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+async function loadGoogleStatus() {
+    const block = document.getElementById('googleStatusBlock');
+    block.innerHTML = '<div style="color:var(--ink-mute);font-size:12px;text-align:center;">Перевірка...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/google-status.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        const d = data.data || data;
+        
+        if (d.connected) {
+            block.innerHTML = `
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:#a0d4a020;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">✓</div>
+                    <div style="flex:1;min-width:200px;">
+                        <div style="font-size:14px;color:var(--ink);">Підключено</div>
+                        <div style="font-size:12px;color:var(--ink-mute);margin-top:4px;">${escapeHtml(d.email || '')}</div>
+                    </div>
+                    <button class="admin-cta ghost" onclick="disconnectGoogle()" style="padding:8px 16px;font-size:11px;color:var(--danger);">Відключити</button>
+                </div>
+            `;
+        } else {
+            block.innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <div style="font-size:13px;color:var(--ink-mute);margin-bottom:16px;">Google аккаунт не підключений</div>
+                    <button class="admin-cta" onclick="connectGoogle()" style="padding:12px 28px;font-size:11px;">
+                        Підключити Google
+                    </button>
+                </div>
+            `;
+        }
+    } catch (err) {
+        block.innerHTML = `<div style="color:var(--danger);font-size:12px;padding:14px;text-align:center;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function connectGoogle() {
+    // Відкриваємо OAuth у новому вікні
+    const w = window.open('/api/admin/google-oauth-start.php', 'google_oauth', 'width=500,height=700');
+    
+    // Слухаємо повідомлення з callback
+    window.addEventListener('message', function handler(e) {
+        if (e.data?.google_oauth) {
+            window.removeEventListener('message', handler);
+            if (e.data.google_oauth === 'success') {
+                showToast('Google підключено');
+            } else {
+                showToast('Помилка підключення');
+            }
+            setTimeout(() => loadGoogleStatus(), 500);
+        }
+    });
+    
+    // На всяк випадок — перевіримо через 3 сек якщо вікно закрилось
+    const checkInterval = setInterval(() => {
+        if (w.closed) {
+            clearInterval(checkInterval);
+            setTimeout(() => loadGoogleStatus(), 500);
+        }
+    }, 1000);
+}
+
+async function disconnectGoogle() {
+    if (!confirm('Відключити Google аккаунт? Події в календарі залишаться, але нові не будуть створюватись.')) return;
+    
+    try {
+        await fetch('/api/admin/google-disconnect.php', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        loadGoogleStatus();
+        showToast('Відключено');
+    } catch (err) {
+        alert('Помилка');
+    }
+}
+
+// Маленький тост (якщо ще не визначений)
+if (typeof showToast !== 'function') {
+    window.showToast = function(msg) {
+        const existing = document.getElementById('tinyToast');
+        if (existing) existing.remove();
+        const t = document.createElement('div');
+        t.id = 'tinyToast';
+        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 20px;background:var(--bg-1);border:1px solid var(--beige);color:var(--beige);font-size:13px;border-radius:4px;z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2500);
+    };
 }
 
 // ====== ХЕЛПЕРИ ======
