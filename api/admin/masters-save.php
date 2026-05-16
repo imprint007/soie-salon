@@ -9,6 +9,7 @@ $input = jsonInput();
 $id = (int)($input['id'] ?? 0);
 $name = trim($input['name'] ?? '');
 $role = trim($input['role'] ?? '');
+$googleCalendarId = trim($input['google_calendar_id'] ?? '');
 $phone = trim($input['phone'] ?? '');
 $email = trim($input['email'] ?? '');
 $bio = trim($input['bio'] ?? '');
@@ -40,6 +41,9 @@ if (!empty($password)) {
     $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 }
 
+// Якщо порожнє — зберігаємо як NULL
+$googleCalendarIdToSave = !empty($googleCalendarId) ? $googleCalendarId : null;
+
 $pdo = getDb();
 
 try {
@@ -58,20 +62,43 @@ try {
     if ($id > 0) {
         // UPDATE — пароль обновляем только если он передан
         if ($passwordHash !== null) {
-            $pdo->prepare("UPDATE masters SET name=?, role=?, phone=?, email=?, bio=?, photo_url=?, experience_years=?, is_active=?, username=?, password_hash=? WHERE id=?")
-                ->execute([$name, $role, $phone, $email, $bio, $photo_url, $experience_years, $is_active, $username, $passwordHash, $id]);
+            $pdo->prepare("UPDATE masters SET 
+                    name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
+                    experience_years=?, is_active=?, username=?, password_hash=?, 
+                    google_calendar_id=? 
+                WHERE id=?")
+                ->execute([
+                    $name, $role, $phone, $email, $bio, $photo_url, 
+                    $experience_years, $is_active, $username, $passwordHash, 
+                    $googleCalendarIdToSave, $id
+                ]);
         } else {
-            $pdo->prepare("UPDATE masters SET name=?, role=?, phone=?, email=?, bio=?, photo_url=?, experience_years=?, is_active=?, username=? WHERE id=?")
-                ->execute([$name, $role, $phone, $email, $bio, $photo_url, $experience_years, $is_active, $username, $id]);
+            $pdo->prepare("UPDATE masters SET 
+                    name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
+                    experience_years=?, is_active=?, username=?, 
+                    google_calendar_id=? 
+                WHERE id=?")
+                ->execute([
+                    $name, $role, $phone, $email, $bio, $photo_url, 
+                    $experience_years, $is_active, $username, 
+                    $googleCalendarIdToSave, $id
+                ]);
         }
     } else {
-        // INSERT — пишемо все поля
-        $pdo->prepare("INSERT INTO masters (name, role, phone, email, bio, photo_url, experience_years, is_active, username, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-            ->execute([$name, $role, $phone, $email, $bio, $photo_url, $experience_years, $is_active, $username, $passwordHash]);
+        // INSERT — пишемо всі поля
+        $pdo->prepare("INSERT INTO masters 
+                (name, role, phone, email, bio, photo_url, 
+                 experience_years, is_active, username, password_hash, google_calendar_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            ->execute([
+                $name, $role, $phone, $email, $bio, $photo_url, 
+                $experience_years, $is_active, $username, $passwordHash, 
+                $googleCalendarIdToSave
+            ]);
         $id = (int)$pdo->lastInsertId();
     }
     
-    // Полностью пересохраняем связи мастер↔услуги
+    // Повністю пересохраняемо звʼязки майстер↔послуги
     $pdo->prepare("DELETE FROM master_services WHERE master_id = ?")->execute([$id]);
     
     if (!empty($service_ids) && is_array($service_ids)) {

@@ -2131,6 +2131,27 @@
             <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
     <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
     
+    <!-- ===== GOOGLE CALENDAR ===== -->
+<div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
+    
+    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+        Календар у Google куди будуть писатись події цього майстра. 
+        <a href="https://calendar.google.com/" target="_blank" style="color:var(--beige);">Створити календар в Google →</a>
+    </div>
+    
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+        <select id="mGoogleCalendarId" style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+            <option value="">— Не використовувати —</option>
+        </select>
+        <button type="button" class="admin-cta ghost" onclick="loadGoogleCalendarsForMaster()" style="padding:10px 16px;font-size:11px;flex-shrink:0;">↻ Оновити</button>
+    </div>
+    
+    <div style="font-size:11px;color:var(--ink-mute);margin-top:8px;" id="mGoogleCalendarHint">
+        Натисніть «Оновити» щоб завантажити список календарів
+    </div>
+</div>
+
     <div class="form-row">
         <div class="form-group">
             <label>Логін</label>
@@ -6070,6 +6091,40 @@ function hideMasterInfo() {
     document.getElementById('noMaster').classList.remove('show');
 }
 
+async function loadGoogleCalendarsForMaster() {
+    const select = document.getElementById('mGoogleCalendarId');
+    const hint = document.getElementById('mGoogleCalendarHint');
+    const currentValue = select.value;
+    
+    hint.textContent = 'Завантаження...';
+    
+    try {
+        const res = await fetch('/api/admin/google-calendars-list.php', { credentials: 'include' });
+        const data = await res.json();
+        
+        if (!data.success) {
+            hint.textContent = data.error || 'Помилка завантаження';
+            hint.style.color = 'var(--danger)';
+            return;
+        }
+        
+        const calendars = data.data || [];
+        
+        select.innerHTML = '<option value="">— Не використовувати —</option>' +
+            calendars.map(c => {
+                const label = c.summary + (c.primary ? ' (основний)' : '');
+                const writeable = c.access_role === 'owner' || c.access_role === 'writer';
+                return `<option value="${escapeHtml(c.id)}" ${currentValue === c.id ? 'selected' : ''} ${!writeable ? 'disabled' : ''}>${escapeHtml(label)}${!writeable ? ' — без права запису' : ''}</option>`;
+            }).join('');
+        
+        hint.textContent = `Завантажено ${calendars.length} календарів`;
+        hint.style.color = 'var(--ink-mute)';
+    } catch (err) {
+        hint.textContent = 'Помилка: ' + err.message;
+        hint.style.color = 'var(--danger)';
+    }
+}
+
 // ============================================
 // АДМИНКА — управление мастерами
 // ============================================
@@ -6160,6 +6215,14 @@ async function openMasterModal() {
     document.getElementById('masterModal').classList.add('show');
     currentSalaryRules = [];
     renderSalaryRules();
+
+    const gcSelect2 = document.getElementById('mGoogleCalendarId');
+    if (gcSelect2) gcSelect2.innerHTML = '<option value="">— Не використовувати —</option>';
+    const gcHint2 = document.getElementById('mGoogleCalendarHint');
+    if (gcHint2) {
+        gcHint2.textContent = 'Натисніть «Оновити» щоб завантажити список календарів';
+        gcHint2.style.color = 'var(--ink-mute)';
+    }
 }
 
 async function editMaster(id) {
@@ -6193,6 +6256,24 @@ async function editMaster(id) {
     document.getElementById('masterModal').classList.add('show');
 
     await loadSalaryRules(id);
+
+    // Google Calendar
+    const gcSelect = document.getElementById('mGoogleCalendarId');
+    if (gcSelect) {
+        // Сохраняем текущее значение в select (для показа выбранного даже если список ещё не загружен)
+        if (m.google_calendar_id) {
+            gcSelect.innerHTML = `<option value="${escapeHtml(m.google_calendar_id)}" selected>${escapeHtml(m.google_calendar_id)}</option>`;
+        } else {
+            gcSelect.innerHTML = '<option value="">— Не використовувати —</option>';
+        }
+    }
+    const gcHint = document.getElementById('mGoogleCalendarHint');
+    if (gcHint) {
+        gcHint.textContent = m.google_calendar_id 
+            ? 'Календар обрано. Натисніть «Оновити» щоб переобрати.' 
+            : 'Натисніть «Оновити» щоб завантажити список календарів';
+        gcHint.style.color = 'var(--ink-mute)';
+    }
 }
 
 async function renderMasterServicesList(selectedIds) {
@@ -6251,6 +6332,7 @@ async function saveMaster() {
         password: document.getElementById('mPassword').value || null, // только если ввели — отправим
         experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
         is_active: document.getElementById('mstActive').checked ? 1 : 0,
+        google_calendar_id: document.getElementById('mGoogleCalendarId').value || null,
         service_ids
         
     };
