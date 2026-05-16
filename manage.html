@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління броню</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0c0b;
+            --bg-1: #161412;
+            --bg-2: #1f1c19;
+            --line: #2a2724;
+            --line-2: #3a3631;
+            --ink: #ede6d9;
+            --ink-mute: #9e968a;
+            --beige: #d4c3a0;
+            --beige-soft: #b8a888;
+            --danger: #d97373;
+            --success: #a0d4a0;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 36px;
+            color: var(--beige);
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+        
+        .header p {
+            color: var(--ink-mute);
+            font-size: 14px;
+            letter-spacing: 0.05em;
+        }
+        
+        .card {
+            background: var(--bg-1);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .booking-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--beige);
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+        
+        .booking-service {
+            font-family: 'Fraunces', serif;
+            font-size: 26px;
+            color: var(--ink);
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+        .status-pending { background: rgba(232,213,153,0.15); color: #e8d599; border: 1px solid rgba(232,213,153,0.3); }
+        .status-confirmed { background: rgba(160,212,160,0.15); color: var(--success); border: 1px solid rgba(160,212,160,0.3); }
+        .status-cancelled { background: rgba(217,115,115,0.15); color: var(--danger); border: 1px solid rgba(217,115,115,0.3); }
+        .status-done { background: rgba(158,150,138,0.15); color: var(--ink-mute); border: 1px solid rgba(158,150,138,0.3); }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            padding-top: 24px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .info-item .label {
+            font-size: 10px;
+            color: var(--ink-mute);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        
+        .info-item .value {
+            font-size: 15px;
+            color: var(--ink);
+            line-height: 1.4;
+        }
+        
+        .info-item .value.large {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            color: var(--beige);
+        }
+        
+        .master-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        
+        .master-photo {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--line-2);
+        }
+        
+        .master-info .name {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            color: var(--ink);
+        }
+        
+        .master-info .role {
+            font-size: 12px;
+            color: var(--ink-mute);
+            margin-top: 2px;
+        }
+        
+        .price-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--bg-2);
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        
+        .price-label {
+            font-size: 12px;
+            color: var(--ink-mute);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        
+        .price-value {
+            font-family: 'Fraunces', serif;
+            font-size: 28px;
+            color: var(--beige);
+        }
+        
+        .options-list {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--line);
+        }
+        
+        .options-list .opt {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+        
+        .options-list .opt-name { color: var(--ink); }
+        .options-list .opt-price { color: var(--ink-mute); }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            background: var(--beige);
+            color: var(--bg);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        .btn:hover { background: var(--beige-soft); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid var(--line-2);
+            color: var(--ink);
+        }
+        .btn.ghost:hover { background: var(--bg-2); border-color: var(--beige); }
+        
+        .btn.danger {
+            background: transparent;
+            border: 1px solid rgba(217,115,115,0.4);
+            color: var(--danger);
+        }
+        .btn.danger:hover { background: rgba(217,115,115,0.1); border-color: var(--danger); }
+        
+        .info-message {
+            padding: 14px 16px;
+            background: rgba(212, 195, 160, 0.08);
+            border: 1px solid rgba(212, 195, 160, 0.2);
+            border-radius: 6px;
+            color: var(--beige);
+            font-size: 13px;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        
+        .error-message {
+            padding: 14px 16px;
+            background: rgba(217, 115, 115, 0.1);
+            border: 1px solid rgba(217, 115, 115, 0.3);
+            border-radius: 6px;
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            padding: 14px 16px;
+            background: rgba(160, 212, 160, 0.1);
+            border: 1px solid rgba(160, 212, 160, 0.3);
+            border-radius: 6px;
+            color: var(--success);
+            font-size: 13px;
+            margin-top: 20px;
+        }
+        
+        .loader {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-mute);
+            font-size: 14px;
+        }
+        
+        /* МОДАЛКА */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--bg-1);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px;
+        }
+        
+        .modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            color: var(--beige);
+            margin-bottom: 24px;
+        }
+        
+        /* КАЛЕНДАРЬ */
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .cal-month {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            color: var(--ink);
+        }
+        
+        .cal-nav {
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            color: var(--ink);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .cal-nav:hover { background: var(--bg-1); border-color: var(--beige); }
+        .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .cal-weekday {
+            text-align: center;
+            font-size: 10px;
+            color: var(--ink-mute);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px;
+        }
+        
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--ink);
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 50%;
+            transition: all 0.15s;
+        }
+        
+        .cal-day.empty { cursor: default; }
+        .cal-day.disabled { color: var(--ink-mute); opacity: 0.3; cursor: not-allowed; }
+        .cal-day.disabled:hover { background: transparent; }
+        .cal-day.closed { color: var(--ink-mute); opacity: 0.4; cursor: not-allowed; }
+        .cal-day:hover:not(.disabled):not(.empty):not(.closed) { background: var(--bg-2); border-color: var(--beige-soft); }
+        .cal-day.selected { background: var(--beige); color: var(--bg); }
+        .cal-day.today { font-weight: 700; }
+        
+        /* СЛОТЫ */
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .slot {
+            padding: 12px 6px;
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        
+        .slot:hover:not(.disabled):not(.selected) {
+            border-color: var(--beige-soft);
+            background: var(--bg-1);
+        }
+        
+        .slot.selected {
+            background: var(--beige);
+            color: var(--bg);
+            border-color: var(--beige);
+        }
+        
+        .slot.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
+        .slot-master {
+            font-size: 10px;
+            color: var(--ink-mute);
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .slot.selected .slot-master {
+            color: var(--bg);
+            opacity: 0.7;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink-mute);
+            font-size: 13px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            color: var(--ink-mute);
+            font-size: 12px;
+        }
+        
+        .footer a { color: var(--beige); text-decoration: none; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 20px 10px; }
+            .card { padding: 20px; }
+            .booking-service { font-size: 22px; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; }
+            .modal { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loader" class="loader">Завантаження...</div>
+        <div id="content" style="display:none;"></div>
+    </div>
+    
+    <!-- МОДАЛКА ПЕРЕНЕСЕННЯ -->
+    <div class="modal-overlay" id="rescheduleModal">
+        <div class="modal">
+            <div class="modal-title">Перенести бронь</div>
+            
+            <div style="font-size:11px;color:var(--ink-mute);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Оберіть дату</div>
+            <div id="calendarContainer"></div>
+            
+            <div id="slotsContainer" style="display:none;margin-top:24px;">
+                <div style="font-size:11px;color:var(--ink-mute);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Оберіть час</div>
+                <div id="slotsList" class="slots-grid"></div>
+            </div>
+            
+            <div id="rescheduleError" class="error-message" style="display:none;"></div>
+            
+            <div class="modal-actions">
+                <button class="btn ghost" onclick="closeRescheduleModal()">Скасувати</button>
+                <button class="btn" id="confirmReschedule" onclick="confirmReschedule()" disabled>Підтвердити перенос</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    const code = new URLSearchParams(window.location.search).get('code');
+    let bookingData = null;
+    let permissions = null;
+    let calendarMonth = new Date();
+    let selectedDate = null;
+    let selectedSlot = null;
+    
+    async function loadBooking() {
+        if (!code) {
+            showError('Невірне посилання');
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/public/booking-get.php?code=' + encodeURIComponent(code));
+            const data = await res.json();
+            
+            if (!data.success) {
+                showError(data.error || 'Бронь не знайдена');
+                return;
+            }
+            
+            bookingData = data.booking;
+            permissions = data.permissions;
+            renderBooking(data);
+            
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        } catch (err) {
+            showError('Помилка завантаження: ' + err.message);
+        }
+    }
+    
+    function showError(msg) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('content').innerHTML = `
+            <div class="header">
+                <h1>Помилка</h1>
+            </div>
+            <div class="card">
+                <div class="error-message">${msg}</div>
+            </div>
+        `;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+    }
+    
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const days = ['Неділя','Понеділок','Вівторок','Середа','Четвер','Пʼятниця','Субота'];
+        const months = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+        return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
+    }
+    
+    function statusLabel(status) {
+        const labels = {
+            pending: 'Очікує підтвердження',
+            confirmed: 'Підтверджено',
+            cancelled: 'Відмінено',
+            done: 'Виконано'
+        };
+        return labels[status] || status;
+    }
+    
+    function renderBooking(data) {
+        const b = data.booking;
+        const p = data.permissions;
+        const s = data.salon;
+        
+        const time = b.booking_time.substring(0, 5);
+        const endMin = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]) + parseInt(b.duration_min);
+        const endTime = String(Math.floor(endMin/60) % 24).padStart(2,'0') + ':' + String(endMin%60).padStart(2,'0');
+        
+        const totalPrice = parseInt(b.total_price);
+        const deposit = parseInt(b.deposit_amount);
+        const payable = totalPrice - deposit;
+        
+        let optionsHtml = '';
+        if (b.selected_options && b.selected_options.length > 0) {
+            optionsHtml = '<div class="options-list">';
+            b.selected_options.forEach(opt => {
+                const price = parseInt(opt.price) || 0;
+                optionsHtml += `<div class="opt"><span class="opt-name">${escapeHtml(opt.name)}</span><span class="opt-price">${price > 0 ? '+' + price + ' ₴' : ''}</span></div>`;
+            });
+            optionsHtml += '</div>';
+        }
+        
+        let actionsHtml = '';
+        if (b.status === 'cancelled') {
+            actionsHtml = '<div class="info-message">Ця бронь відмінена. Для нової брони звʼяжіться з салоном.</div>';
+        } else if (b.status === 'done') {
+            actionsHtml = '<div class="info-message">Послугу виконано. Дякуємо!</div>';
+        } else {
+            const buttons = [];
+            
+            if (p.can_reschedule) {
+                buttons.push('<button class="btn ghost" onclick="openRescheduleModal()">Перенести</button>');
+            }
+            if (p.can_cancel) {
+                buttons.push('<button class="btn danger" onclick="cancelBooking()">Відмінити</button>');
+            }
+            
+            if (buttons.length > 0) {
+                actionsHtml = '<div class="actions">' + buttons.join('') + '</div>';
+            }
+            
+            // Подсказки если нельзя
+            if (!p.can_reschedule && !p.can_cancel) {
+                actionsHtml += `<div class="info-message">Щоб змінити або скасувати бронь — зателефонуйте в салон${s.phone ? ': <b>' + escapeHtml(s.phone) + '</b>' : ''}.</div>`;
+            } else if (!p.can_reschedule) {
+                actionsHtml += `<div class="info-message" style="margin-top:12px;font-size:12px;">Переносити можна не пізніше ніж за ${p.reschedule_hours_required} год. Залишилось ${p.hours_until_booking} год.</div>`;
+            } else if (!p.can_cancel) {
+                actionsHtml += `<div class="info-message" style="margin-top:12px;font-size:12px;">Відміняти можна не пізніше ніж за ${p.cancel_hours_required} год.</div>`;
+            }
+        }
+        
+        document.getElementById('content').innerHTML = `
+            <div class="header">
+                <h1>${escapeHtml(s.name || 'Salon')}</h1>
+                <p>Управління броню</p>
+            </div>
+            
+            <div class="card">
+                <div class="booking-code">${escapeHtml(b.booking_code)}</div>
+                <div class="booking-service">${escapeHtml(b.service_name)}</div>
+                <span class="status-badge status-${b.status}">${statusLabel(b.status)}</span>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Дата</div>
+                        <div class="value large">${formatDate(b.booking_date)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Час</div>
+                        <div class="value large">${time} — ${endTime}</div>
+                    </div>
+                </div>
+                
+                ${b.master_id ? `
+                    <div class="master-block">
+                        ${b.master_photo ? `<img src="${escapeHtml(b.master_photo)}" alt="${escapeHtml(b.master_name)}" class="master-photo">` : ''}
+                        <div class="master-info">
+                            <div class="name">${escapeHtml(b.master_name)}</div>
+                            ${b.master_role ? `<div class="role">${escapeHtml(b.master_role)}</div>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${optionsHtml}
+                
+                <div class="price-block">
+                    <div>
+                        <div class="price-label">До сплати в салоні</div>
+                        <div class="price-value">${payable.toLocaleString('uk-UA')} ₴</div>
+                    </div>
+                    <div style="text-align:right;font-size:11px;color:var(--ink-mute);">
+                        Загалом ${totalPrice.toLocaleString('uk-UA')} ₴<br>
+                        Депозит ${deposit > 0 ? deposit.toLocaleString('uk-UA') + ' ₴' : '—'}
+                    </div>
+                </div>
+                
+                ${b.client_comment ? `<div style="margin-top:20px;padding:14px;background:var(--bg-2);border-radius:6px;font-size:13px;color:var(--ink-mute);"><b>Ваш коментар:</b> ${escapeHtml(b.client_comment)}</div>` : ''}
+                
+                ${actionsHtml}
+            </div>
+            
+            <div class="footer">
+                ${s.phone ? `Зателефонуйте: <a href="tel:${escapeHtml(s.phone)}">${escapeHtml(s.phone)}</a><br>` : ''}
+                ${s.address ? escapeHtml(s.address) : ''}
+            </div>
+        `;
+    }
+    
+    // ============ ОТМЕНА ============
+    async function cancelBooking() {
+        if (!confirm('Точно відмінити бронь?')) return;
+        
+        try {
+            const res = await fetch('/api/public/booking-cancel.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const data = await res.json();
+            
+            if (!data.success) {
+                alert(data.error || 'Помилка');
+                return;
+            }
+            
+            alert('Бронь відмінено');
+            loadBooking();
+        } catch (err) {
+            alert('Помилка: ' + err.message);
+        }
+    }
+    
+    // ============ ПЕРЕНОС ============
+    function openRescheduleModal() {
+        document.getElementById('rescheduleModal').classList.add('active');
+        calendarMonth = new Date();
+        selectedDate = null;
+        selectedSlot = null;
+        document.getElementById('slotsContainer').style.display = 'none';
+        document.getElementById('rescheduleError').style.display = 'none';
+        document.getElementById('confirmReschedule').disabled = true;
+        renderCalendar();
+    }
+    
+    function closeRescheduleModal() {
+        document.getElementById('rescheduleModal').classList.remove('active');
+    }
+    
+    async function renderCalendar() {
+        const year = calendarMonth.getFullYear();
+        const month = calendarMonth.getMonth() + 1;
+        const container = document.getElementById('calendarContainer');
+        
+        const monthNames = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+        
+        container.innerHTML = `
+            <div class="cal-header">
+                <button class="cal-nav" onclick="prevMonth()">‹</button>
+                <div class="cal-month">${monthNames[calendarMonth.getMonth()]} ${year}</div>
+                <button class="cal-nav" onclick="nextMonth()">›</button>
+            </div>
+            <div class="cal-weekdays">
+                ${['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(d => `<div class="cal-weekday">${d}</div>`).join('')}
+            </div>
+            <div class="cal-grid" id="calGrid"><div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--ink-mute);">Завантаження...</div></div>
+        `;
+        
+        try {
+            const res = await fetch(`/api/public/calendar-days.php?year=${year}&month=${month}`);
+            const data = await res.json();
+            
+            const grid = document.getElementById('calGrid');
+            grid.innerHTML = '';
+            
+            // Дни месяца
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            // День недели первого дня (0 = Воскресенье, в Украине неделя с понедельника)
+            const firstDay = new Date(year, month - 1, 1);
+            let startWeekday = firstDay.getDay() - 1;
+            if (startWeekday < 0) startWeekday = 6; // воскресенье = 6
+            
+            // Пустые ячейки до первого дня
+            for (let i = 0; i < startWeekday; i++) {
+                grid.innerHTML += '<div class="cal-day empty"></div>';
+            }
+            
+            // Дни
+            (data.days || []).forEach(d => {
+                const dateObj = new Date(d.date);
+                dateObj.setHours(0,0,0,0);
+                const isPast = dateObj < today;
+                const isToday = dateObj.getTime() === today.getTime();
+                
+                let cls = 'cal-day';
+                if (isPast || d.closed || !d.available) cls += ' disabled';
+                if (isToday) cls += ' today';
+                if (selectedDate === d.date) cls += ' selected';
+                
+                grid.innerHTML += `<div class="${cls}" onclick="${!isPast && !d.closed && d.available ? `selectDate('${d.date}')` : ''}">${dateObj.getDate()}</div>`;
+            });
+        } catch (err) {
+            document.getElementById('calGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--danger);">Помилка: ${err.message}</div>`;
+        }
+    }
+    
+    function prevMonth() {
+        const now = new Date();
+        const newMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+        if (newMonth.getFullYear() < now.getFullYear() || 
+            (newMonth.getFullYear() === now.getFullYear() && newMonth.getMonth() < now.getMonth())) {
+            return;
+        }
+        calendarMonth = newMonth;
+        renderCalendar();
+    }
+    
+    function nextMonth() {
+        calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+        renderCalendar();
+    }
+    
+    async function selectDate(date) {
+        selectedDate = date;
+        selectedSlot = null;
+        document.getElementById('confirmReschedule').disabled = true;
+        renderCalendar();
+        
+        const container = document.getElementById('slotsContainer');
+        const list = document.getElementById('slotsList');
+        container.style.display = 'block';
+        list.innerHTML = '<div class="empty-state">Завантаження слотів...</div>';
+        
+        try {
+            const serviceId = bookingData.service_id;
+            const duration = bookingData.duration_min;
+            
+            const res = await fetch(`/api/public/calendar-slots.php?date=${date}&duration=${duration}&service_id=${serviceId}`);
+            const data = await res.json();
+            
+            if (!data.success || data.closed) {
+                list.innerHTML = '<div class="empty-state">Цей день вихідний</div>';
+                return;
+            }
+            
+            const availableSlots = (data.slots || []).filter(s => s.available);
+            
+            if (availableSlots.length === 0) {
+                list.innerHTML = '<div class="empty-state">Немає вільних слотів на цей день</div>';
+                return;
+            }
+            
+            list.innerHTML = availableSlots.map(s => `
+                <div class="slot" onclick='selectSlot(${JSON.stringify(s)})'>
+                    ${s.time}
+                    ${s.master_name ? `<span class="slot-master">${escapeHtml(s.master_name)}</span>` : ''}
+                </div>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = `<div class="empty-state" style="color:var(--danger);">Помилка: ${err.message}</div>`;
+        }
+    }
+    
+    function selectSlot(slot) {
+        selectedSlot = slot;
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        document.getElementById('confirmReschedule').disabled = false;
+    }
+    
+    async function confirmReschedule() {
+        if (!selectedDate || !selectedSlot) return;
+        
+        const btn = document.getElementById('confirmReschedule');
+        btn.disabled = true;
+        btn.textContent = 'Збереження...';
+        
+        try {
+            const res = await fetch('/api/public/booking-reschedule.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code,
+                    new_date: selectedDate,
+                    new_time: selectedSlot.time,
+                    new_master_id: selectedSlot.master_id || null
+                })
+            });
+            const data = await res.json();
+            
+            if (!data.success) {
+                const errEl = document.getElementById('rescheduleError');
+                errEl.textContent = data.error;
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Підтвердити перенос';
+                return;
+            }
+            
+            alert('Бронь успішно перенесено!');
+            closeRescheduleModal();
+            loadBooking();
+        } catch (err) {
+            alert('Помилка: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = 'Підтвердити перенос';
+        }
+    }
+    
+    // Закрытие модалки по клику на оверлей
+    document.getElementById('rescheduleModal').addEventListener('click', (e) => {
+        if (e.target.id === 'rescheduleModal') closeRescheduleModal();
+    });
+    
+    // Загрузка
+    loadBooking();
+    </script>
+</body>
+</html>
