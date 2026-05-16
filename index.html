@@ -5131,16 +5131,18 @@ async function saveService() {
 
       const options = [];
       groupEl.querySelectorAll('.opt-row').forEach(rowEl => {
-        const optName = rowEl.querySelector('.opt-name').value.trim();
-        if (!optName) return;
-        const uploader = rowEl._imgUploader;
-        options.push({
-          name: optName,
-          icon_url: uploader ? uploader.getValue() : '',
-          price_modifier: parseInt(rowEl.querySelector('.opt-price').value) || 0,
-          duration_modifier: parseInt(rowEl.querySelector('.opt-duration').value) || 0
-        });
-      });
+    const optName = rowEl.querySelector('.opt-name').value.trim();
+    if (!optName) return;
+    const uploader = rowEl._imgUploader;
+    const optionId = parseInt(rowEl.dataset.optionId) || 0;
+    options.push({
+        id: optionId,  // ← НОВЕ: передаємо id опції
+        name: optName,
+        icon_url: uploader ? uploader.getValue() : '',
+        price_modifier: parseInt(rowEl.querySelector('.opt-price').value) || 0,
+        duration_modifier: parseInt(rowEl.querySelector('.opt-duration').value) || 0
+    });
+});
 
       option_groups.push({
         name: groupName,

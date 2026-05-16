@@ -33,10 +33,29 @@ try {
         $id = (int)$pdo->lastInsertId();
     }
     
-    // Удаляем все старые опции этой услуги
-    $pdo->prepare("DELETE FROM service_options WHERE service_id = ?")->execute([$id]);
+    // Збираємо ID опцій які прийшли від клієнта — щоб видалити ті, яких більше немає
+    $existingOptionIds = [];
+    foreach ($option_groups as $group) {
+        foreach (($group['options'] ?? []) as $opt) {
+            $optId = (int)($opt['id'] ?? 0);
+            if ($optId > 0) {
+                $existingOptionIds[] = $optId;
+            }
+        }
+    }
     
-    // Добавляем заново
+    // Видаляємо опції яких більше немає (вони збереглися в БД, але не прийшли від клієнта)
+    if (!empty($existingOptionIds)) {
+        $placeholders = implode(',', array_fill(0, count($existingOptionIds), '?'));
+        $sql = "DELETE FROM service_options WHERE service_id = ? AND id NOT IN ($placeholders)";
+        $params = array_merge([$id], $existingOptionIds);
+        $pdo->prepare($sql)->execute($params);
+    } else {
+        // Якщо взагалі немає опцій — видаляємо всі що були
+        $pdo->prepare("DELETE FROM service_options WHERE service_id = ?")->execute([$id]);
+    }
+    
+    // Обробляємо опції — оновлюємо існуючі або створюємо нові
     $sortGroup = 0;
     foreach ($option_groups as $group) {
         $groupName = trim($group['name'] ?? '');
@@ -50,19 +69,48 @@ try {
             $optName = trim($opt['name'] ?? $opt['option_name'] ?? '');
             if (empty($optName)) continue;
             
-            $pdo->prepare("INSERT INTO service_options 
-                (service_id, group_name, option_name, description, icon_url, price_modifier, duration_modifier, is_required, is_multiple, sort_order) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-                ->execute([
-                    $id, $groupName, $optName,
-                    trim($opt['description'] ?? ''),
-                    trim($opt['icon_url'] ?? ''),
-                    (int)($opt['price_modifier'] ?? 0),
-                    (int)($opt['duration_modifier'] ?? 0),
-                    $isRequired,
-                    $isMultiple,
-                    $sortGroup * 100 + $sortOpt
-                ]);
+            $optId = (int)($opt['id'] ?? 0);
+            $sortOrder = $sortGroup * 100 + $sortOpt;
+            $description2 = trim($opt['description'] ?? '');
+            $iconUrl = trim($opt['icon_url'] ?? '');
+            $priceMod = (int)($opt['price_modifier'] ?? 0);
+            $durationMod = (int)($opt['duration_modifier'] ?? 0);
+            
+            if ($optId > 0) {
+                // Перевіряємо що опція належить цій послузі
+                $check = $pdo->prepare("SELECT id FROM service_options WHERE id = ? AND service_id = ?");
+                $check->execute([$optId, $id]);
+                
+                if ($check->fetch()) {
+                    // UPDATE існуючої — зберігає id і всі звʼязки з option_consumables
+                    $pdo->prepare("UPDATE service_options SET 
+                            group_name=?, option_name=?, description=?, icon_url=?, 
+                            price_modifier=?, duration_modifier=?, is_required=?, is_multiple=?, sort_order=?
+                        WHERE id=?")
+                        ->execute([
+                            $groupName, $optName, $description2, $iconUrl,
+                            $priceMod, $durationMod, $isRequired, $isMultiple, $sortOrder, $optId
+                        ]);
+                } else {
+                    // id передано, але опція не знайдена — створюємо нову
+                    $pdo->prepare("INSERT INTO service_options 
+                        (service_id, group_name, option_name, description, icon_url, price_modifier, duration_modifier, is_required, is_multiple, sort_order) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                        ->execute([
+                            $id, $groupName, $optName, $description2, $iconUrl,
+                            $priceMod, $durationMod, $isRequired, $isMultiple, $sortOrder
+                        ]);
+                }
+            } else {
+                // INSERT нової опції
+                $pdo->prepare("INSERT INTO service_options 
+                    (service_id, group_name, option_name, description, icon_url, price_modifier, duration_modifier, is_required, is_multiple, sort_order) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                    ->execute([
+                        $id, $groupName, $optName, $description2, $iconUrl,
+                        $priceMod, $durationMod, $isRequired, $isMultiple, $sortOrder
+                    ]);
+            }
             $sortOpt++;
         }
         $sortGroup++;
