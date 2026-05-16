@@ -742,30 +742,30 @@
             const today = new Date();
             today.setHours(0,0,0,0);
             
-            // День недели первого дня (0 = Воскресенье, в Украине неделя с понедельника)
-            const firstDay = new Date(year, month - 1, 1);
-            let startWeekday = firstDay.getDay() - 1;
-            if (startWeekday < 0) startWeekday = 6; // воскресенье = 6
-            
-            // Пустые ячейки до первого дня
-            for (let i = 0; i < startWeekday; i++) {
-                grid.innerHTML += '<div class="cal-day empty"></div>';
-            }
-            
             // Дни
             (data.days || []).forEach(d => {
-                const dateObj = new Date(d.date);
-                dateObj.setHours(0,0,0,0);
-                const isPast = dateObj < today;
-                const isToday = dateObj.getTime() === today.getTime();
-                
-                let cls = 'cal-day';
-                if (isPast || d.closed || !d.available) cls += ' disabled';
-                if (isToday) cls += ' today';
-                if (selectedDate === d.date) cls += ' selected';
-                
-                grid.innerHTML += `<div class="${cls}" onclick="${!isPast && !d.closed && d.available ? `selectDate('${d.date}')` : ''}">${dateObj.getDate()}</div>`;
-            });
+    // Якщо день з іншого місяця — порожня клітинка
+    if (d.is_other_month) {
+        grid.innerHTML += '<div class="cal-day empty"></div>';
+        return;
+    }
+    
+    const isPast = !!d.is_past;
+    const isClosed = !!d.is_closed;
+    const isAvailable = !!d.is_available;
+    const isTooFar = !!d.is_too_far;
+    const isToday = !!d.is_today;
+    const isDisabled = isPast || isClosed || isTooFar || !isAvailable;
+    
+    let cls = 'cal-day';
+    if (isDisabled) cls += ' disabled';
+    if (isToday) cls += ' today';
+    if (selectedDate === d.date) cls += ' selected';
+    
+    const onclick = isDisabled ? '' : `onclick="selectDate('${d.date}')"`;
+    
+    grid.innerHTML += `<div class="${cls}" ${onclick}>${d.day}</div>`;
+});
         } catch (err) {
             document.getElementById('calGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--danger);">Помилка: ${err.message}</div>`;
         }
