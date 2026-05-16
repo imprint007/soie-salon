@@ -7934,7 +7934,9 @@ function renderAppearanceSettings() {
 
 // ====== EMAIL ======
 function renderEmailSettings() {
-    const provider = s('mail_provider', 'smtp');
+    // Якщо select вже існує — беремо з нього, інакше з БД
+    const selectEl = document.getElementById('set-mail_provider');
+    const provider = selectEl ? selectEl.value : s('mail_provider', 'smtp');
     
     document.getElementById('settingsContent').innerHTML = `
         <div class="settings-panel active">
