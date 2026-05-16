@@ -1,8 +1,9 @@
 <?php
+<?php
 header('Content-Type: text/html; charset=utf-8');
-require_once __DIR__ . '/_helper.php';
+session_start();
+
 require_once __DIR__ . '/../lib/google_api.php';
-setupAdminApi();
 
 session_start();
 
