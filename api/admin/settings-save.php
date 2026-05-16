@@ -34,7 +34,7 @@ $allowedKeys = [
     'privacy_policy_url','terms_of_service_url','legal_entity','tax_id',
     'seo_title','seo_description','seo_keywords',
     'language','timezone','currency_symbol','booking_code_prefix','hero_video_url','hero_video_speed','google_client_id','google_client_secret','google_redirect_uri','allow_client_cancel','allow_client_reschedule',
-    'mail_provider','brevo_api_key','brevo_from_email','brevo_from_name',
+    'mail_provider','brevo_api_key','brevo_from_email','brevo_from_name','mail_provider','brevo_api_key','brevo_from_email','brevo_from_name',
 ];
 
 $pdo = getDb();

@@ -7934,8 +7934,38 @@ function renderAppearanceSettings() {
 
 // ====== EMAIL ======
 function renderEmailSettings() {
+    const provider = s('mail_provider', 'smtp');
+    
     document.getElementById('settingsContent').innerHTML = `
         <div class="settings-panel active">
+            <!-- ===== ВИБІР ПРОВАЙДЕРА ===== -->
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Email провайдер</h3>
+                    <p>Як ваш сайт буде відправляти листи. <strong style="color:var(--beige);">Brevo</strong> рекомендуємо — листи майже не потрапляють в спам, перші 300 листів на день безкоштовно.</p>
+                </div>
+                <div class="form-group">
+                    <label>Який провайдер використовувати?</label>
+                    <select id="set-mail_provider" onchange="renderEmailSettings()">
+                        <option value="smtp" ${provider === 'smtp' ? 'selected' : ''}>SMTP сервер (Gmail, cPanel, ваш хостинг)</option>
+                        <option value="brevo" ${provider === 'brevo' ? 'selected' : ''}>Brevo API (рекомендуємо)</option>
+                    </select>
+                </div>
+                
+                ${provider === 'brevo' ? `
+                <div style="padding:14px;background:rgba(212,195,160,0.08);border:1px solid rgba(212,195,160,0.2);border-radius:6px;margin-top:14px;font-size:12px;color:var(--ink-mute);line-height:1.6;">
+                    <strong style="color:var(--beige);">Як підключити Brevo за 5 хвилин:</strong><br>
+                    1. Зайдіть на <a href="https://www.brevo.com/" target="_blank" style="color:var(--beige);">brevo.com</a> і зареєструйтесь (безкоштовно)<br>
+                    2. Підтвердіть свій email<br>
+                    3. У панелі: <strong>SMTP & API</strong> → <strong>API Keys</strong> → <strong>Generate a new API key</strong><br>
+                    4. Скопіюйте ключ і вставте нижче<br>
+                    5. У <strong>Senders, domains</strong> додайте і верифікуйте email від якого будете відправляти
+                </div>
+                ` : ''}
+            </div>
+
+            ${provider === 'smtp' ? `
+            <!-- ===== SMTP НАЛАШТУВАННЯ ===== -->
             <div class="settings-card">
                 <div class="settings-card-head">
                     <h3>SMTP-сервер</h3>
@@ -7972,48 +8002,132 @@ function renderEmailSettings() {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="settings-card">
-                <div class="settings-card-head">
-                    <h3>Адреса відправника</h3>
-                </div>
                 <div class="settings-grid">
                     <div class="form-group">
-                        <label>Email відправника (From)</label>
-                        <input type="email" id="set-smtp_from_email" value="${escapeHtml(s('smtp_from_email'))}" placeholder="info@salon.ua">
+                        <label>Від кого (email)</label>
+                        <input type="email" id="set-smtp_from_email" value="${escapeHtml(s('smtp_from_email'))}" placeholder="noreply@yourdomain.com">
                     </div>
                     <div class="form-group">
-                        <label>Імʼя відправника</label>
+                        <label>Від кого (імʼя)</label>
                         <input type="text" id="set-smtp_from_name" value="${escapeHtml(s('smtp_from_name'))}" placeholder="Unique Curls">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Email для отримання заявок (адміна)</label>
-                    <input type="email" id="set-email_for_notifications" value="${escapeHtml(s('email_for_notifications'))}" placeholder="admin@salon.ua">
-                </div>
             </div>
+            ` : ''}
 
+            ${provider === 'brevo' ? `
+            <!-- ===== BREVO НАЛАШТУВАННЯ ===== -->
             <div class="settings-card">
                 <div class="settings-card-head">
-                    <h3>Шаблони листів</h3>
-                    <p>Підтримуються змінні: <code>{code}</code>, <code>{name}</code>, <code>{date}</code>, <code>{time}</code>, <code>{service}</code>, <code>{master}</code></p>
+                    <h3>Brevo API</h3>
+                    <p>Введіть API ключ та email відправника з вашого аккаунта Brevo.</p>
                 </div>
                 <div class="form-group">
-                    <label>Тема листа клієнту</label>
-                    <input type="text" id="set-email_template_client_subject" value="${escapeHtml(s('email_template_client_subject'))}">
+                    <label>Brevo API ключ</label>
+                    <div class="password-wrap">
+                        <input type="password" id="set-brevo_api_key" value="${escapeHtml(s('brevo_api_key'))}" placeholder="xkeysib-...">
+                        <button type="button" class="pw-toggle" onclick="togglePw('set-brevo_api_key', this)">👁</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Тема листа адміну</label>
-                    <input type="text" id="set-email_template_admin_subject" value="${escapeHtml(s('email_template_admin_subject'))}">
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label>Email відправника</label>
+                        <input type="email" id="set-brevo_from_email" value="${escapeHtml(s('brevo_from_email'))}" placeholder="noreply@yourdomain.com">
+                        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Має бути верифікований у Brevo</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Імʼя відправника</label>
+                        <input type="text" id="set-brevo_from_name" value="${escapeHtml(s('brevo_from_name'))}" placeholder="Unique Curls">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Підпис листа</label>
-                    <textarea id="set-email_signature" rows="3" placeholder="З повагою, команда салону">${escapeHtml(s('email_signature'))}</textarea>
+            </div>
+            ` : ''}
+
+            <!-- ===== ТЕСТОВА ВІДПРАВКА ===== -->
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Тестова відправка</h3>
+                    <p>Збережіть налаштування зверху, потім надішліть тестовий лист.</p>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="form-group" style="flex:1;min-width:240px;margin:0;">
+                        <label>Email одержувача</label>
+                        <input type="email" id="emailTestTo" value="${escapeHtml(s('email_for_notifications') || s('smtp_user') || '')}" placeholder="test@example.com">
+                    </div>
+                    <button class="admin-cta" onclick="sendTestEmail()" id="emailTestBtn" style="padding:12px 24px;font-size:11px;">
+                        Надіслати тест
+                    </button>
+                </div>
+                <div id="emailTestResult" style="margin-top:14px;display:none;"></div>
+            </div>
+
+            <!-- ===== ЯКЩО ЛИСТИ В СПАМ ===== -->
+            <div class="settings-card">
+                <div class="settings-card-head">
+                    <h3>Якщо листи потрапляють в спам</h3>
+                </div>
+                <div style="font-size:13px;color:var(--ink-mute);line-height:1.7;">
+                    <p style="margin:0 0 14px;"><strong style="color:var(--beige);">Найпростіше — використовуйте Brevo</strong>. Вона автоматично підписує листи через свій домен, доставляемість 99%.</p>
+                    <p style="margin:0 0 14px;">Якщо хочете залишити SMTP — налаштуйте 3 DNS-записи на вашому домені:</p>
+                    <ul style="margin:0 0 14px;padding-left:20px;">
+                        <li><strong>SPF</strong> — хто може слати листи від вашого домену</li>
+                        <li><strong>DKIM</strong> — криптографічний підпис кожного листа</li>
+                        <li><strong>DMARC</strong> — політика обробки підробок</li>
+                    </ul>
+                    <p style="margin:0;">Перевірити доставляемість можна на <a href="https://www.mail-tester.com/" target="_blank" style="color:var(--beige);">mail-tester.com</a> — надішліть тестовий лист і отримайте оцінку 0-10.</p>
                 </div>
             </div>
         </div>
     `;
+}
+
+// ============================================
+// ТЕСТОВА ВІДПРАВКА EMAIL
+// ============================================
+async function sendTestEmail() {
+    const to = document.getElementById('emailTestTo').value.trim();
+    const btn = document.getElementById('emailTestBtn');
+    const result = document.getElementById('emailTestResult');
+    
+    if (!to) {
+        alert('Введіть email одержувача');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Відправляю...';
+    result.style.display = 'block';
+    result.innerHTML = '<div style="padding:12px;color:var(--ink-mute);font-size:12px;">Відправляю...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/email-test-send.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ to })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            result.innerHTML = `
+                <div style="padding:14px;background:rgba(160,212,160,0.1);border:1px solid rgba(160,212,160,0.3);color:#a0d4a0;border-radius:6px;font-size:13px;">
+                    ✓ ${escapeHtml(data.message || 'Лист відправлено')}<br>
+                    <span style="font-size:11px;opacity:0.7;">Перевірте папку Inbox і Spam</span>
+                </div>
+            `;
+        } else {
+            result.innerHTML = `
+                <div style="padding:14px;background:rgba(217,115,115,0.1);border:1px solid rgba(217,115,115,0.3);color:var(--danger);border-radius:6px;font-size:13px;">
+                    ✗ ${escapeHtml(data.error || 'Помилка')}
+                </div>
+            `;
+        }
+    } catch (err) {
+        result.innerHTML = `<div style="padding:14px;color:var(--danger);font-size:13px;">Помилка: ${escapeHtml(err.message)}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Надіслати тест';
+    }
 }
 
 // ====== TELEGRAM ======
