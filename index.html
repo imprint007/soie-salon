@@ -2291,6 +2291,21 @@
         </div>
     </div>
     
+    <!-- Подвкладки внутри Товари -->
+    <div style="display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:20px;" id="productsTabs">
+        <button class="prod-tab active" data-prod-tab="catalog" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid var(--beige);color:var(--beige);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Каталог</button>
+        <button class="prod-tab" data-prod-tab="stats" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Статистика</button>
+        <button class="prod-tab" data-prod-tab="movements" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Журнал руху</button>
+    </div>
+
+    <!-- Вкладки контент -->
+    <div id="prodTabCatalog">
+    <!-- сюда переедет существующий контент (фильтры, поиск, сетка) -->
+    </div>
+
+    <div id="prodTabStats" style="display:none;"></div>
+    <div id="prodTabMovements" style="display:none;"></div>
+
     <!-- Фильтры -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="productFilters">
         <button class="filter-chip active" data-product-filter="all">Усі</button>
@@ -5085,6 +5100,298 @@ async function deleteProduct() {
     } catch (err) {
         alert('Помилка');
     }
+}
+
+// ============================================
+// ТАБЫ В ТОВАРАХ
+// ============================================
+document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.prod-tab');
+    if (!tab) return;
+    
+    document.querySelectorAll('.prod-tab').forEach(t => {
+        t.classList.remove('active');
+        t.style.borderBottomColor = 'transparent';
+        t.style.color = 'var(--ink-mute)';
+    });
+    tab.classList.add('active');
+    tab.style.borderBottomColor = 'var(--beige)';
+    tab.style.color = 'var(--beige)';
+    
+    // Скрыть все
+    document.getElementById('prodTabCatalog').style.display = 'none';
+    document.getElementById('prodTabStats').style.display = 'none';
+    document.getElementById('prodTabMovements').style.display = 'none';
+    
+    const tabName = tab.dataset.prodTab;
+    if (tabName === 'catalog') {
+        document.getElementById('prodTabCatalog').style.display = 'block';
+    } else if (tabName === 'stats') {
+        document.getElementById('prodTabStats').style.display = 'block';
+        loadProductStats();
+    } else if (tabName === 'movements') {
+        document.getElementById('prodTabMovements').style.display = 'block';
+        loadStockMovements();
+    }
+});
+
+// ============================================
+// СТАТИСТИКА ТОВАРОВ
+// ============================================
+let productStatsPeriod = 'month';
+
+async function loadProductStats() {
+    const container = document.getElementById('prodTabStats');
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/products-stats.php?period=' + productStatsPeriod, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        renderProductStats(data.data || data);
+    } catch (err) {
+        container.innerHTML = `<div style="padding:20px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderProductStats(d) {
+    const container = document.getElementById('prodTabStats');
+    const t = d.totals;
+    const p = d.period_stats;
+    
+    let html = `
+        <!-- Период -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="prodStatsPeriod">
+            ${['today','week','month','3months','year','all'].map(per => {
+                const labels = { today:'Сьогодні', week:'Тиждень', month:'Місяць', '3months':'3 місяці', year:'Рік', all:'Все' };
+                const active = per === productStatsPeriod;
+                return `<button class="prod-stats-period" data-period="${per}" style="padding:8px 14px;background:${active ? 'var(--beige)' : 'transparent'};border:1px solid ${active ? 'var(--beige)' : 'var(--line)'};color:${active ? 'var(--bg)' : 'var(--ink)'};font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:4px;">${labels[per]}</button>`;
+            }).join('')}
+        </div>
+        
+        <!-- Карточки -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-label">Товарів</div>
+                <div class="stat-value">${t.total_products}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Вартість складу</div>
+                <div class="stat-value accent">${Number(t.inventory_value).toLocaleString('uk-UA')} ₴</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Закінчуються</div>
+                <div class="stat-value" style="color:#e8d599;">${t.low_stock}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Немає в наявності</div>
+                <div class="stat-value" style="color:var(--danger);">${t.out_of_stock}</div>
+            </div>
+        </div>
+        
+        <!-- Период -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-label">Закупок за період</div>
+                <div class="stat-value">${Number(p.purchases_total).toLocaleString('uk-UA')} ₴</div>
+                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">${p.purchases_count} операцій</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Розхід за період</div>
+                <div class="stat-value" style="color:var(--danger);">${Number(p.consumption_cost).toLocaleString('uk-UA')} ₴</div>
+                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">${p.consumption_count} списань</div>
+            </div>
+        </div>
+        
+        <!-- ТОП-10 -->
+        <div style="background:var(--bg-1);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:20px;">
+            <h3 style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);margin:0 0 16px;">ТОП-10 використовуваних товарів</h3>
+            ${d.top_consumed && d.top_consumed.length ? `
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--line);">
+                            <th style="text-align:left;padding:10px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Товар</th>
+                            <th style="text-align:right;padding:10px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Кількість</th>
+                            <th style="text-align:right;padding:10px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Списано</th>
+                            <th style="text-align:right;padding:10px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Вартість</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${d.top_consumed.map(p => `
+                            <tr style="border-top:1px solid var(--line);">
+                                <td style="padding:12px 10px;">${escapeHtml(p.name)}</td>
+                                <td style="text-align:right;padding:12px 10px;color:var(--ink);">${Number(p.total_qty).toLocaleString('uk-UA')} ${getUnitLabel(p.unit)}</td>
+                                <td style="text-align:right;padding:12px 10px;color:var(--ink-mute);">${p.times_used} раз</td>
+                                <td style="text-align:right;padding:12px 10px;color:var(--beige);">${Number(p.total_cost).toLocaleString('uk-UA')} ₴</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Поки що немає списань</div>'}
+        </div>
+        
+        <!-- Низький залишок -->
+        <div style="background:var(--bg-1);border:1px solid var(--line);border-radius:4px;padding:20px;">
+            <h3 style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);margin:0 0 16px;">⚠ Низький залишок</h3>
+            ${d.low_stock && d.low_stock.length ? `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">
+                    ${d.low_stock.map(p => `
+                        <div onclick="editProduct(${p.id});setTimeout(()=>{document.querySelector('[data-prod-tab=catalog]').click()},100);" style="padding:12px;background:var(--bg-2);border:1px solid rgba(232,213,153,0.3);border-radius:4px;cursor:pointer;">
+                            <div style="font-size:13px;color:var(--ink);margin-bottom:6px;">${escapeHtml(p.name)}</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div style="font-size:11px;color:#e8d599;">Залишок: ${p.current_stock} ${getUnitLabel(p.unit)}</div>
+                                <div style="font-size:10px;color:var(--ink-mute);">мін: ${p.min_stock}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Все в порядку 👍</div>'}
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    // Обробник зміни періоду
+    container.querySelectorAll('.prod-stats-period').forEach(btn => {
+        btn.addEventListener('click', () => {
+            productStatsPeriod = btn.dataset.period;
+            loadProductStats();
+        });
+    });
+}
+
+// ============================================
+// ЖУРНАЛ ДВИЖЕНИЙ
+// ============================================
+let movementsPeriod = 'month';
+let movementsType = '';
+
+async function loadStockMovements() {
+    const container = document.getElementById('prodTabMovements');
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    try {
+        const url = '/api/admin/stock-movements-list.php?period=' + movementsPeriod + (movementsType ? '&type=' + movementsType : '');
+        const res = await fetch(url, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        renderStockMovements(data.data || data);
+    } catch (err) {
+        container.innerHTML = `<div style="padding:20px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+    }
+}
+
+function renderStockMovements(d) {
+    const container = document.getElementById('prodTabMovements');
+    const movements = d.data || [];
+    const summary = d.summary || {};
+    
+    const typeLabels = {
+        purchase: 'Закупка',
+        consumption: 'Списання',
+        adjustment: 'Корекція',
+        return: 'Повернення',
+        sale: 'Продаж'
+    };
+    const typeColors = {
+        purchase: '#a0d4a0',
+        consumption: 'var(--danger)',
+        adjustment: '#9b8eed',
+        return: '#e8d599',
+        sale: 'var(--beige)'
+    };
+    
+    let html = `
+        <!-- Фільтри -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="movPeriodTabs">
+            ${['today','week','month','3months','year','all'].map(per => {
+                const labels = { today:'Сьогодні', week:'Тиждень', month:'Місяць', '3months':'3 місяці', year:'Рік', all:'Все' };
+                const active = per === movementsPeriod;
+                return `<button class="mov-period" data-period="${per}" style="padding:8px 14px;background:${active ? 'var(--beige)' : 'transparent'};border:1px solid ${active ? 'var(--beige)' : 'var(--line)'};color:${active ? 'var(--bg)' : 'var(--ink)'};font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:4px;">${labels[per]}</button>`;
+            }).join('')}
+        </div>
+        
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="movTypeTabs">
+            <button class="mov-type" data-type="" style="padding:8px 14px;background:${!movementsType ? 'var(--beige)' : 'transparent'};border:1px solid ${!movementsType ? 'var(--beige)' : 'var(--line)'};color:${!movementsType ? 'var(--bg)' : 'var(--ink)'};font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Усі</button>
+            ${Object.entries(typeLabels).map(([type, label]) => {
+                const active = type === movementsType;
+                return `<button class="mov-type" data-type="${type}" style="padding:8px 14px;background:${active ? 'var(--beige)' : 'transparent'};border:1px solid ${active ? 'var(--beige)' : 'var(--line)'};color:${active ? 'var(--bg)' : 'var(--ink)'};font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:4px;">${label}</button>`;
+            }).join('')}
+        </div>
+        
+        <!-- Підсумки -->
+        ${Object.keys(summary).length > 0 ? `
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:24px;">
+                ${Object.entries(summary).map(([type, s]) => `
+                    <div style="padding:14px;background:var(--bg-1);border:1px solid var(--line);border-radius:4px;">
+                        <div style="font-size:10px;color:${typeColors[type]};letter-spacing:0.1em;text-transform:uppercase;">${typeLabels[type] || type}</div>
+                        <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--ink);margin-top:6px;">${Number(s.total_qty).toLocaleString('uk-UA')}</div>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">${s.count} операцій</div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+        
+        <!-- Список рухів -->
+        <div style="background:var(--bg-1);border:1px solid var(--line);border-radius:4px;overflow:hidden;">
+            ${movements.length === 0 ? `
+                <div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:12px;">Немає рухів за обраний період</div>
+            ` : `
+                <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                    <thead>
+                        <tr style="background:var(--bg-2);">
+                            <th style="text-align:left;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Дата</th>
+                            <th style="text-align:left;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Тип</th>
+                            <th style="text-align:left;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Товар</th>
+                            <th style="text-align:right;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Кількість</th>
+                            <th style="text-align:right;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Залишок</th>
+                            <th style="text-align:left;padding:12px 14px;color:var(--ink-mute);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;">Причина</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${movements.map(m => {
+                            const date = new Date(m.created_at);
+                            const dateStr = date.toLocaleDateString('uk-UA') + ' ' + date.toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'});
+                            const qty = parseFloat(m.quantity);
+                            const isPositive = qty >= 0;
+                            const unit = getUnitLabel(m.product_unit);
+                            
+                            let reason = m.reason_text || '';
+                            if (m.booking_code) reason += ` <span style="color:var(--ink-mute);">(${m.booking_code} · ${escapeHtml(m.client_name || '')})</span>`;
+                            else if (m.expense_description) reason += ` <span style="color:var(--ink-mute);">(${escapeHtml(m.expense_description)})</span>`;
+                            
+                            return `
+                                <tr style="border-top:1px solid var(--line);">
+                                    <td style="padding:12px 14px;color:var(--ink-mute);font-size:11px;">${dateStr}</td>
+                                    <td style="padding:12px 14px;"><span style="padding:4px 10px;background:${typeColors[m.movement_type]}20;color:${typeColors[m.movement_type]};font-size:10px;letter-spacing:0.1em;text-transform:uppercase;border-radius:999px;">${typeLabels[m.movement_type] || m.movement_type}</span></td>
+                                    <td style="padding:12px 14px;color:var(--ink);">${escapeHtml(m.product_name || '—')}</td>
+                                    <td style="padding:12px 14px;text-align:right;color:${isPositive ? '#a0d4a0' : 'var(--danger)'};font-weight:500;">${isPositive ? '+' : ''}${qty.toLocaleString('uk-UA')} ${unit}</td>
+                                    <td style="padding:12px 14px;text-align:right;color:var(--ink-mute);">${Number(m.stock_after).toLocaleString('uk-UA')} ${unit}</td>
+                                    <td style="padding:12px 14px;color:var(--ink-mute);">${reason}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `}
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    // Обробники
+    container.querySelectorAll('.mov-period').forEach(btn => {
+        btn.addEventListener('click', () => {
+            movementsPeriod = btn.dataset.period;
+            loadStockMovements();
+        });
+    });
+    container.querySelectorAll('.mov-type').forEach(btn => {
+        btn.addEventListener('click', () => {
+            movementsType = btn.dataset.type;
+            loadStockMovements();
+        });
+    });
 }
 
 // ============ КАТЕГОРИИ ТОВАРОВ ============
