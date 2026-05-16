@@ -462,9 +462,50 @@
   .review-row:last-child { border-bottom: none; }
   .review-row .lbl { color: var(--ink-mute); letter-spacing: 0.08em; flex-shrink: 0; }
   .review-row .val { color: var(--ink); font-weight: 400; text-align: right; }
-  .review-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; margin-top: 10px; border-top: 1px solid var(--line-3); }
-  .review-total .lbl { font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--beige); }
-  .review-total .val { font-family: 'Fraunces', serif; font-size: 32px; color: var(--beige); }
+  .review-total {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line, #2a2724);
+}
+.rt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+}
+.rt-row .lbl {
+    font-size: 11px;
+    color: var(--ink-mute, #9e968a);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+.rt-row .val {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--ink, #ede6d9);
+}
+/* Загальна сума — звичайний розмір якщо є депозит */
+.rt-total .val {
+    font-size: 22px;
+}
+/* Депозит — акцент */
+.rt-deposit .val {
+    color: var(--beige, #d4c3a0);
+    font-weight: 600;
+}
+/* В салоні — головна сума, велика */
+.rt-payable .val {
+    font-size: 32px;
+    color: var(--beige, #d4c3a0);
+}
+/* Якщо депозиту немає — основна сума це загальна */
+.rt-no-deposit .rt-total .val {
+    font-size: 32px;
+    color: var(--beige, #d4c3a0);
+}
+.rt-no-deposit .rt-payable {
+    display: none;
+}
   .deposit-note { margin-top: 14px; padding: 14px; background: rgba(224,201,168,0.04); border-left: 2px solid var(--beige); font-size: 12px; color: var(--ink-mute); line-height: 1.6; }
   .deposit-note strong { color: var(--beige); font-weight: 400; }
 
@@ -1824,7 +1865,23 @@
     <div class="review-row"><span class="lbl">Майстер</span><span class="val" id="reviewMaster">—</span></div>
     <div class="review-row"><span class="lbl">Дата і час</span><span class="val" id="reviewDate">—</span></div>
     <div class="review-row"><span class="lbl">Тривалість</span><span class="val" id="reviewDuration">—</span></div>
-    <div class="review-total"><span class="lbl">До сплати</span><span class="val" id="reviewTotal">—</span></div>
+    <div class="review-total" id="reviewTotalBlock">
+    <!-- Загальна сума -->
+    <div class="rt-row rt-total">
+        <span class="lbl">Загальна сума</span>
+        <span class="val" id="reviewTotal">0 ₴</span>
+    </div>
+    <!-- Депозит (показується якщо включений) -->
+    <div class="rt-row rt-deposit" id="reviewDepositRow" style="display:none;">
+        <span class="lbl">Депозит зараз</span>
+        <span class="val" id="reviewDepositVal">0 ₴</span>
+    </div>
+    <!-- До сплати в салоні -->
+    <div class="rt-row rt-payable" id="reviewPayableRow">
+        <span class="lbl">В салоні</span>
+        <span class="val" id="reviewPayable">0 ₴</span>
+    </div>
+</div>
     <div class="deposit-note" id="depositNote"><strong>Депозит 600 ₴</strong> буде утримано для підтвердження бронювання.</div>
   </div>
 
@@ -3929,10 +3986,27 @@ function updateReview() {
     const deposit = depositRequired ? (parseInt(ps('deposit_amount', '0')) || 0) : 0;
     
     // Екран Контакти
-    setText('reviewService', svc);
-    setText('reviewMaster', state.masterName || 'Будь-який');
-    setText('reviewDuration', formatDuration(totalTime));
-    setText('reviewTotal', total.toLocaleString('uk-UA') + ' ₴');
+    // Екран Контакти
+setText('reviewService', svc);
+setText('reviewMaster', state.masterName || 'Будь-який');
+setText('reviewDuration', formatDuration(totalTime));
+
+// Блок з сумами
+const payable = Math.max(0, total - deposit);
+setText('reviewTotal', total.toLocaleString('uk-UA') + ' ₴');
+setText('reviewDepositVal', deposit.toLocaleString('uk-UA') + ' ₴');
+setText('reviewPayable', payable.toLocaleString('uk-UA') + ' ₴');
+
+const totalBlock = document.getElementById('reviewTotalBlock');
+const depositRow = document.getElementById('reviewDepositRow');
+
+if (depositRequired && deposit > 0) {
+    totalBlock?.classList.remove('rt-no-deposit');
+    if (depositRow) depositRow.style.display = '';
+} else {
+    totalBlock?.classList.add('rt-no-deposit');
+    if (depositRow) depositRow.style.display = 'none';
+}
     
     if (state.selectedDate && state.selectedTime) {
         setText('reviewDate', `${state.selectedDate} · ${state.selectedTime}`);
@@ -3954,9 +4028,11 @@ function updateReview() {
     
     // Кнопка: «Сплатити» якщо депозит, «Записатися» якщо без депозиту
     const submitBtn = document.getElementById('bookingSubmitBtn');
-    if (submitBtn) {
-        submitBtn.textContent = depositRequired ? 'Сплатити' : 'Записатися';
-    }
+if (submitBtn) {
+    submitBtn.textContent = (depositRequired && deposit > 0)
+        ? `Сплатити депозит ${deposit.toLocaleString('uk-UA')} ₴`
+        : 'Записатися';
+}
     
     // Екран Успіху
     setText('succService', svc);
