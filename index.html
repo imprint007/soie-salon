@@ -3264,7 +3264,7 @@ function renderServiceConsumables() {
                 </select>
                 
                 <div style="display:flex;align-items:center;gap:4px;width:140px;">
-                    <input type="number" class="consumable-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="0.001" style="width:100px;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                    <input type="number" class="consumable-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="${getStepForUnit(product?.unit)}" style="...">
                     <span style="color:var(--ink-mute);font-size:12px;min-width:24px;" id="cons-unit-${i}">${unit}</span>
                 </div>
                 
@@ -3434,7 +3434,7 @@ function renderOptionConsumables() {
                 
                 <div style="display:flex;align-items:center;gap:4px;width:150px;">
                     <span style="color:${isPositive ? '#a0d4a0' : 'var(--danger)'};font-size:14px;font-weight:600;">${isPositive ? '+' : ''}</span>
-                    <input type="number" class="opt-cons-qty" data-index="${i}" value="${c.quantity_delta || 0}" step="0.001" style="width:90px;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                    <input type="number" class="opt-cons-qty" data-index="${i}" value="${c.quantity_delta || 0}" step="${getStepForUnit(product?.unit)}" style="...">
                     <span style="color:var(--ink-mute);font-size:12px;min-width:24px;" id="opt-cons-unit-${i}">${unit}</span>
                 </div>
                 
@@ -6442,6 +6442,24 @@ function updatePricePerUnit() {
 function getUnitLabel(unit) {
     const labels = { ml: 'мл', l: 'л', gr: 'гр', kg: 'кг', pcs: 'шт', pack: 'уп', m: 'м' };
     return labels[unit] || unit;
+}
+
+function getStepForUnit(unit) {
+    if (!unit) return '1';
+    switch (unit) {
+        case 'pcs':
+        case 'pack':
+        case 'm':
+            return '1';      // штуки — целые
+        case 'ml':
+        case 'gr':
+            return '0.1';    // мл/гр — десятые
+        case 'l':
+        case 'kg':
+            return '0.001';  // литры/кг — тысячные
+        default:
+            return '1';
+    }
 }
 
 async function saveExpense() {
