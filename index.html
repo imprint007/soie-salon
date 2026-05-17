@@ -1655,6 +1655,137 @@
 }
 #optionConsumablesModal.modal-overlay.show { display: flex !important; }
 
+/* === ВКЛАДКИ В МОДАЛКЕ МАСТЕРА === */
+.master-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.master-tab {
+    padding: 10px 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-mute);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.master-tab.active {
+    color: var(--beige);
+    border-bottom-color: var(--beige);
+}
+
+.master-tab:hover:not(.active) {
+    color: var(--ink);
+}
+
+.master-tab-content {
+    display: none;
+}
+
+.master-tab-content.active {
+    display: block;
+}
+
+/* === ГРАФИК === */
+.schedule-day {
+    display: grid;
+    grid-template-columns: 110px 70px 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.schedule-day.off {
+    opacity: 0.5;
+}
+
+.schedule-day .day-name {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.schedule-day .day-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    user-select: none;
+}
+
+.schedule-day .day-toggle input {
+    accent-color: var(--beige);
+    cursor: pointer;
+}
+
+.schedule-day input[type="time"] {
+    padding: 8px 10px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    border-radius: 4px;
+    color-scheme: dark;
+}
+
+.schedule-day input[type="time"]:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* === ВИКЛЮЧЕННЯ === */
+.exception-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.exception-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.exception-type-vacation { background: rgba(160,212,160,0.15); color: #a0d4a0; }
+.exception-type-sick { background: rgba(217,115,115,0.15); color: var(--danger); }
+.exception-type-day_off { background: rgba(158,150,138,0.15); color: var(--ink-mute); }
+.exception-type-extra_work { background: rgba(232,213,153,0.15); color: #e8d599; }
+.exception-type-custom_hours { background: rgba(155,142,237,0.15); color: #9b8eed; }
+
+@media (max-width: 600px) {
+    .schedule-day {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .exception-item {
+        grid-template-columns: 1fr;
+    }
+}
 
 </style>
 </head>
