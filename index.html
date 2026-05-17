@@ -2298,115 +2298,198 @@
         </div>
         <div class="modal-body">
             
-            <input type="hidden" id="mstId" value="">
+            <!-- ВКЛАДКИ -->
+            <div class="master-tabs">
+                <button class="master-tab active" data-master-tab="profile" type="button" onclick="switchMasterTab('profile')">Профіль</button>
+                <button class="master-tab" data-master-tab="schedule" type="button" onclick="switchMasterTab('schedule')">Графік</button>
+            </div>
+            
+            <!-- ===== ВКЛАДКА ПРОФІЛЬ ===== -->
+            <div class="master-tab-content active" data-tab="profile">
+            
+                <input type="hidden" id="mstId" value="">
 
+                <div class="form-group">
+                    <label>Фото майстра</label>
+                    <div id="mstPhotoUploader"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Імʼя та прізвище</label>
+                    <input type="text" id="mstName" placeholder="Анна Воронова">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Посада / роль</label>
+                        <input type="text" id="mstRole" placeholder="Senior · Колорист">
+                    </div>
+                    <div class="form-group">
+                        <label>Стаж (років)</label>
+                        <input type="number" id="mstExperience" placeholder="5">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="tel" id="mstPhone" placeholder="+380 (67) 123-45-67">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="mstEmail" placeholder="anna@example.com">
+                    </div>
+                </div>
+
+                <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+                    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
+        
+                     <!-- ===== GOOGLE CALENDAR ===== -->
+                    <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+                         <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
+        
+                            <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+                             Календар у Google куди будуть писатись події цього майстра. 
+                            <a href="https://calendar.google.com/" target="_blank" style="color:var(--beige);">Створити календар в Google →</a>
+                    </div>
+        
+                <div style="display:flex;gap:8px;align-items:flex-start;">
+                     <select id="mGoogleCalendarId" style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+                    <option value="">— Не використовувати —</option>
+                     </select>
+                    <button type="button" class="admin-cta ghost" onclick="loadGoogleCalendarsForMaster()" style="padding:10px 16px;font-size:11px;flex-shrink:0;">↻ Оновити</button>
+                </div>
+        
+                <div style="font-size:11px;color:var(--ink-mute);margin-top:8px;" id="mGoogleCalendarHint">
+                 Натисніть «Оновити» щоб завантажити список календарів
+            </div>
+        </div>
+
+        <div class="form-row">
             <div class="form-group">
-                <label>Фото майстра</label>
-                <div id="mstPhotoUploader"></div>
+                <label>Логін</label>
+                <input type="text" id="mUsername" placeholder="anna_voronova" autocomplete="off">
             </div>
-
             <div class="form-group">
-                <label>Імʼя та прізвище</label>
-                <input type="text" id="mstName" placeholder="Анна Воронова">
+                <label>Пароль <span style="color:var(--ink-mute);font-size:11px;">(залиш пустим щоб не міняти)</span></label>
+                <input type="password" id="mPassword" placeholder="••••••••" autocomplete="new-password">
             </div>
+        </div>
+        
+        <div style="font-size:11px;color:var(--ink-mute);line-height:1.5;">
+            Майстер зможе зайти в особистий кабінет за адресою <strong style="color:var(--ink);">/master.html</strong>
+        </div>
+        </div>
 
-            <div class="form-row">
                 <div class="form-group">
-                    <label>Посада / роль</label>
-                    <input type="text" id="mstRole" placeholder="Senior · Колорист">
+                    <label>Біографія / опис</label>
+                    <textarea id="mstBio" rows="3" placeholder="Коротко про майстра"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Стаж (років)</label>
-                    <input type="number" id="mstExperience" placeholder="5">
-                </div>
-            </div>
 
-            <div class="form-row">
                 <div class="form-group">
-                    <label>Телефон</label>
-                    <input type="tel" id="mstPhone" placeholder="+380 (67) 123-45-67">
+                    <label>Які послуги виконує</label>
+                    <div id="mstServicesList" class="services-checklist">
+                        <div style="padding:14px;color:var(--ink-mute);font-size:12px;">Завантаження послуг...</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="mstEmail" placeholder="anna@example.com">
-                </div>
-            </div>
 
-            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
-                <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
-    
-                 <!-- ===== GOOGLE CALENDAR ===== -->
                 <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
-                     <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
-    
-                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
-                         Календар у Google куди будуть писатись події цього майстра. 
-                        <a href="https://calendar.google.com/" target="_blank" style="color:var(--beige);">Створити календар в Google →</a>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <label style="margin:0;">Зарплата майстра (%)</label>
+            <button type="button" class="admin-cta ghost" onclick="addSalaryRule()" style="padding:6px 14px;font-size:11px;">+ Додати правило</button>
+        </div>
+        
+        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+            Базовий % застосовується до всіх послуг. Можна додати окремий % для конкретних послуг або опцій.
+        </div>
+        
+        <div id="salaryRulesList" style="display:flex;flex-direction:column;gap:8px;">
+            <!-- правила будуть рендеритись JS -->
+        </div>
+        </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="mstActive" checked>
+                        <span>Активний (доступний для запису)</span>
+                    </label>
                 </div>
-    
-            <div style="display:flex;gap:8px;align-items:flex-start;">
-                 <select id="mGoogleCalendarId" style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
-                <option value="">— Не використовувати —</option>
-                 </select>
-                <button type="button" class="admin-cta ghost" onclick="loadGoogleCalendarsForMaster()" style="padding:10px 16px;font-size:11px;flex-shrink:0;">↻ Оновити</button>
+
+                <div id="mstError" class="auth-error" style="display:none;"></div>
+            
             </div>
-    
-            <div style="font-size:11px;color:var(--ink-mute);margin-top:8px;" id="mGoogleCalendarHint">
-             Натисніть «Оновити» щоб завантажити список календарів
-        </div>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group">
-            <label>Логін</label>
-            <input type="text" id="mUsername" placeholder="anna_voronova" autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label>Пароль <span style="color:var(--ink-mute);font-size:11px;">(залиш пустим щоб не міняти)</span></label>
-            <input type="password" id="mPassword" placeholder="••••••••" autocomplete="new-password">
-        </div>
-    </div>
-    
-    <div style="font-size:11px;color:var(--ink-mute);line-height:1.5;">
-        Майстер зможе зайти в особистий кабінет за адресою <strong style="color:var(--ink);">/master.html</strong>
-    </div>
-    </div>
-
-            <div class="form-group">
-                <label>Біографія / опис</label>
-                <textarea id="mstBio" rows="3" placeholder="Коротко про майстра"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Які послуги виконує</label>
-                <div id="mstServicesList" class="services-checklist">
-                    <div style="padding:14px;color:var(--ink-mute);font-size:12px;">Завантаження послуг...</div>
+            <!-- /Профіль -->
+            
+            <!-- ===== ВКЛАДКА ГРАФІК ===== -->
+            <div class="master-tab-content" data-tab="schedule" style="display:none;">
+                <div id="scheduleLoading" style="text-align:center;padding:30px;color:var(--ink-mute);font-size:13px;">Завантаження графіка...</div>
+                
+                <div id="scheduleContent" style="display:none;">
+                    <div style="margin-bottom:24px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Постійний графік</div>
+                            <button type="button" class="admin-cta ghost" style="padding:6px 12px;font-size:10px;" onclick="copyMondayToAll()">Скопіювати ПН на всі дні</button>
+                        </div>
+                        <div id="scheduleDaysList"></div>
+                    </div>
+                    
+                    <div style="margin-top:30px;padding-top:24px;border-top:1px solid var(--line);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Виключення</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Відпустки, лікарняні, додаткові робочі дні</div>
+                            </div>
+                            <button type="button" class="admin-cta" style="padding:8px 16px;font-size:11px;" onclick="openExceptionForm()">+ Додати</button>
+                        </div>
+                        
+                        <div id="exceptionForm" style="display:none;padding:16px;background:var(--bg-2);border:1px solid var(--beige);border-radius:4px;margin-bottom:14px;">
+                            <input type="hidden" id="exId" value="">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Дата</label>
+                                    <input type="date" id="exDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Тип</label>
+                                    <select id="exType" onchange="updateExceptionTimeFields()">
+                                        <option value="vacation">Відпустка</option>
+                                        <option value="sick">Лікарняний</option>
+                                        <option value="day_off">Вихідний</option>
+                                        <option value="extra_work">Додатковий робочий день</option>
+                                        <option value="custom_hours">Інший час роботи</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row" id="exTimeRow" style="display:none;">
+                                <div class="form-group">
+                                    <label>Початок</label>
+                                    <input type="time" id="exStart" value="10:00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Кінець</label>
+                                    <input type="time" id="exEnd" value="19:00">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Коментар (опц.)</label>
+                                <input type="text" id="exNote" placeholder="Наприклад: Відпустка в Карпатах">
+                            </div>
+                            <div style="display:flex;gap:8px;margin-top:14px;">
+                                <button type="button" class="admin-cta ghost" style="flex:1;" onclick="cancelExceptionForm()">Скасувати</button>
+                                <button type="button" class="admin-cta" style="flex:1;" onclick="saveException()">Зберегти</button>
+                            </div>
+                        </div>
+                        
+                        <div id="exceptionsList"></div>
+                    </div>
+                    
+                    <button type="button" class="admin-cta" style="width:100%;margin-top:24px;padding:14px;" onclick="saveMasterSchedule()">
+                        Зберегти графік
+                    </button>
                 </div>
             </div>
-
-            <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <label style="margin:0;">Зарплата майстра (%)</label>
-        <button type="button" class="admin-cta ghost" onclick="addSalaryRule()" style="padding:6px 14px;font-size:11px;">+ Додати правило</button>
-    </div>
-    
-    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
-        Базовий % застосовується до всіх послуг. Можна додати окремий % для конкретних послуг або опцій.
-    </div>
-    
-    <div id="salaryRulesList" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- правила будуть рендеритись JS -->
-    </div>
-    </div>
-
-            <div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="mstActive" checked>
-                    <span>Активний (доступний для запису)</span>
-                </label>
-            </div>
-
-            <div id="mstError" class="auth-error" style="display:none;"></div>
+            <!-- /Графік -->
+            
         </div>
         <div class="modal-footer">
             <button class="admin-cta ghost" onclick="closeMasterModal()">Скасувати</button>
