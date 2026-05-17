@@ -1786,27 +1786,28 @@
         grid-template-columns: 1fr;
     }
 
-    /* === DATE/TIME INPUTS у графіку та виключеннях === */
+  /* === DATE/TIME INPUTS у графіку та виключеннях === */
 #exceptionForm input[type="date"],
 #exceptionForm input[type="time"] {
-    padding: 12px 14px;
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    border-radius: 4px;
-    color-scheme: dark;
-    width: 100%;
+    padding: 12px 14px !important;
+    background: var(--bg-1) !important;
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--ink) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    border-radius: 4px !important;
+    color-scheme: dark !important;
+    width: 100% !important;
+    box-sizing: border-box;
 }
 
 #exceptionForm input[type="date"]:focus,
 #exceptionForm input[type="time"]:focus {
-    outline: none;
-    border-color: var(--beige);
+    outline: none !important;
+    border-color: var(--beige) !important;
 }
 
-/* Іконка календаря — бежевий колір */
 #exceptionForm input[type="date"]::-webkit-calendar-picker-indicator,
 #exceptionForm input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(80%) sepia(20%) saturate(400%) hue-rotate(10deg);
@@ -1819,27 +1820,22 @@
     opacity: 1;
 }
 
-/* === КНОПКА "ДІАПАЗОН" коли активна === */
-.ex-mode-btn.active {
+/* Текст всередині date input */
+#exceptionForm input[type="date"]::-webkit-datetime-edit,
+#exceptionForm input[type="time"]::-webkit-datetime-edit {
+    color: var(--ink) !important;
+}
+
+#exceptionForm input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    color: var(--ink) !important;
+}
+/* === КНОПКА "+ ДОДАТИ" в графіку (бежевий фон → темний текст) === */
+button.admin-cta:not(.ghost):not(.danger) {
     color: var(--bg) !important;
 }
 
-/* === КНОПКА "+ ДОДАТИ" — теж бежева === */
-.admin-cta {
-    color: var(--bg);
-}
-
-.admin-cta:hover {
-    color: var(--bg);
-}
-
-/* Ghost (контурні) кнопки залишаються світлим текстом */
-.admin-cta.ghost {
-    color: var(--ink);
-}
-
-.admin-cta.ghost:hover {
-    color: var(--beige);
+button.admin-cta:not(.ghost):not(.danger):hover {
+    color: var(--bg) !important;
 }
 }
 
