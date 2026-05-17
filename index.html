@@ -2297,6 +2297,7 @@
             <button class="modal-close" onclick="closeMasterModal()">×</button>
         </div>
         <div class="modal-body">
+            
             <input type="hidden" id="mstId" value="">
 
             <div class="form-group">
@@ -2332,28 +2333,28 @@
             </div>
 
             <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
-    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
+                <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
     
-    <!-- ===== GOOGLE CALENDAR ===== -->
-<div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
-    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
+                 <!-- ===== GOOGLE CALENDAR ===== -->
+                <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+                     <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
     
-    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
-        Календар у Google куди будуть писатись події цього майстра. 
-        <a href="https://calendar.google.com/" target="_blank" style="color:var(--beige);">Створити календар в Google →</a>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+                         Календар у Google куди будуть писатись події цього майстра. 
+                        <a href="https://calendar.google.com/" target="_blank" style="color:var(--beige);">Створити календар в Google →</a>
+                </div>
+    
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+                 <select id="mGoogleCalendarId" style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+                <option value="">— Не використовувати —</option>
+                 </select>
+                <button type="button" class="admin-cta ghost" onclick="loadGoogleCalendarsForMaster()" style="padding:10px 16px;font-size:11px;flex-shrink:0;">↻ Оновити</button>
+            </div>
+    
+            <div style="font-size:11px;color:var(--ink-mute);margin-top:8px;" id="mGoogleCalendarHint">
+             Натисніть «Оновити» щоб завантажити список календарів
+        </div>
     </div>
-    
-    <div style="display:flex;gap:8px;align-items:flex-start;">
-        <select id="mGoogleCalendarId" style="flex:1;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
-            <option value="">— Не використовувати —</option>
-        </select>
-        <button type="button" class="admin-cta ghost" onclick="loadGoogleCalendarsForMaster()" style="padding:10px 16px;font-size:11px;flex-shrink:0;">↻ Оновити</button>
-    </div>
-    
-    <div style="font-size:11px;color:var(--ink-mute);margin-top:8px;" id="mGoogleCalendarHint">
-        Натисніть «Оновити» щоб завантажити список календарів
-    </div>
-</div>
 
     <div class="form-row">
         <div class="form-group">
@@ -2369,7 +2370,7 @@
     <div style="font-size:11px;color:var(--ink-mute);line-height:1.5;">
         Майстер зможе зайти в особистий кабінет за адресою <strong style="color:var(--ink);">/master.html</strong>
     </div>
-</div>
+    </div>
 
             <div class="form-group">
                 <label>Біографія / опис</label>
@@ -2396,7 +2397,7 @@
     <div id="salaryRulesList" style="display:flex;flex-direction:column;gap:8px;">
         <!-- правила будуть рендеритись JS -->
     </div>
-</div>
+    </div>
 
             <div class="form-group">
                 <label class="checkbox-label">
@@ -4854,6 +4855,314 @@ function resetAndGoHome() {
 }
 
 // ============================================
+// ВКЛАДКИ В МОДАЛКЕ МАСТЕРА
+// ============================================
+function switchMasterTab(tabName) {
+    document.querySelectorAll('.master-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.masterTab === tabName);
+    });
+    document.querySelectorAll('.master-tab-content').forEach(c => {
+        const show = c.dataset.tab === tabName;
+        c.style.display = show ? 'block' : 'none';
+        c.classList.toggle('active', show);
+    });
+    
+    // Если открыли «Графік» — загружаем
+    if (tabName === 'schedule') {
+        loadMasterSchedule();
+    }
+}
+
+// ============================================
+// ГРАФИК МАСТЕРА — ЗАГРУЗКА И РЕНДЕР
+// ============================================
+let currentSchedule = [];
+let currentExceptions = [];
+
+const dayNames = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота'];
+const dayShort = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+
+async function loadMasterSchedule() {
+    const masterId = parseInt(document.getElementById('mstId').value);
+    if (!masterId) {
+        document.getElementById('scheduleLoading').textContent = 'Спершу збережіть майстра, потім налаштовуйте графік';
+        return;
+    }
+    
+    document.getElementById('scheduleLoading').style.display = 'block';
+    document.getElementById('scheduleLoading').textContent = 'Завантаження графіка...';
+    document.getElementById('scheduleContent').style.display = 'none';
+    
+    try {
+        const res = await fetch('/api/admin/master-schedule-get.php?master_id=' + masterId, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        const d = data.data || data;
+        currentSchedule = d.schedule || [];
+        currentExceptions = d.exceptions || [];
+        
+        // Якщо графіка немає — заповнюємо дефолтним
+        if (currentSchedule.length === 0) {
+            for (let wd = 0; wd <= 6; wd++) {
+                currentSchedule.push({
+                    weekday: wd,
+                    is_working: wd === 0 ? 0 : 1,
+                    start_time: wd === 0 ? null : '10:00:00',
+                    end_time: wd === 0 ? null : '19:00:00',
+                    break_start: null,
+                    break_end: null
+                });
+            }
+        }
+        
+        renderScheduleDays();
+        renderExceptions();
+        
+        document.getElementById('scheduleLoading').style.display = 'none';
+        document.getElementById('scheduleContent').style.display = 'block';
+    } catch (err) {
+        document.getElementById('scheduleLoading').textContent = 'Помилка: ' + err.message;
+    }
+}
+
+function renderScheduleDays() {
+    const list = document.getElementById('scheduleDaysList');
+    // Сортуємо: ПН ВТ СР ЧТ ПТ СБ НД (1,2,3,4,5,6,0)
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    
+    list.innerHTML = order.map(wd => {
+        const day = currentSchedule.find(s => parseInt(s.weekday) === wd) || { 
+            weekday: wd, is_working: 1, start_time: '10:00:00', end_time: '19:00:00' 
+        };
+        const isWorking = parseInt(day.is_working) === 1;
+        const startTime = (day.start_time || '10:00:00').substring(0, 5);
+        const endTime = (day.end_time || '19:00:00').substring(0, 5);
+        
+        return `
+            <div class="schedule-day ${isWorking ? '' : 'off'}" data-weekday="${wd}">
+                <div class="day-name">${dayNames[wd]}</div>
+                <label class="day-toggle">
+                    <input type="checkbox" class="sched-working" ${isWorking ? 'checked' : ''} onchange="toggleScheduleDay(${wd}, this.checked)">
+                    ${isWorking ? 'працює' : 'вихідний'}
+                </label>
+                <input type="time" class="sched-start" value="${startTime}" ${isWorking ? '' : 'disabled'} onchange="updateScheduleDay(${wd}, 'start_time', this.value)">
+                <input type="time" class="sched-end" value="${endTime}" ${isWorking ? '' : 'disabled'} onchange="updateScheduleDay(${wd}, 'end_time', this.value)">
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleScheduleDay(weekday, isWorking) {
+    let day = currentSchedule.find(s => parseInt(s.weekday) === weekday);
+    if (!day) {
+        day = { weekday, is_working: 0 };
+        currentSchedule.push(day);
+    }
+    day.is_working = isWorking ? 1 : 0;
+    if (isWorking && !day.start_time) {
+        day.start_time = '10:00:00';
+        day.end_time = '19:00:00';
+    }
+    renderScheduleDays();
+}
+
+function updateScheduleDay(weekday, field, value) {
+    let day = currentSchedule.find(s => parseInt(s.weekday) === weekday);
+    if (!day) {
+        day = { weekday, is_working: 1 };
+        currentSchedule.push(day);
+    }
+    day[field] = value + ':00';
+}
+
+function copyMondayToAll() {
+    const monday = currentSchedule.find(s => parseInt(s.weekday) === 1);
+    if (!monday || !parseInt(monday.is_working)) {
+        alert('Спершу налаштуйте понеділок');
+        return;
+    }
+    if (!confirm('Скопіювати графік понеділка на всі дні крім неділі?')) return;
+    
+    [2, 3, 4, 5, 6].forEach(wd => {
+        let day = currentSchedule.find(s => parseInt(s.weekday) === wd);
+        if (!day) {
+            day = { weekday: wd };
+            currentSchedule.push(day);
+        }
+        day.is_working = 1;
+        day.start_time = monday.start_time;
+        day.end_time = monday.end_time;
+    });
+    
+    renderScheduleDays();
+}
+
+async function saveMasterSchedule() {
+    const masterId = parseInt(document.getElementById('mstId').value);
+    if (!masterId) {
+        alert('Спершу збережіть майстра');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/master-schedule-save.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                master_id: masterId,
+                schedule: currentSchedule.map(d => ({
+                    weekday: parseInt(d.weekday),
+                    is_working: parseInt(d.is_working) ? 1 : 0,
+                    start_time: d.start_time,
+                    end_time: d.end_time,
+                    break_start: d.break_start || null,
+                    break_end: d.break_end || null
+                }))
+            })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        showToast('Графік збережено');
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+// ============================================
+// ВИКЛЮЧЕННЯ
+// ============================================
+const exceptionTypeLabels = {
+    vacation: 'Відпустка',
+    sick: 'Лікарняний',
+    day_off: 'Вихідний',
+    extra_work: 'Доп. робочий',
+    custom_hours: 'Інший час'
+};
+
+function renderExceptions() {
+    const list = document.getElementById('exceptionsList');
+    if (currentExceptions.length === 0) {
+        list.innerHTML = '<div style="padding:20px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;border-radius:4px;">Поки що немає виключень</div>';
+        return;
+    }
+    
+    list.innerHTML = currentExceptions.map(ex => {
+        const date = new Date(ex.exception_date);
+        const dateStr = date.toLocaleDateString('uk-UA', { day: '2-digit', month: 'long', year: 'numeric', weekday: 'short' });
+        const timeStr = (ex.start_time && ex.end_time) 
+            ? `${ex.start_time.substring(0,5)} — ${ex.end_time.substring(0,5)}` 
+            : '';
+        
+        return `
+            <div class="exception-item">
+                <div>
+                    <div style="font-size:14px;color:var(--ink);">${dateStr}</div>
+                    ${timeStr ? `<div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${timeStr}</div>` : ''}
+                </div>
+                <div>
+                    <span class="exception-type-badge exception-type-${ex.exception_type}">${exceptionTypeLabels[ex.exception_type] || ex.exception_type}</span>
+                </div>
+                <div style="font-size:12px;color:var(--ink-mute);">${ex.note ? escapeHtml(ex.note) : ''}</div>
+                <button type="button" onclick="deleteException(${ex.id})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:12px;border-radius:4px;">✕</button>
+            </div>
+        `;
+    }).join('');
+}
+
+function openExceptionForm() {
+    document.getElementById('exceptionForm').style.display = 'block';
+    document.getElementById('exId').value = '';
+    document.getElementById('exDate').value = '';
+    document.getElementById('exType').value = 'vacation';
+    document.getElementById('exNote').value = '';
+    updateExceptionTimeFields();
+}
+
+function cancelExceptionForm() {
+    document.getElementById('exceptionForm').style.display = 'none';
+}
+
+function updateExceptionTimeFields() {
+    const type = document.getElementById('exType').value;
+    const needsTime = type === 'extra_work' || type === 'custom_hours';
+    document.getElementById('exTimeRow').style.display = needsTime ? 'flex' : 'none';
+}
+
+async function saveException() {
+    const masterId = parseInt(document.getElementById('mstId').value);
+    const date = document.getElementById('exDate').value;
+    const type = document.getElementById('exType').value;
+    const note = document.getElementById('exNote').value.trim();
+    
+    if (!date) {
+        alert('Введіть дату');
+        return;
+    }
+    
+    const payload = {
+        master_id: masterId,
+        exception_date: date,
+        exception_type: type,
+        note
+    };
+    
+    if (type === 'extra_work' || type === 'custom_hours') {
+        payload.start_time = document.getElementById('exStart').value + ':00';
+        payload.end_time = document.getElementById('exEnd').value + ':00';
+    }
+    
+    try {
+        const res = await fetch('/api/admin/master-exception-save.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        cancelExceptionForm();
+        await loadMasterSchedule();
+        showToast('Виключення збережено');
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+async function deleteException(id) {
+    if (!confirm('Видалити виключення?')) return;
+    
+    try {
+        const res = await fetch('/api/admin/master-exception-delete.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        await loadMasterSchedule();
+        showToast('Видалено');
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
+// Хелпер toast если ещё нет
+if (typeof showToast !== 'function') {
+    window.showToast = function(msg) {
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 20px;background:var(--bg-1);border:1px solid var(--beige);color:var(--beige);font-size:13px;border-radius:4px;z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2500);
+    };
+}
+
+// ============================================
 // АДМИНКА — пакеты
 // ============================================
 let currentPackages = [];
@@ -6566,6 +6875,7 @@ function closeMasterModal() {
 
 async function openMasterModal() {
     document.getElementById('masterModalTitle').textContent = 'Новий майстер';
+    switchMasterTab('profile');
     document.getElementById('mstId').value = '';
     document.getElementById('mstName').value = '';
     document.getElementById('mstRole').value = '';
@@ -6607,6 +6917,7 @@ async function openMasterModal() {
 async function editMaster(id) {
     const m = currentMasters.find(x => x.id == id);
     if (!m) return;
+    switchMasterTab('profile');
 
     document.getElementById('masterModalTitle').textContent = 'Редагувати: ' + m.name;
     document.getElementById('mstId').value = m.id;
