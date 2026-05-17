@@ -2444,7 +2444,15 @@
                         
                         <div id="exceptionForm" style="display:none;padding:16px;background:var(--bg-2);border:1px solid var(--beige);border-radius:4px;margin-bottom:14px;">
                             <input type="hidden" id="exId" value="">
-                            <div class="form-row">
+                            
+                            <!-- Перемикач: одна дата чи діапазон -->
+                            <div style="display:flex;gap:8px;margin-bottom:14px;">
+                                <button type="button" class="ex-mode-btn active" data-mode="single" onclick="switchExceptionMode('single')" style="flex:1;padding:8px;background:var(--beige);border:1px solid var(--beige);color:var(--bg);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Один день</button>
+                                <button type="button" class="ex-mode-btn" data-mode="range" onclick="switchExceptionMode('range')" style="flex:1;padding:8px;background:transparent;border:1px solid var(--line);color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Діапазон</button>
+                            </div>
+                            
+                            <!-- Одна дата -->
+                            <div id="exSingleDate" class="form-row">
                                 <div class="form-group">
                                     <label>Дата</label>
                                     <input type="date" id="exDate">
@@ -2460,6 +2468,34 @@
                                     </select>
                                 </div>
                             </div>
+                            
+                            <!-- Діапазон -->
+                            <div id="exRangeDate" style="display:none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>З якого числа</label>
+                                        <input type="date" id="exDateFrom">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>По яке число (включно)</label>
+                                        <input type="date" id="exDateTo">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Тип</label>
+                                    <select id="exTypeRange" onchange="updateExceptionTimeFields()">
+                                        <option value="vacation">Відпустка</option>
+                                        <option value="sick">Лікарняний</option>
+                                        <option value="day_off">Вихідний</option>
+                                        <option value="extra_work">Додатковий робочий день</option>
+                                        <option value="custom_hours">Інший час роботи</option>
+                                    </select>
+                                </div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:-8px;margin-bottom:14px;line-height:1.5;">
+                                    <span id="exRangeInfo">Виберіть початкову і кінцеву дату</span>
+                                </div>
+                            </div>
+                            
                             <div class="form-row" id="exTimeRow" style="display:none;">
                                 <div class="form-group">
                                     <label>Початок</label>
@@ -2479,7 +2515,7 @@
                                 <button type="button" class="admin-cta" style="flex:1;" onclick="saveException()">Зберегти</button>
                             </div>
                         </div>
-                        
+
                         <div id="exceptionsList"></div>
                     </div>
                     
@@ -5154,13 +5190,36 @@ function renderExceptions() {
     }).join('');
 }
 
+let currentExceptionMode = 'single'; // 'single' або 'range'
+
+function switchExceptionMode(mode) {
+    currentExceptionMode = mode;
+    
+    document.querySelectorAll('.ex-mode-btn').forEach(btn => {
+        const isActive = btn.dataset.mode === mode;
+        btn.classList.toggle('active', isActive);
+        btn.style.background = isActive ? 'var(--beige)' : 'transparent';
+        btn.style.border = isActive ? '1px solid var(--beige)' : '1px solid var(--line)';
+        btn.style.color = isActive ? 'var(--bg)' : 'var(--ink-mute)';
+    });
+    
+    document.getElementById('exSingleDate').style.display = mode === 'single' ? 'flex' : 'none';
+    document.getElementById('exRangeDate').style.display = mode === 'range' ? 'block' : 'none';
+    
+    updateExceptionTimeFields();
+    updateRangeInfo();
+}
+
 function openExceptionForm() {
     document.getElementById('exceptionForm').style.display = 'block';
     document.getElementById('exId').value = '';
     document.getElementById('exDate').value = '';
+    document.getElementById('exDateFrom').value = '';
+    document.getElementById('exDateTo').value = '';
     document.getElementById('exType').value = 'vacation';
+    document.getElementById('exTypeRange').value = 'vacation';
     document.getElementById('exNote').value = '';
-    updateExceptionTimeFields();
+    switchExceptionMode('single');
 }
 
 function cancelExceptionForm() {
@@ -5168,25 +5227,90 @@ function cancelExceptionForm() {
 }
 
 function updateExceptionTimeFields() {
-    const type = document.getElementById('exType').value;
+    const type = currentExceptionMode === 'single' 
+        ? document.getElementById('exType').value 
+        : document.getElementById('exTypeRange').value;
     const needsTime = type === 'extra_work' || type === 'custom_hours';
     document.getElementById('exTimeRow').style.display = needsTime ? 'flex' : 'none';
 }
 
+function updateRangeInfo() {
+    const from = document.getElementById('exDateFrom')?.value;
+    const to = document.getElementById('exDateTo')?.value;
+    const info = document.getElementById('exRangeInfo');
+    if (!info) return;
+    
+    if (!from || !to) {
+        info.textContent = 'Виберіть початкову і кінцеву дату';
+        info.style.color = 'var(--ink-mute)';
+        return;
+    }
+    
+    const d1 = new Date(from);
+    const d2 = new Date(to);
+    
+    if (d2 < d1) {
+        info.textContent = 'Кінцева дата має бути пізніше початкової';
+        info.style.color = 'var(--danger)';
+        return;
+    }
+    
+    const days = Math.round((d2 - d1) / 86400000) + 1;
+    info.textContent = `Буде створено записи на ${days} день(нів)`;
+    info.style.color = 'var(--ink-mute)';
+}
+
+document.addEventListener('change', (e) => {
+    if (e.target.id === 'exDateFrom' || e.target.id === 'exDateTo') {
+        updateRangeInfo();
+    }
+});
+
 async function saveException() {
     const masterId = parseInt(document.getElementById('mstId').value);
-    const date = document.getElementById('exDate').value;
-    const type = document.getElementById('exType').value;
+    if (!masterId) {
+        alert('Спершу збережіть майстра');
+        return;
+    }
+    
     const note = document.getElementById('exNote').value.trim();
     
-    if (!date) {
-        alert('Введіть дату');
-        return;
+    let dates = [];
+    let type;
+    
+    if (currentExceptionMode === 'single') {
+        const date = document.getElementById('exDate').value;
+        if (!date) { alert('Введіть дату'); return; }
+        dates = [date];
+        type = document.getElementById('exType').value;
+    } else {
+        const from = document.getElementById('exDateFrom').value;
+        const to = document.getElementById('exDateTo').value;
+        if (!from || !to) { alert('Виберіть діапазон дат'); return; }
+        
+        const d1 = new Date(from);
+        const d2 = new Date(to);
+        if (d2 < d1) { alert('Кінцева дата має бути пізніше'); return; }
+        
+        const cursor = new Date(d1);
+        while (cursor <= d2) {
+            const y = cursor.getFullYear();
+            const m = String(cursor.getMonth() + 1).padStart(2, '0');
+            const d = String(cursor.getDate()).padStart(2, '0');
+            dates.push(`${y}-${m}-${d}`);
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        
+        type = document.getElementById('exTypeRange').value;
+        
+        if (dates.length > 90) {
+            alert(`Занадто великий діапазон: ${dates.length} днів. Максимум 90 днів.`);
+            return;
+        }
     }
     
     const payload = {
         master_id: masterId,
-        exception_date: date,
         exception_type: type,
         note
     };
@@ -5196,19 +5320,50 @@ async function saveException() {
         payload.end_time = document.getElementById('exEnd').value + ':00';
     }
     
+    let saved = 0;
+    let errors = 0;
+    
+    for (const date of dates) {
+        try {
+            const res = await fetch('/api/admin/master-exception-save.php', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...payload, exception_date: date })
+            });
+            const data = await res.json();
+            if (data.success) saved++;
+            else errors++;
+        } catch (err) {
+            errors++;
+        }
+    }
+    
+    cancelExceptionForm();
+    await loadMasterSchedule();
+    
+    if (errors === 0) {
+        showToast(saved === 1 ? 'Виключення збережено' : `Збережено ${saved} виключень`);
+    } else {
+        showToast(`Збережено ${saved}, помилок ${errors}`);
+    }
+}
+
+async function deleteException(id) {
+    if (!confirm('Видалити виключення?')) return;
+    
     try {
-        const res = await fetch('/api/admin/master-exception-save.php', {
+        const res = await fetch('/api/admin/master-exception-delete.php', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ id })
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         
-        cancelExceptionForm();
         await loadMasterSchedule();
-        showToast('Виключення збережено');
+        showToast('Видалено');
     } catch (err) {
         alert('Помилка: ' + err.message);
     }
