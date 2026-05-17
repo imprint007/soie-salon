@@ -1785,6 +1785,62 @@
     .exception-item {
         grid-template-columns: 1fr;
     }
+
+    /* === DATE/TIME INPUTS у графіку та виключеннях === */
+#exceptionForm input[type="date"],
+#exceptionForm input[type="time"] {
+    padding: 12px 14px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+    color-scheme: dark;
+    width: 100%;
+}
+
+#exceptionForm input[type="date"]:focus,
+#exceptionForm input[type="time"]:focus {
+    outline: none;
+    border-color: var(--beige);
+}
+
+/* Іконка календаря — бежевий колір */
+#exceptionForm input[type="date"]::-webkit-calendar-picker-indicator,
+#exceptionForm input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(80%) sepia(20%) saturate(400%) hue-rotate(10deg);
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+#exceptionForm input[type="date"]::-webkit-calendar-picker-indicator:hover,
+#exceptionForm input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* === КНОПКА "ДІАПАЗОН" коли активна === */
+.ex-mode-btn.active {
+    color: var(--bg) !important;
+}
+
+/* === КНОПКА "+ ДОДАТИ" — теж бежева === */
+.admin-cta {
+    color: var(--bg);
+}
+
+.admin-cta:hover {
+    color: var(--bg);
+}
+
+/* Ghost (контурні) кнопки залишаються світлим текстом */
+.admin-cta.ghost {
+    color: var(--ink);
+}
+
+.admin-cta.ghost:hover {
+    color: var(--beige);
+}
 }
 
 </style>
