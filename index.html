@@ -9801,19 +9801,30 @@ function toggleSalaryDetails(masterId) {
     }
 }
 
-// Примусово темний фон для всіх текстових полів
+// Примусовий стиль для всіх полів вводу (як у решти форм)
 function forceDarkInputs() {
-    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input[type="url"], input[type="date"], input[type="time"], textarea, select');
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input[type="url"], input[type="search"], input[type="date"], input[type="time"], input:not([type]), textarea, select');
     inputs.forEach(el => {
-        el.style.setProperty('background-color', '#1f1c19', 'important');
-        el.style.setProperty('color', '#ede6d9', 'important');
-        el.style.setProperty('-webkit-text-fill-color', '#ede6d9', 'important');
+        el.style.setProperty('width', '100%', 'important');
+        el.style.setProperty('padding', '11px 14px', 'important');
+        el.style.setProperty('background', 'var(--bg-2)', 'important');
+        el.style.setProperty('background-color', 'var(--bg-2)', 'important');
+        el.style.setProperty('border', '1px solid var(--line-2)', 'important');
+        el.style.setProperty('color', 'var(--ink)', 'important');
+        el.style.setProperty('-webkit-text-fill-color', 'var(--ink)', 'important');
+        el.style.setProperty('font-family', "'Inter', sans-serif", 'important');
+        el.style.setProperty('font-size', '14px', 'important');
+        el.style.setProperty('transition', 'border-color 0.3s', 'important');
+        el.style.setProperty('box-sizing', 'border-box', 'important');
+        // тёмная тема для системного календаря
+        if (el.type === 'date' || el.type === 'time') {
+            el.style.setProperty('color-scheme', 'dark', 'important');
+        }
     });
 }
 
-// Запускаємо при завантаженні і періодично (для динамічно створених полів)
 document.addEventListener('DOMContentLoaded', forceDarkInputs);
-setInterval(forceDarkInputs, 1000);
+setInterval(forceDarkInputs, 800);
 
 </script>
 
