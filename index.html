@@ -9801,6 +9801,20 @@ function toggleSalaryDetails(masterId) {
     }
 }
 
+// Примусово темний фон для всіх текстових полів
+function forceDarkInputs() {
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input[type="url"], input[type="date"], input[type="time"], textarea, select');
+    inputs.forEach(el => {
+        el.style.setProperty('background-color', '#1f1c19', 'important');
+        el.style.setProperty('color', '#ede6d9', 'important');
+        el.style.setProperty('-webkit-text-fill-color', '#ede6d9', 'important');
+    });
+}
+
+// Запускаємо при завантаженні і періодично (для динамічно створених полів)
+document.addEventListener('DOMContentLoaded', forceDarkInputs);
+setInterval(forceDarkInputs, 1000);
+
 </script>
 
 </body>
