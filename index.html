@@ -1873,6 +1873,25 @@ select:-webkit-autofill {
     color: #ede6d9 !important;
 }
 
+/* === НАЙСИЛЬНІШЕ ПРАВИЛО ДЛЯ ВСІХ INPUT === */
+body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body textarea,
+body select {
+    background-color: #1f1c19 !important;
+    color: #ede6d9 !important;
+    -webkit-text-fill-color: #ede6d9 !important;
+}
+
+body input:-webkit-autofill,
+body input:-webkit-autofill:hover,
+body input:-webkit-autofill:focus,
+body textarea:-webkit-autofill,
+body select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #1f1c19 inset !important;
+    -webkit-text-fill-color: #ede6d9 !important;
+    caret-color: #ede6d9 !important;
+}
+
 }
 
 </style>
