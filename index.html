@@ -1892,6 +1892,132 @@ body select:-webkit-autofill {
     caret-color: #ede6d9 !important;
 }
 
+/* === ВИБІР МАЙСТРА ПРИ БРОНЮВАННІ === */
+.masters-select {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid var(--beige);
+    background: linear-gradient(135deg, rgba(224,201,168,0.06), transparent);
+    animation: fadeUp 0.5s ease;
+    display: none;
+}
+.masters-select.show { display: block; }
+
+.ms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+.ms-time {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    color: var(--ink);
+}
+.ms-count {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--beige);
+    text-transform: uppercase;
+}
+
+.ms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.ms-card {
+    padding: 16px 10px 12px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+}
+.ms-card:hover { border-color: var(--line-3); }
+.ms-card.selected {
+    border-color: var(--beige);
+    background: rgba(224,201,168,0.08);
+}
+
+.ms-card-photo {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    margin: 0 auto 10px;
+    background-color: var(--bg-3);
+    border: 1px solid var(--line-2);
+    transition: border-color 0.25s;
+}
+.ms-card.selected .ms-card-photo { border-color: var(--beige); }
+
+.ms-card-name {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+.ms-card-role {
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.ms-card-check {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--beige);
+    color: var(--bg-0);
+    font-size: 12px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.ms-card.selected .ms-card-check { display: flex; }
+
+.ms-any-label {
+    font-size: 9px;
+    color: var(--beige);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 6px;
+}
+
+.no-master {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px dashed var(--danger);
+    text-align: center;
+    display: none;
+    animation: fadeUp 0.5s ease;
+}
+.no-master.show { display: block; }
+.no-master .nm-title { font-family: 'Fraunces', serif; font-style: italic; color: var(--danger); font-size: 17px; margin-bottom: 6px; }
+.no-master .nm-sub { font-size: 12px; color: var(--ink-mute); }
+
+/* Бейдж на слоті часу */
+.slot-badge {
+    display: block;
+    font-size: 9px;
+    color: var(--beige);
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 440px) {
+    .ms-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 }
 
 </style>
@@ -2053,13 +2179,12 @@ body select:-webkit-autofill {
     <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Оберіть дату</div>
   </div>
 
-  <div class="master-reveal" id="masterReveal">
-    <div class="master-avatar" id="masterAvatar"></div>
-    <div class="master-info">
-      <div class="m-role" id="masterRole">Вільний майстер</div>
-      <div class="m-name" id="masterName">—</div>
-      <div class="m-exp" id="masterExp">—</div>
+    <div class="masters-select" id="mastersSelect">
+    <div class="ms-header">
+      <div class="ms-time" id="msTimeLabel">—</div>
+      <div class="ms-count" id="msCountLabel"></div>
     </div>
+    <div class="ms-grid" id="msGrid"></div>
   </div>
 
   <div class="no-master" id="noMaster">
