@@ -7185,69 +7185,125 @@ async function loadTimeSlots(dateStr) {
     }
 }
 
-function renderTimeSlots(slots) {
-    const grid = document.getElementById('timesGrid');
-    
-    grid.innerHTML = slots.map(slot => {
-        const classes = ['time-slot'];
-        if (!slot.available) classes.push('unavailable');
-        
-        const slotData = JSON.stringify({
-            time: slot.time,
-            master_id: slot.master_id,
-            master_name: slot.master_name,
-            master_photo: slot.master_photo,
-            master_role: slot.master_role,
-            available: slot.available
-        }).replace(/"/g, '&quot;');
-        
-        const onclick = slot.available 
-            ? `onclick='selectTimeSlot(${JSON.stringify(slot).replace(/'/g, "&#39;")})'` 
-            : '';
-        
-        return `<div class="${classes.join(' ')}" ${onclick}>${slot.time}</div>`;
-    }).join('');
-}
+        // ============================================
+        // СЛОТИ ЧАСУ + ВИБІР МАЙСТРА
+        // ============================================
+        let loadedTimeSlots = [];
+        let currentFreeMasters = [];
 
-function selectTimeSlot(slot) {
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-    event.currentTarget.classList.add('selected');
-    
-    state.selectedTime = slot.time;
-    state.masterId = slot.master_id;
-    state.masterName = slot.master_name;
-    
-    // Показуємо інформацію про майстра
-    showMasterInfo(slot);
-    
-    document.getElementById('dateBtn').disabled = false;
-}
+        function renderTimeSlots(slots) {
+            loadedTimeSlots = slots;
+            const grid = document.getElementById('timesGrid');
+            
+            grid.innerHTML = slots.map((slot, i) => {
+                const classes = ['time-slot'];
+                if (!slot.available) classes.push('unavailable');
+                
+                const onclick = slot.available 
+                    ? `onclick="pickSlot(${i})"` 
+                    : '';
+                
+                // Бейдж кількості майстрів
+                const mCount = (slot.free_masters || []).length;
+                const badge = (slot.available && mCount > 1)
+                    ? `<span class="slot-badge">${mCount} майстр.</span>`
+                    : '';
+                
+                return `<div class="${classes.join(' ')}" data-slot-idx="${i}" ${onclick}>${slot.time}${badge}</div>`;
+            }).join('');
+            
+            hideMasterInfo();
+        }
 
-function showMasterInfo(slot) {
-    const reveal = document.getElementById('masterReveal');
-    const noMaster = document.getElementById('noMaster');
-    
-    if (!slot.master_id) {
-        reveal.classList.remove('show');
-        noMaster.classList.add('show');
-        return;
-    }
-    
-    document.getElementById('masterAvatar').style.backgroundImage = `url('${slot.master_photo || ''}')`;
-    document.getElementById('masterName').textContent = slot.master_name || '—';
-    document.getElementById('masterRole').textContent = slot.master_role || 'Вільний майстер';
-    document.getElementById('masterExp').textContent = slot.free_masters_count > 1 
-        ? `Доступно ${slot.free_masters_count} майстрів на цей час` 
-        : 'Єдиний вільний майстер';
-    
-    reveal.classList.add('show');
-    noMaster.classList.remove('show');
-}
+        function pickSlot(index) {
+            const slot = loadedTimeSlots[index];
+            if (!slot || !slot.available) return;
+            
+            state.selectedTime = slot.time;
+            
+            // Підсвічуємо обраний слот
+            document.querySelectorAll('#timesGrid .time-slot').forEach(s => s.classList.remove('selected'));
+            const el = document.querySelector(`#timesGrid .time-slot[data-slot-idx="${index}"]`);
+            if (el) el.classList.add('selected');
+            
+            const freeMasters = slot.free_masters || [];
+            
+            if (freeMasters.length === 0) {
+                hideMasterInfo();
+                document.getElementById('noMaster').classList.add('show');
+                document.getElementById('dateBtn').disabled = true;
+                state.masterId = null;
+                state.masterName = null;
+                return;
+            }
+            
+            // Показуємо вибір майстра
+            showMastersSelect(slot, freeMasters);
+            document.getElementById('dateBtn').disabled = false;
+        }
 
-function hideMasterInfo() {
-    document.getElementById('masterReveal').classList.remove('show');
-    document.getElementById('noMaster').classList.remove('show');
-}
+        function showMastersSelect(slot, masters) {
+            currentFreeMasters = masters;
+            
+            const selectEl = document.getElementById('mastersSelect');
+            const noMasterEl = document.getElementById('noMaster');
+            
+            // Час
+            document.getElementById('msTimeLabel').textContent = slot.time;
+            
+            // Кількість
+            const countLabel = document.getElementById('msCountLabel');
+            if (masters.length === 1) {
+                countLabel.textContent = 'Доступен 1 мастер';
+            } else if (masters.length >= 2 && masters.length <= 4) {
+                countLabel.textContent = `Доступно ${masters.length} майстра`;
+            } else {
+                countLabel.textContent = `Доступно ${masters.length} майстрів`;
+            }
+            
+            // Картки майстрів
+            const grid = document.getElementById('msGrid');
+            grid.innerHTML = masters.map((m, i) => {
+                const selectedClass = i === 0 ? ' selected' : '';
+                const anyLabel = i === 0 ? '<div class="ms-any-label">рекомендовано</div>' : '';
+                return `
+                    <div class="ms-card${selectedClass}" onclick="pickMaster(${i})">
+                        <div class="ms-card-check">✓</div>
+                        <div class="ms-card-photo" style="background-image:url('${escapeAttr(m.photo_url || '')}')"></div>
+                        <div class="ms-card-name">${escapeText(m.name)}</div>
+                        <div class="ms-card-role">${escapeText(m.role || '')}</div>
+                        ${anyLabel}
+                    </div>
+                `;
+            }).join('');
+            
+            // Дефолт — перший майстер
+            state.masterId = masters[0].id;
+            state.masterName = masters[0].name;
+            
+            selectEl.classList.add('show');
+            noMasterEl.classList.remove('show');
+        }
+
+        function pickMaster(index) {
+            const m = currentFreeMasters[index];
+            if (!m) return;
+            
+            state.masterId = m.id;
+            state.masterName = m.name;
+            
+            // Оновлюємо UI
+            document.querySelectorAll('#msGrid .ms-card').forEach(c => c.classList.remove('selected'));
+            const cards = document.querySelectorAll('#msGrid .ms-card');
+            if (cards[index]) cards[index].classList.add('selected');
+        }
+
+        function hideMasterInfo() {
+            const selectEl = document.getElementById('mastersSelect');
+            const noMasterEl = document.getElementById('noMaster');
+            if (selectEl) selectEl.classList.remove('show');
+            if (noMasterEl) noMasterEl.classList.remove('show');
+        }
 
 async function loadGoogleCalendarsForMaster() {
     const select = document.getElementById('mGoogleCalendarId');
