@@ -181,9 +181,20 @@ try {
                 'master_photo' => null,
             ];
         } else {
-            // Беремо першого вільного (на клієнті оберемо випадкового з масиву можливих)
-            // Тут просто беремо випадкового
-            $picked = $freeMasters[array_rand($freeMasters)];
+            // Перший вільний — за замовчуванням
+            $picked = $freeMasters[0];
+            
+            // Масив усіх вільних майстрів
+            $availableMasters = [];
+            foreach ($freeMasters as $fm) {
+                $availableMasters[] = [
+                    'id' => (int)$fm['id'],
+                    'name' => $fm['name'],
+                    'photo' => $fm['photo_url'],
+                    'role' => $fm['role'],
+                ];
+            }
+            
             $slots[] = [
                 'time' => $timeStr,
                 'end_time' => $endStr,
@@ -194,6 +205,7 @@ try {
                 'master_photo' => $picked['photo_url'],
                 'master_role' => $picked['role'],
                 'free_masters_count' => count($freeMasters),
+                'available_masters' => $availableMasters,
             ];
         }
         
