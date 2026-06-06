@@ -4441,8 +4441,9 @@ function renderClientsList() {
     
     list.innerHTML = allClients.map(c => {
         const lastDate = c.last_visit ? new Date(c.last_visit).toLocaleDateString('uk-UA') : '—';
-        const photo = c.photo_url 
-            ? `<div style="width:44px;height:44px;border-radius:50%;background:center/cover url('${escapeHtml(c.photo_url)}');flex-shrink:0;border:1px solid var(--line);"></div>` 
+        const photoSrc = c.last_photo || c.photo_url;
+        const photo = photoSrc 
+            ? `<div style="width:44px;height:44px;border-radius:50%;background:center/cover url('${escapeHtml(photoSrc)}');flex-shrink:0;border:1px solid var(--line);"></div>` 
             : `<div style="width:44px;height:44px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--line);color:var(--ink-mute);font-size:18px;">${escapeHtml(c.name?.charAt(0) || '?')}</div>`;
         
         return `
@@ -4985,14 +4986,13 @@ function renderClientsList() {
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error);
                 
-                if (!id) {
-                    // Новий клієнт — відкриваємо профіль
-                    closeClientModal();
+                showToast('Збережено');
+                closeClientModal();
+                loadClients();
+
+                if (!id && data.id) {
                     openClientProfile(data.id);
                 }
-                
-                showToast('Збережено');
-                loadClients();
             } catch (err) {
                 alert('Помилка: ' + err.message);
             }

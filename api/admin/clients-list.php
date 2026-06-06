@@ -31,7 +31,8 @@ try {
                (SELECT COUNT(*) FROM bookings b WHERE b.client_id = c.id AND b.status != 'cancelled') AS bookings_count,
                (SELECT COALESCE(SUM(b4.total_price), 0) FROM bookings b4 WHERE b4.client_id = c.id AND b4.status IN ('done', 'confirmed')) AS total_spent,
                (SELECT b2.booking_date FROM bookings b2 WHERE b2.client_id = c.id ORDER BY b2.booking_date DESC LIMIT 1) AS last_visit,
-               (SELECT s.name FROM bookings b3 LEFT JOIN services s ON s.id = b3.service_id WHERE b3.client_id = c.id ORDER BY b3.booking_date DESC LIMIT 1) AS last_service
+               (SELECT s.name FROM bookings b3 LEFT JOIN services s ON s.id = b3.service_id WHERE b3.client_id = c.id ORDER BY b3.booking_date DESC LIMIT 1) AS last_service,
+               (SELECT cp.photo_url FROM client_photos cp WHERE cp.client_id = c.id ORDER BY cp.created_at DESC LIMIT 1) AS last_photo
         FROM clients c
         WHERE $where
         ORDER BY c.name ASC
