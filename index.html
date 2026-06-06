@@ -4455,7 +4455,7 @@ function renderClientsList() {
                 </div>
                 <div style="text-align:right;flex-shrink:0;">
                     <div style="font-size:13px;color:var(--ink);">${escapeHtml(c.phone)}</div>
-                    <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${c.bookings_count || 0} візитів</div>
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${c.bookings_count || 0} візитів · ${parseInt(c.total_spent || 0).toLocaleString('uk-UA')} ₴</div>
                 </div>
                 <div style="color:var(--ink-mute);font-size:18px;flex-shrink:0;padding-left:8px;">→</div>
             </div>
@@ -4617,48 +4617,105 @@ function renderClientsList() {
                 return;
             }
             
-            list.innerHTML = bookings.map(b => {
-                const date = new Date(b.booking_date).toLocaleDateString('uk-UA');
+            const statusLabels = { pending: 'Очікує', confirmed: 'Підтверджено', done: 'Виконано', cancelled: 'Скасовано' };
+            const statusColors = { pending: '#e8d599', confirmed: '#a0d4a0', done: 'var(--ink-mute)', cancelled: 'var(--danger)' };
+            
+            list.innerHTML = bookings.map((b, i) => {
+                const date = new Date(b.booking_date);
+                const dateStr = date.toLocaleDateString('uk-UA', { day: '2-digit', month: 'long', year: 'numeric', weekday: 'short' });
                 const time = (b.booking_time || '').substring(0, 5);
-                const statusLabels = { pending: 'Очікує', confirmed: 'Підтверджено', done: 'Виконано', cancelled: 'Скасовано' };
-                const statusColors = { pending: '#e8d599', confirmed: '#a0d4a0', done: 'var(--ink-mute)', cancelled: 'var(--danger)' };
                 
+                // Опції
                 let optionsHtml = '';
                 if (b.selected_options && b.selected_options.length > 0) {
-                    optionsHtml = b.selected_options.map(o => `<span style="font-size:11px;color:var(--ink-mute);">· ${escapeHtml(o.name || '')}</span>`).join(' ');
+                    optionsHtml = '<div style="margin-top:10px;">' +
+                        b.selected_options.map(o => {
+                            const price = parseInt(o.price) || 0;
+                            return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;">
+                                <span style="color:var(--ink);">· ${escapeHtml(o.name || '')}</span>
+                                ${price > 0 ? `<span style="color:var(--ink-mute);">+${price} ₴</span>` : ''}
+                            </div>`;
+                        }).join('') + '</div>';
                 }
                 
+                // Списані товари
                 let consumablesHtml = '';
                 if (b.consumables && b.consumables.length > 0) {
-                    consumablesHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--ink-mute);">';
-                    consumablesHtml += b.consumables.map(c => {
-                        const qty = Math.abs(parseFloat(c.quantity));
-                        const unit = c.unit ? getUnitLabel(c.unit) : '';
-                        return `${escapeHtml(c.product_name)} ${qty} ${unit}`;
-                    }).join(' · ');
-                    consumablesHtml += '</div>';
+                    consumablesHtml = `
+                        <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);">
+                            <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--beige);margin-bottom:8px;">Використані матеріали</div>
+                            ${b.consumables.map(c => {
+                                const qty = Math.abs(parseFloat(c.quantity));
+                                const unit = typeof getUnitLabel === 'function' ? getUnitLabel(c.unit) : (c.unit || '');
+                                return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+                                    <span style="color:var(--ink);">${escapeHtml(c.product_name)}</span>
+                                    <span style="color:var(--ink-mute);">${qty} ${unit}</span>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    `;
                 }
                 
+                // Коментар
+                const commentHtml = b.client_comment 
+                    ? `<div style="margin-top:10px;font-size:12px;color:var(--ink-mute);font-style:italic;">💬 ${escapeHtml(b.client_comment)}</div>` 
+                    : '';
+                
                 return `
-                    <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:10px;">
-                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-                            <div>
-                                <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--ink);">${escapeHtml(b.service_name || '—')}</div>
-                                <div style="font-size:12px;color:var(--ink-mute);margin-top:4px;">
-                                    ${date} · ${time} · ${escapeHtml(b.master_name || '—')}
+                    <div style="margin-bottom:8px;border:1px solid var(--line);border-radius:6px;overflow:hidden;">
+                        <!-- Заголовок (клікабельний) -->
+                        <div onclick="toggleBookingDetail(${i})" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg-2);cursor:pointer;transition:background 0.15s;"
+                            onmouseover="this.style.background='var(--bg-1)'" onmouseout="this.style.background='var(--bg-2)'">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:16px;" id="bookingArrow${i}">▸</span>
+                                <div>
+                                    <div style="font-size:14px;color:var(--ink);font-weight:500;">${dateStr}</div>
+                                    <div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(b.service_name || '—')} · ${time} · ${escapeHtml(b.master_name || '—')}</div>
                                 </div>
-                                ${optionsHtml ? `<div style="margin-top:4px;">${optionsHtml}</div>` : ''}
                             </div>
                             <div style="text-align:right;flex-shrink:0;">
                                 <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);">${parseInt(b.total_price).toLocaleString('uk-UA')} ₴</div>
-                                <div style="margin-top:4px;"><span style="padding:3px 10px;border-radius:999px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${statusColors[b.status]};background:${statusColors[b.status]}15;">${statusLabels[b.status] || b.status}</span></div>
+                                <div style="margin-top:4px;"><span style="padding:3px 10px;border-radius:999px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${statusColors[b.status]};background:${statusColors[b.status]}15;">${statusLabels[b.status] || b.status}</span></div>
                             </div>
                         </div>
-                        ${consumablesHtml}
-                        ${b.client_comment ? `<div style="margin-top:8px;font-size:11px;color:var(--ink-mute);font-style:italic;">💬 ${escapeHtml(b.client_comment)}</div>` : ''}
+                        
+                        <!-- Деталі (приховані) -->
+                        <div id="bookingDetail${i}" style="display:none;padding:16px;background:var(--bg-1);border-top:1px solid var(--line);">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+                                <div>
+                                    <div style="font-size:10px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Послуга</div>
+                                    <div style="font-size:14px;color:var(--ink);margin-top:4px;">${escapeHtml(b.service_name || '—')}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:10px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Майстер</div>
+                                    <div style="font-size:14px;color:var(--ink);margin-top:4px;">${escapeHtml(b.master_name || '—')}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:10px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Час</div>
+                                    <div style="font-size:14px;color:var(--ink);margin-top:4px;">${time}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:10px;color:var(--ink-mute);letter-spacing:0.1em;text-transform:uppercase;">Код</div>
+                                    <div style="font-size:14px;color:var(--ink);margin-top:4px;font-family:monospace;">${escapeHtml(b.booking_code || '')}</div>
+                                </div>
+                            </div>
+                            ${optionsHtml}
+                            ${consumablesHtml}
+                            ${commentHtml}
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleBookingDetail(index) {
+            const detail = document.getElementById('bookingDetail' + index);
+            const arrow = document.getElementById('bookingArrow' + index);
+            if (!detail) return;
+            
+            const isOpen = detail.style.display !== 'none';
+            detail.style.display = isOpen ? 'none' : 'block';
+            arrow.textContent = isOpen ? '▸' : '▾';
         }
 
         // ============================================
@@ -4695,36 +4752,91 @@ function renderClientsList() {
         }
 
         async function addClientPhoto() {
-            const clientId = parseInt(document.getElementById('cliId').value);
-            if (!clientId) { alert('Спершу збережіть клієнта'); return; }
-            
-            const url = prompt('URL фото (або завантажте через аплоадер):');
-            if (!url) return;
-            
-            const caption = prompt('Підпис (опціонально):') || '';
-            
-            try {
-                const res = await fetch('/api/admin/client-photo-save.php', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: clientId,
-                        photo_url: url,
-                        caption,
-                        photo_type: 'result'
-                    })
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.error);
+                const clientId = parseInt(document.getElementById('cliId').value);
+                if (!clientId) { alert('Спершу збережіть клієнта'); return; }
                 
-                // Перезавантажуємо профіль
-                openClientProfile(clientId);
-                switchClientTab('gallery');
-            } catch (err) {
-                alert('Помилка: ' + err.message);
+                // Створюємо тимчасовий контейнер для аплоадера
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+                
+                const card = document.createElement('div');
+                card.style.cssText = 'background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:24px;max-width:460px;width:100%;';
+                card.innerHTML = `
+                    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--beige);margin-bottom:8px;">Додати фото</div>
+                    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;">Завантажте фото роботи або результату</div>
+                    <div id="clientPhotoUploadContainer"></div>
+                    <div class="form-group" style="margin-top:14px;">
+                        <label>Тип</label>
+                        <select id="newPhotoType">
+                            <option value="result">Результат</option>
+                            <option value="before">До</option>
+                            <option value="after">Після</option>
+                            <option value="other">Інше</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Підпис (опц.)</label>
+                        <input type="text" id="newPhotoCaption" placeholder="Наприклад: Біозавивка велика хвиля">
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:16px;">
+                        <button type="button" class="admin-cta ghost" style="flex:1;" onclick="this.closest('div[style*=fixed]').remove()">Скасувати</button>
+                        <button type="button" class="admin-cta" style="flex:1;" onclick="saveClientPhotoFromUploader(${clientId})">Зберегти</button>
+                    </div>
+                `;
+                
+                overlay.appendChild(card);
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+                
+                // Створюємо аплоадер
+                if (typeof ImageUploader === 'function') {
+                    const container = document.getElementById('clientPhotoUploadContainer');
+                    window._clientPhotoUploader = new ImageUploader(container, {
+                        uploadUrl: '/api/admin/upload.php',
+                        prefix: 'clients',
+                        value: ''
+                    });
+                }
             }
-        }
+
+            async function saveClientPhotoFromUploader(clientId) {
+                const uploader = window._clientPhotoUploader;
+                const url = uploader ? uploader.getValue() : '';
+                
+                if (!url) {
+                    alert('Завантажте або вставте фото');
+                    return;
+                }
+                
+                const photoType = document.getElementById('newPhotoType').value;
+                const caption = document.getElementById('newPhotoCaption').value.trim();
+                
+                try {
+                    const res = await fetch('/api/admin/client-photo-save.php', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            client_id: clientId,
+                            photo_url: url,
+                            caption,
+                            photo_type: photoType
+                        })
+                    });
+                    const data = await res.json();
+                    if (!data.success) throw new Error(data.error);
+                    
+                    // Закриваємо оверлей
+                    document.querySelector('div[style*="fixed"][style*="z-index:10000"]')?.remove();
+                    
+                    // Оновлюємо профіль
+                    openClientProfile(clientId);
+                    setTimeout(() => switchClientTab('gallery'), 100);
+                    showToast('Фото додано');
+                } catch (err) {
+                    alert('Помилка: ' + err.message);
+                }
+            }
 
         async function deleteClientPhoto(id) {
             if (!confirm('Видалити фото?')) return;
@@ -4847,35 +4959,103 @@ function renderClientsList() {
         }
 
         function addCustomField() {
-            const name = prompt('Назва поля:');
-            if (!name) return;
+            const list = document.getElementById('fieldsMgmtList');
             
-            const type = prompt('Тип (text / textarea / select / checkbox / number / date):', 'text');
-            if (!type) return;
+            // Додаємо форму прямо в список
+            const formId = 'newFieldForm_' + Date.now();
+            const formHtml = `
+                <div id="${formId}" style="padding:16px;background:var(--bg-1);border:1px solid var(--beige);border-radius:6px;margin-bottom:10px;">
+                    <div class="form-group">
+                        <label>Назва поля</label>
+                        <input type="text" id="${formId}_name" placeholder="Наприклад: Тип волосся">
+                    </div>
+                    <div class="form-group">
+                        <label>Тип поля</label>
+                        <select id="${formId}_type" onchange="document.getElementById('${formId}_opts').style.display = this.value==='select'?'block':'none'">
+                            <option value="text">Текст (один рядок)</option>
+                            <option value="textarea">Текст (кілька рядків)</option>
+                            <option value="select">Вибір зі списку</option>
+                            <option value="checkbox">Галочка (так/ні)</option>
+                            <option value="number">Число</option>
+                            <option value="date">Дата</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="${formId}_opts" style="display:none;">
+                        <label>Варіанти (кожен з нового рядка)</label>
+                        <textarea id="${formId}_options" rows="3" placeholder="Пряме\nХвилясте\nКучеряве"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Підказка (placeholder)</label>
+                        <input type="text" id="${formId}_placeholder" placeholder="Наприклад: Вкажіть тип...">
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button type="button" class="admin-cta ghost" style="flex:1;" onclick="document.getElementById('${formId}').remove()">Скасувати</button>
+                        <button type="button" class="admin-cta" style="flex:1;" onclick="saveNewField('${formId}')">Додати</button>
+                    </div>
+                </div>
+            `;
+            
+            list.insertAdjacentHTML('beforeend', formHtml);
+            document.getElementById(formId + '_name').focus();
+        }
+
+        async function saveNewField(formId) {
+            const name = document.getElementById(formId + '_name').value.trim();
+            const type = document.getElementById(formId + '_type').value;
+            const placeholder = document.getElementById(formId + '_placeholder').value.trim();
+            
+            if (!name) { alert('Введіть назву поля'); return; }
             
             let options = null;
             if (type === 'select') {
-                const opts = prompt('Варіанти через кому (наприклад: Коротке, До плечей, Довге):');
-                if (opts) options = opts.split(',').map(o => o.trim()).filter(Boolean);
+                const raw = document.getElementById(formId + '_options').value.trim();
+                if (raw) {
+                    options = raw.split('\n').map(o => o.trim()).filter(Boolean);
+                }
+                if (!options || options.length < 2) {
+                    alert('Для типу «Вибір» потрібно мінімум 2 варіанти');
+                    return;
+                }
             }
             
-            fetch('/api/admin/client-field-save.php', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    field_name: name,
-                    field_type: type,
-                    field_options: options,
-                    sort_order: 99
-                })
-            })
-            .then(r => r.json())
-            .then(d => {
-                if (!d.success) throw new Error(d.error);
+            try {
+                const res = await fetch('/api/admin/client-field-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        field_name: name,
+                        field_type: type,
+                        field_options: options,
+                        placeholder,
+                        sort_order: 99
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
                 loadClientFields();
-            })
-            .catch(err => alert('Помилка: ' + err.message));
+                showToast('Поле додано');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        async function deleteCustomField(id) {
+            if (!confirm('Видалити поле анкети? Дані у клієнтів будуть втрачені.')) return;
+            
+            try {
+                await fetch('/api/admin/client-field-delete.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadClientFields();
+                showToast('Видалено');
+            } catch (err) {
+                alert('Помилка');
+            }
         }
 
         async function deleteCustomField(id) {

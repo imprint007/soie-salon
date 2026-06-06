@@ -28,7 +28,8 @@ try {
     // Список з останньою бронею
     $sql = "
         SELECT c.id, c.name, c.phone, c.email, c.photo_url, c.notes, c.created_at,
-               (SELECT COUNT(*) FROM bookings b WHERE b.client_id = c.id) AS bookings_count,
+               (SELECT COUNT(*) FROM bookings b WHERE b.client_id = c.id AND b.status != 'cancelled') AS bookings_count,
+               (SELECT COALESCE(SUM(b4.total_price), 0) FROM bookings b4 WHERE b4.client_id = c.id AND b4.status IN ('done', 'confirmed')) AS total_spent,
                (SELECT b2.booking_date FROM bookings b2 WHERE b2.client_id = c.id ORDER BY b2.booking_date DESC LIMIT 1) AS last_visit,
                (SELECT s.name FROM bookings b3 LEFT JOIN services s ON s.id = b3.service_id WHERE b3.client_id = c.id ORDER BY b3.booking_date DESC LIMIT 1) AS last_service
         FROM clients c
