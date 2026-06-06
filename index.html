@@ -2276,6 +2276,7 @@ body select:-webkit-autofill {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Витрати
     </a>
+    <a onclick="setAdminSection('clients', this)"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Клієнти</a>
     <a onclick="setAdminSection('settings', this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Налаштування
@@ -2741,6 +2742,122 @@ body select:-webkit-autofill {
         </div>
     </div>
 </div>
+
+        <!-- ============ КЛІЄНТИ ============ -->
+        <div class="admin-section" id="ad-clients">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+                <h2 style="font-family:'Fraunces',serif;font-size:32px;color:var(--ink);margin:0;">Клієнтська <span style="color:var(--beige);font-style:italic;">база</span></h2>
+                <div style="display:flex;gap:8px;">
+                    <button class="admin-cta ghost" onclick="openClientFieldsModal()" style="padding:10px 18px;font-size:11px;">Поля анкети</button>
+                    <button class="admin-cta" onclick="openClientModal()" style="padding:10px 22px;font-size:11px;">+ Клієнт</button>
+                </div>
+            </div>
+            
+            <!-- Пошук -->
+            <div style="margin-bottom:20px;">
+                <input type="text" id="clientSearch" placeholder="Пошук за іменем, телефоном, email..." oninput="searchClients()" style="width:100%;max-width:400px;">
+            </div>
+            
+            <!-- Список -->
+            <div id="clientsList" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+            </div>
+        </div>
+
+        <!-- ============ МОДАЛКА ПРОФІЛЮ КЛІЄНТА ============ -->
+        <div class="modal-overlay" id="clientModal" onclick="if(event.target===this) closeClientModal()">
+            <div class="modal-card" style="max-width:700px;">
+                <div class="modal-head">
+                    <h2 id="clientModalTitle">Клієнт</h2>
+                    <button class="modal-close" onclick="closeClientModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="cliId" value="">
+                    
+                    <!-- Вкладки -->
+                    <div class="master-tabs">
+                        <button class="master-tab active" data-client-tab="profile" type="button" onclick="switchClientTab('profile')">Анкета</button>
+                        <button class="master-tab" data-client-tab="history" type="button" onclick="switchClientTab('history')">Історія</button>
+                        <button class="master-tab" data-client-tab="gallery" type="button" onclick="switchClientTab('gallery')">Галерея</button>
+                    </div>
+                    
+                    <!-- ВКЛАДКА АНКЕТА -->
+                    <div class="client-tab-content active" data-ctab="profile">
+                        <div class="form-group">
+                            <label>Фото клієнта</label>
+                            <div id="cliPhotoUploader"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>ПІБ</label>
+                            <input type="text" id="cliName" placeholder="Анна Петренко">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Телефон</label>
+                                <input type="tel" id="cliPhone" placeholder="+380 67 123 45 67">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="cliEmail" placeholder="anna@example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Нотатки адміністратора</label>
+                            <textarea id="cliNotes" rows="2" placeholder="Загальні нотатки..."></textarea>
+                        </div>
+                        
+                        <!-- Довільні поля (рендеряться JS) -->
+                        <div id="cliCustomFields" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Анкета клієнта</div>
+                            <div id="cliFieldsList"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- ВКЛАДКА ІСТОРІЯ -->
+                    <div class="client-tab-content" data-ctab="history" style="display:none;">
+                        <div id="cliBookingsList"></div>
+                    </div>
+                    
+                    <!-- ВКЛАДКА ГАЛЕРЕЯ -->
+                    <div class="client-tab-content" data-ctab="gallery" style="display:none;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Фото робіт</div>
+                            <button type="button" class="admin-cta" style="padding:8px 16px;font-size:11px;" onclick="addClientPhoto()">+ Додати фото</button>
+                        </div>
+                        <div id="cliPhotosList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div>
+                    </div>
+                    
+                    <div id="cliError" class="auth-error" style="display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="admin-cta ghost" onclick="closeClientModal()">Закрити</button>
+                    <button class="admin-cta" id="cliSaveBtn" onclick="saveClient()">Зберегти</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ МОДАЛКА ПОЛІВ АНКЕТИ ============ -->
+        <div class="modal-overlay" id="clientFieldsModal" onclick="if(event.target===this) closeClientFieldsModal()">
+            <div class="modal-card" style="max-width:600px;">
+                <div class="modal-head">
+                    <h2>Поля анкети клієнта</h2>
+                    <button class="modal-close" onclick="closeClientFieldsModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;line-height:1.5;">
+                        Тут ви налаштовуєте які поля побачите в анкеті кожного клієнта. Наприклад: тип волосся, алергії, довжина.
+                    </div>
+                    <div id="fieldsMgmtList"></div>
+                    <button type="button" class="admin-cta ghost" onclick="addCustomField()" style="width:100%;margin-top:14px;padding:12px;font-size:11px;">+ Додати поле</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="admin-cta ghost" onclick="closeClientFieldsModal()">Закрити</button>
+                </div>
+            </div>
+        </div>
 
 <!-- ============ ТОВАРИ ============ -->
 <div class="admin-section" id="ad-products"">
@@ -4283,6 +4400,500 @@ if (document.readyState === 'loading') {
     loadPublicServices();
 }
 
+
+// ============================================
+// КЛІЄНТИ — CRM
+// ============================================
+let allClients = [];
+let currentClientData = null;
+let cliImageUploader = null;
+
+async function loadClients() {
+    const search = document.getElementById('clientSearch')?.value?.trim() || '';
+    const list = document.getElementById('clientsList');
+    list.innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+    
+    try {
+        const res = await fetch('/api/admin/clients-list.php?search=' + encodeURIComponent(search), { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        
+        allClients = data.data || [];
+        renderClientsList();
+    } catch (err) {
+        list.innerHTML = `<div style="padding:20px;color:var(--danger);">Помилка: ${err.message}</div>`;
+    }
+}
+
+let clientSearchTimer;
+function searchClients() {
+    clearTimeout(clientSearchTimer);
+    clientSearchTimer = setTimeout(loadClients, 300);
+}
+
+function renderClientsList() {
+    const list = document.getElementById('clientsList');
+    
+    if (allClients.length === 0) {
+        list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:13px;">Клієнтів не знайдено</div>';
+        return;
+    }
+    
+    list.innerHTML = allClients.map(c => {
+        const lastDate = c.last_visit ? new Date(c.last_visit).toLocaleDateString('uk-UA') : '—';
+        const photo = c.photo_url 
+            ? `<div style="width:44px;height:44px;border-radius:50%;background:center/cover url('${escapeHtml(c.photo_url)}');flex-shrink:0;border:1px solid var(--line);"></div>` 
+            : `<div style="width:44px;height:44px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--line);color:var(--ink-mute);font-size:18px;">${escapeHtml(c.name?.charAt(0) || '?')}</div>`;
+        
+        return `
+            <div onclick="openClientProfile(${c.id})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-1);border:1px solid var(--line);border-radius:6px;cursor:pointer;transition:all 0.15s;" 
+                 onmouseover="this.style.borderColor='var(--beige)'" onmouseout="this.style.borderColor='var(--line)'">
+                ${photo}
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--ink);">${escapeHtml(c.name)}</div>
+                    <div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(c.last_service || '—')} · ${lastDate}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:13px;color:var(--ink);">${escapeHtml(c.phone)}</div>
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${c.bookings_count || 0} візитів</div>
+                </div>
+                <div style="color:var(--ink-mute);font-size:18px;flex-shrink:0;padding-left:8px;">→</div>
+            </div>
+        `;
+    }).join('');
+}
+
+        // ============================================
+        // ПРОФІЛЬ КЛІЄНТА
+        // ============================================
+        function switchClientTab(tab) {
+            document.querySelectorAll('[data-client-tab]').forEach(t => {
+                t.classList.toggle('active', t.dataset.clientTab === tab);
+            });
+            document.querySelectorAll('.client-tab-content').forEach(c => {
+                const show = c.dataset.ctab === tab;
+                c.style.display = show ? 'block' : 'none';
+                c.classList.toggle('active', show);
+            });
+        }
+
+        async function openClientProfile(id) {
+            const modal = document.getElementById('clientModal');
+            document.getElementById('cliId').value = id;
+            document.getElementById('clientModalTitle').textContent = 'Завантаження...';
+            switchClientTab('profile');
+            modal.classList.add('show');
+            
+            try {
+                const res = await fetch('/api/admin/client-get.php?id=' + id, { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                currentClientData = data;
+                const c = data.client;
+                
+                document.getElementById('clientModalTitle').textContent = c.name;
+                document.getElementById('cliName').value = c.name || '';
+                document.getElementById('cliPhone').value = c.phone || '';
+                document.getElementById('cliEmail').value = c.email || '';
+                document.getElementById('cliNotes').value = c.notes || '';
+                
+                // Фото аплоадер
+                if (typeof ImageUploader === 'function') {
+                    const container = document.getElementById('cliPhotoUploader');
+                    container.innerHTML = '';
+                    cliImageUploader = new ImageUploader(container, {
+                        uploadUrl: '/api/admin/upload.php',
+                        prefix: 'clients',
+                        value: c.photo_url || ''
+                    });
+                }
+                
+                renderClientCustomFields(data.custom_fields, data.field_values);
+                renderClientBookings(data.bookings);
+                renderClientPhotos(data.photos);
+                
+            } catch (err) {
+                document.getElementById('clientModalTitle').textContent = 'Помилка: ' + err.message;
+            }
+        }
+
+        function openClientModal() {
+            const modal = document.getElementById('clientModal');
+            document.getElementById('cliId').value = '';
+            document.getElementById('clientModalTitle').textContent = 'Новий клієнт';
+            document.getElementById('cliName').value = '';
+            document.getElementById('cliPhone').value = '';
+            document.getElementById('cliEmail').value = '';
+            document.getElementById('cliNotes').value = '';
+            document.getElementById('cliFieldsList').innerHTML = '';
+            document.getElementById('cliBookingsList').innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-mute);font-size:12px;">Спершу збережіть клієнта</div>';
+            document.getElementById('cliPhotosList').innerHTML = '';
+            
+            currentClientData = null;
+            switchClientTab('profile');
+            
+            if (typeof ImageUploader === 'function') {
+                const container = document.getElementById('cliPhotoUploader');
+                container.innerHTML = '';
+                cliImageUploader = new ImageUploader(container, {
+                    uploadUrl: '/api/admin/upload.php',
+                    prefix: 'clients',
+                    value: ''
+                });
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function closeClientModal() {
+            document.getElementById('clientModal').classList.remove('show');
+            currentClientData = null;
+        }
+
+        // ============================================
+        // АНКЕТА — ДОВІЛЬНІ ПОЛЯ
+        // ============================================
+        function renderClientCustomFields(fields, values) {
+            const list = document.getElementById('cliFieldsList');
+            if (!fields || fields.length === 0) {
+                list.innerHTML = '<div style="color:var(--ink-mute);font-size:12px;">Поля анкети не налаштовані. Натисніть «Поля анкети» у розділі Клієнти.</div>';
+                return;
+            }
+            
+            list.innerHTML = fields.map(f => {
+                const val = values[f.id] || '';
+                
+                if (f.field_type === 'select') {
+                    const options = f.field_options ? JSON.parse(f.field_options) : [];
+                    return `
+                        <div class="form-group">
+                            <label>${escapeHtml(f.field_name)} ${f.is_required == 1 ? '<span style="color:var(--danger);">*</span>' : ''}</label>
+                            <select class="cli-field" data-field-id="${f.id}">
+                                <option value="">— Оберіть —</option>
+                                ${options.map(o => `<option value="${escapeHtml(o)}" ${val === o ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+                
+                if (f.field_type === 'textarea') {
+                    return `
+                        <div class="form-group">
+                            <label>${escapeHtml(f.field_name)}</label>
+                            <textarea class="cli-field" data-field-id="${f.id}" rows="2" placeholder="${escapeHtml(f.placeholder || '')}">${escapeHtml(val)}</textarea>
+                        </div>
+                    `;
+                }
+                
+                if (f.field_type === 'checkbox') {
+                    return `
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="cli-field" data-field-id="${f.id}" ${val === '1' ? 'checked' : ''}>
+                                <span>${escapeHtml(f.field_name)}</span>
+                            </label>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="form-group">
+                        <label>${escapeHtml(f.field_name)}</label>
+                        <input type="${f.field_type === 'number' ? 'number' : 'text'}" class="cli-field" data-field-id="${f.id}" value="${escapeHtml(val)}" placeholder="${escapeHtml(f.placeholder || '')}">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // ІСТОРІЯ БРОНЮВАНЬ
+        // ============================================
+        function renderClientBookings(bookings) {
+            const list = document.getElementById('cliBookingsList');
+            
+            if (!bookings || bookings.length === 0) {
+                list.innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-mute);font-size:13px;">Немає бронювань</div>';
+                return;
+            }
+            
+            list.innerHTML = bookings.map(b => {
+                const date = new Date(b.booking_date).toLocaleDateString('uk-UA');
+                const time = (b.booking_time || '').substring(0, 5);
+                const statusLabels = { pending: 'Очікує', confirmed: 'Підтверджено', done: 'Виконано', cancelled: 'Скасовано' };
+                const statusColors = { pending: '#e8d599', confirmed: '#a0d4a0', done: 'var(--ink-mute)', cancelled: 'var(--danger)' };
+                
+                let optionsHtml = '';
+                if (b.selected_options && b.selected_options.length > 0) {
+                    optionsHtml = b.selected_options.map(o => `<span style="font-size:11px;color:var(--ink-mute);">· ${escapeHtml(o.name || '')}</span>`).join(' ');
+                }
+                
+                let consumablesHtml = '';
+                if (b.consumables && b.consumables.length > 0) {
+                    consumablesHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--ink-mute);">';
+                    consumablesHtml += b.consumables.map(c => {
+                        const qty = Math.abs(parseFloat(c.quantity));
+                        const unit = c.unit ? getUnitLabel(c.unit) : '';
+                        return `${escapeHtml(c.product_name)} ${qty} ${unit}`;
+                    }).join(' · ');
+                    consumablesHtml += '</div>';
+                }
+                
+                return `
+                    <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:10px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                            <div>
+                                <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--ink);">${escapeHtml(b.service_name || '—')}</div>
+                                <div style="font-size:12px;color:var(--ink-mute);margin-top:4px;">
+                                    ${date} · ${time} · ${escapeHtml(b.master_name || '—')}
+                                </div>
+                                ${optionsHtml ? `<div style="margin-top:4px;">${optionsHtml}</div>` : ''}
+                            </div>
+                            <div style="text-align:right;flex-shrink:0;">
+                                <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);">${parseInt(b.total_price).toLocaleString('uk-UA')} ₴</div>
+                                <div style="margin-top:4px;"><span style="padding:3px 10px;border-radius:999px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${statusColors[b.status]};background:${statusColors[b.status]}15;">${statusLabels[b.status] || b.status}</span></div>
+                            </div>
+                        </div>
+                        ${consumablesHtml}
+                        ${b.client_comment ? `<div style="margin-top:8px;font-size:11px;color:var(--ink-mute);font-style:italic;">💬 ${escapeHtml(b.client_comment)}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // ГАЛЕРЕЯ ФОТО
+        // ============================================
+        function renderClientPhotos(photos) {
+            const list = document.getElementById('cliPhotosList');
+            
+            if (!photos || photos.length === 0) {
+                list.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--ink-mute);font-size:13px;">Немає фото. Натисніть «+ Додати фото».</div>';
+                return;
+            }
+            
+            list.innerHTML = photos.map(p => {
+                const typeLabels = { before: 'До', after: 'Після', result: 'Результат', other: 'Інше' };
+                const dateStr = p.booking_date ? new Date(p.booking_date).toLocaleDateString('uk-UA') : '';
+                
+                return `
+                    <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--line);cursor:pointer;" onclick="viewPhoto('${escapeHtml(p.photo_url)}')">
+                        <div style="aspect-ratio:1;background:center/cover url('${escapeHtml(p.photo_url)}');"></div>
+                        <div style="padding:8px;background:var(--bg-2);">
+                            <div style="font-size:10px;color:var(--beige);letter-spacing:0.1em;text-transform:uppercase;">${typeLabels[p.photo_type] || 'Фото'}</div>
+                            ${dateStr ? `<div style="font-size:10px;color:var(--ink-mute);margin-top:2px;">${dateStr}</div>` : ''}
+                            ${p.caption ? `<div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(p.caption)}</div>` : ''}
+                        </div>
+                        <button onclick="event.stopPropagation();deleteClientPhoto(${p.id})" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;color:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewPhoto(url) {
+            window.open(url, '_blank');
+        }
+
+        async function addClientPhoto() {
+            const clientId = parseInt(document.getElementById('cliId').value);
+            if (!clientId) { alert('Спершу збережіть клієнта'); return; }
+            
+            const url = prompt('URL фото (або завантажте через аплоадер):');
+            if (!url) return;
+            
+            const caption = prompt('Підпис (опціонально):') || '';
+            
+            try {
+                const res = await fetch('/api/admin/client-photo-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: clientId,
+                        photo_url: url,
+                        caption,
+                        photo_type: 'result'
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                // Перезавантажуємо профіль
+                openClientProfile(clientId);
+                switchClientTab('gallery');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        async function deleteClientPhoto(id) {
+            if (!confirm('Видалити фото?')) return;
+            const clientId = parseInt(document.getElementById('cliId').value);
+            
+            try {
+                await fetch('/api/admin/client-photo-delete.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                openClientProfile(clientId);
+                switchClientTab('gallery');
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
+
+        // ============================================
+        // ЗБЕРЕЖЕННЯ КЛІЄНТА
+        // ============================================
+        async function saveClient() {
+            const id = parseInt(document.getElementById('cliId').value) || 0;
+            const name = document.getElementById('cliName').value.trim();
+            const phone = document.getElementById('cliPhone').value.trim();
+            
+            if (!name) { alert('Введіть імʼя'); return; }
+            if (!phone) { alert('Введіть телефон'); return; }
+            
+            // Збираємо довільні поля
+            const fieldValues = {};
+            document.querySelectorAll('.cli-field').forEach(el => {
+                const fieldId = el.dataset.fieldId;
+                if (el.type === 'checkbox') {
+                    fieldValues[fieldId] = el.checked ? '1' : '0';
+                } else {
+                    fieldValues[fieldId] = el.value;
+                }
+            });
+            
+            const payload = {
+                id,
+                name,
+                phone,
+                email: document.getElementById('cliEmail').value.trim(),
+                notes: document.getElementById('cliNotes').value.trim(),
+                photo_url: cliImageUploader ? cliImageUploader.getValue() : '',
+                field_values: fieldValues
+            };
+            
+            try {
+                const res = await fetch('/api/admin/client-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                if (!id) {
+                    // Новий клієнт — відкриваємо профіль
+                    closeClientModal();
+                    openClientProfile(data.id);
+                }
+                
+                showToast('Збережено');
+                loadClients();
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        // ============================================
+        // УПРАВЛІННЯ ПОЛЯМИ АНКЕТИ
+        // ============================================
+        function openClientFieldsModal() {
+            document.getElementById('clientFieldsModal').classList.add('show');
+            loadClientFields();
+        }
+
+        function closeClientFieldsModal() {
+            document.getElementById('clientFieldsModal').classList.remove('show');
+        }
+
+        async function loadClientFields() {
+            const list = document.getElementById('fieldsMgmtList');
+            list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+            
+            try {
+                const res = await fetch('/api/admin/client-fields-list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                const fields = data.data || [];
+                
+                if (fields.length === 0) {
+                    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;">Поки немає полів</div>';
+                    return;
+                }
+                
+                const typeLabels = { text: 'Текст', textarea: 'Багаторядковий', select: 'Вибір', checkbox: 'Галочка', number: 'Число', date: 'Дата' };
+                
+                list.innerHTML = fields.map(f => {
+                    const options = f.field_type === 'select' && f.field_options ? JSON.parse(f.field_options).join(', ') : '';
+                    return `
+                        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:8px;">
+                            <div style="flex:1;">
+                                <div style="font-size:14px;color:var(--ink);">${escapeHtml(f.field_name)}</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${typeLabels[f.field_type] || f.field_type}${options ? ' · ' + escapeHtml(options) : ''}</div>
+                            </div>
+                            <button type="button" onclick="deleteCustomField(${f.id})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:12px;border-radius:4px;">✕</button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                list.innerHTML = `<div style="color:var(--danger);">${err.message}</div>`;
+            }
+        }
+
+        function addCustomField() {
+            const name = prompt('Назва поля:');
+            if (!name) return;
+            
+            const type = prompt('Тип (text / textarea / select / checkbox / number / date):', 'text');
+            if (!type) return;
+            
+            let options = null;
+            if (type === 'select') {
+                const opts = prompt('Варіанти через кому (наприклад: Коротке, До плечей, Довге):');
+                if (opts) options = opts.split(',').map(o => o.trim()).filter(Boolean);
+            }
+            
+            fetch('/api/admin/client-field-save.php', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    field_name: name,
+                    field_type: type,
+                    field_options: options,
+                    sort_order: 99
+                })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (!d.success) throw new Error(d.error);
+                loadClientFields();
+            })
+            .catch(err => alert('Помилка: ' + err.message));
+        }
+
+        async function deleteCustomField(id) {
+            if (!confirm('Видалити поле анкети? Дані у клієнтів будуть втрачені.')) return;
+            
+            try {
+                await fetch('/api/admin/client-field-delete.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadClientFields();
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
+
   // ============================================
   // КЛИЕНТСКАЯ ЧАСТЬ — состояние брони
   // ============================================
@@ -4630,6 +5241,7 @@ async function assignRandomMaster() {
     if (name === 'bookings') loadBookings();
     if (name === 'products') loadProducts();
     if (name === 'expenses') loadExpenses();
+    if (name === 'clients') loadClients();
     if (name === 'reports') loadReports();
     if (name === 'dashboard') loadDashboard();
     if (name === 'settings') loadSettings();
