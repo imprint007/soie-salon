@@ -4752,91 +4752,178 @@ function renderClientsList() {
         }
 
         async function addClientPhoto() {
-                const clientId = parseInt(document.getElementById('cliId').value);
-                if (!clientId) { alert('Спершу збережіть клієнта'); return; }
+            const clientId = parseInt(document.getElementById('cliId').value);
+            if (!clientId) { alert('Спершу збережіть клієнта'); return; }
+            
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+            
+            const card = document.createElement('div');
+            card.style.cssText = 'background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:24px;max-width:460px;width:100%;';
+            card.innerHTML = `
+                <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--beige);margin-bottom:8px;">Додати фото</div>
+                <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;">Завантажте фото роботи або результату</div>
                 
-                // Створюємо тимчасовий контейнер для аплоадера
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+                <!-- Кнопка завантаження -->
+                <div id="cpUploadArea" style="border:2px dashed var(--line);border-radius:6px;padding:30px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:14px;"
+                    onclick="document.getElementById('cpFileInput').click()"
+                    ondragover="event.preventDefault();this.style.borderColor='var(--beige)'"
+                    ondragleave="this.style.borderColor='var(--line)'"
+                    ondrop="event.preventDefault();this.style.borderColor='var(--line)';handleClientPhotoDrop(event)">
+                    <div style="font-size:28px;margin-bottom:8px;">📤</div>
+                    <div style="color:var(--ink);font-size:13px;">Натисніть або перетягніть фото</div>
+                    <div style="color:var(--ink-mute);font-size:11px;margin-top:4px;">JPG, PNG, WebP · до 5 МБ</div>
+                    <input type="file" id="cpFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="uploadClientPhoto(this.files[0])">
+                </div>
                 
-                const card = document.createElement('div');
-                card.style.cssText = 'background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:24px;max-width:460px;width:100%;';
-                card.innerHTML = `
-                    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--beige);margin-bottom:8px;">Додати фото</div>
-                    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;">Завантажте фото роботи або результату</div>
-                    <div id="clientPhotoUploadContainer"></div>
-                    <div class="form-group" style="margin-top:14px;">
-                        <label>Тип</label>
-                        <select id="newPhotoType">
-                            <option value="result">Результат</option>
-                            <option value="before">До</option>
-                            <option value="after">Після</option>
-                            <option value="other">Інше</option>
-                        </select>
+                <!-- Превʼю -->
+                <div id="cpPreview" style="display:none;margin-bottom:14px;">
+                    <div id="cpPreviewImg" style="width:100%;aspect-ratio:4/3;background-size:cover;background-position:center;border-radius:6px;border:1px solid var(--line);"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                        <span style="font-size:11px;color:var(--ink-mute);" id="cpFileName"></span>
+                        <button type="button" onclick="resetClientPhotoUpload()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕ Видалити</button>
                     </div>
-                    <div class="form-group">
-                        <label>Підпис (опц.)</label>
-                        <input type="text" id="newPhotoCaption" placeholder="Наприклад: Біозавивка велика хвиля">
-                    </div>
-                    <div style="display:flex;gap:8px;margin-top:16px;">
-                        <button type="button" class="admin-cta ghost" style="flex:1;" onclick="this.closest('div[style*=fixed]').remove()">Скасувати</button>
-                        <button type="button" class="admin-cta" style="flex:1;" onclick="saveClientPhotoFromUploader(${clientId})">Зберегти</button>
-                    </div>
-                `;
+                </div>
                 
-                overlay.appendChild(card);
-                overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-                document.body.appendChild(overlay);
+                <!-- Прогрес -->
+                <div id="cpProgress" style="display:none;margin-bottom:14px;">
+                    <div style="height:4px;background:var(--bg-2);border-radius:2px;overflow:hidden;">
+                        <div id="cpProgressBar" style="height:100%;background:var(--beige);width:0%;transition:width 0.3s;"></div>
+                    </div>
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;text-align:center;">Завантаження...</div>
+                </div>
                 
-                // Створюємо аплоадер
-                if (typeof ImageUploader === 'function') {
-                    const container = document.getElementById('clientPhotoUploadContainer');
-                    window._clientPhotoUploader = new ImageUploader(container, {
-                        uploadUrl: '/api/admin/upload.php',
-                        prefix: 'clients',
-                        value: ''
-                    });
-                }
-            }
+                <input type="hidden" id="cpPhotoUrl" value="">
+                
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select id="newPhotoType">
+                        <option value="result">Результат</option>
+                        <option value="before">До</option>
+                        <option value="after">Після</option>
+                        <option value="other">Інше</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Підпис (опц.)</label>
+                    <input type="text" id="newPhotoCaption" placeholder="Наприклад: Біозавивка велика хвиля">
+                </div>
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                    <button type="button" class="admin-cta ghost" style="flex:1;" id="cpCancelBtn">Скасувати</button>
+                    <button type="button" class="admin-cta" style="flex:1;" id="cpSaveBtn">Зберегти</button>
+                </div>
+            `;
+            
+            overlay.appendChild(card);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            card.querySelector('#cpCancelBtn').addEventListener('click', () => overlay.remove());
+            card.querySelector('#cpSaveBtn').addEventListener('click', () => saveClientPhotoFinal(clientId, overlay));
+            document.body.appendChild(overlay);
+        }
 
-            async function saveClientPhotoFromUploader(clientId) {
-                const uploader = window._clientPhotoUploader;
-                const url = uploader ? uploader.getValue() : '';
-                
-                if (!url) {
-                    alert('Завантажте або вставте фото');
-                    return;
-                }
-                
-                const photoType = document.getElementById('newPhotoType').value;
-                const caption = document.getElementById('newPhotoCaption').value.trim();
-                
-                try {
-                    const res = await fetch('/api/admin/client-photo-save.php', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            client_id: clientId,
-                            photo_url: url,
-                            caption,
-                            photo_type: photoType
-                        })
-                    });
-                    const data = await res.json();
-                    if (!data.success) throw new Error(data.error);
-                    
-                    // Закриваємо оверлей
-                    document.querySelector('div[style*="fixed"][style*="z-index:10000"]')?.remove();
-                    
-                    // Оновлюємо профіль
-                    openClientProfile(clientId);
-                    setTimeout(() => switchClientTab('gallery'), 100);
-                    showToast('Фото додано');
-                } catch (err) {
-                    alert('Помилка: ' + err.message);
-                }
+        function handleClientPhotoDrop(e) {
+            const file = e.dataTransfer?.files?.[0];
+            if (file && file.type.startsWith('image/')) {
+                uploadClientPhoto(file);
             }
+        }
+
+        async function uploadClientPhoto(file) {
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Файл занадто великий (макс 5 МБ)');
+                return;
+            }
+            
+            const progress = document.getElementById('cpProgress');
+            const progressBar = document.getElementById('cpProgressBar');
+            const uploadArea = document.getElementById('cpUploadArea');
+            
+            progress.style.display = 'block';
+            uploadArea.style.display = 'none';
+            progressBar.style.width = '30%';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('prefix', 'clients');
+                
+                progressBar.style.width = '60%';
+                
+                const res = await fetch('/api/admin/upload.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                progressBar.style.width = '100%';
+                
+                if (!data.success) throw new Error(data.error || 'Помилка завантаження');
+                
+                const url = data.url || data.path || data.file_url;
+                document.getElementById('cpPhotoUrl').value = url;
+                
+                // Показуємо превʼю
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    const preview = document.getElementById('cpPreview');
+                    const previewImg = document.getElementById('cpPreviewImg');
+                    const fileName = document.getElementById('cpFileName');
+                    
+                    previewImg.style.backgroundImage = `url('${url}')`;
+                    fileName.textContent = file.name;
+                    preview.style.display = 'block';
+                }, 300);
+                
+            } catch (err) {
+                progress.style.display = 'none';
+                uploadArea.style.display = 'block';
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        function resetClientPhotoUpload() {
+            document.getElementById('cpPhotoUrl').value = '';
+            document.getElementById('cpPreview').style.display = 'none';
+            document.getElementById('cpUploadArea').style.display = 'block';
+        }
+
+        async function saveClientPhotoFinal(clientId, overlay) {
+            const url = document.getElementById('cpPhotoUrl').value;
+            
+            if (!url) {
+                alert('Спершу завантажте фото');
+                return;
+            }
+            
+            const photoType = document.getElementById('newPhotoType').value;
+            const caption = document.getElementById('newPhotoCaption').value.trim();
+            
+            try {
+                const res = await fetch('/api/admin/client-photo-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: clientId,
+                        photo_url: url,
+                        caption,
+                        photo_type: photoType
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                overlay.remove();
+                openClientProfile(clientId);
+                setTimeout(() => switchClientTab('gallery'), 100);
+                showToast('Фото додано');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
 
         async function deleteClientPhoto(id) {
             if (!confirm('Видалити фото?')) return;
