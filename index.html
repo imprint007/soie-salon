@@ -2816,6 +2816,16 @@ body select:-webkit-autofill {
                         </div>
                     </div>
                     
+                    <!-- Використані матеріали -->
+                    <div id="cliProductUsage" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Використані матеріали</div>
+                            <button type="button" class="admin-cta ghost" onclick="addProductUsageRow()" style="padding:6px 14px;font-size:11px;">+ Додати</button>
+                        </div>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:12px;">Для інформації — зі складу не списується</div>
+                        <div id="cliProductUsageList"></div>
+                    </div>
+
                     <!-- ВКЛАДКА ІСТОРІЯ -->
                     <div class="client-tab-content" data-ctab="history" style="display:none;">
                         <div id="cliBookingsList"></div>
@@ -2839,220 +2849,220 @@ body select:-webkit-autofill {
             </div>
         </div>
 
-        <!-- ============ МОДАЛКА ПОЛІВ АНКЕТИ ============ -->
-        <div class="modal-overlay" id="clientFieldsModal" onclick="if(event.target===this) closeClientFieldsModal()">
-            <div class="modal-card" style="max-width:600px;">
+            <!-- ============ МОДАЛКА ПОЛІВ АНКЕТИ ============ -->
+            <div class="modal-overlay" id="clientFieldsModal" onclick="if(event.target===this) closeClientFieldsModal()">
+                <div class="modal-card" style="max-width:600px;">
+                    <div class="modal-head">
+                        <h2>Поля анкети клієнта</h2>
+                        <button class="modal-close" onclick="closeClientFieldsModal()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;line-height:1.5;">
+                            Тут ви налаштовуєте які поля побачите в анкеті кожного клієнта. Наприклад: тип волосся, алергії, довжина.
+                        </div>
+                        <div id="fieldsMgmtList"></div>
+                        <button type="button" class="admin-cta ghost" onclick="addCustomField()" style="width:100%;margin-top:14px;padding:12px;font-size:11px;">+ Додати поле</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="admin-cta ghost" onclick="closeClientFieldsModal()">Закрити</button>
+                    </div>
+                </div>
+            </div>
+
+        <!-- ============ ТОВАРИ ============ -->
+        <div class="admin-section" id="ad-products"">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+                <h2 style="font-family:'Fraunces',serif;font-size:32px;color:var(--ink);margin:0;">Товари <span style="color:var(--beige);font-style:italic;">складу</span></h2>
+                <div style="display:flex;gap:8px;">
+                    <button class="admin-cta ghost" onclick="openProductCategoriesModal()" style="padding:10px 18px;font-size:11px;">Категорії</button>
+                    <button class="admin-cta" onclick="openProductModal()" style="padding:10px 22px;font-size:11px;">+ Товар</button>
+                </div>
+            </div>
+            
+            <!-- Подвкладки внутри Товари -->
+            <div style="display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:20px;" id="productsTabs">
+                <button class="prod-tab active" data-prod-tab="catalog" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid var(--beige);color:var(--beige);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Каталог</button>
+                <button class="prod-tab" data-prod-tab="stats" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Статистика</button>
+                <button class="prod-tab" data-prod-tab="movements" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Журнал руху</button>
+            </div>
+
+            <!-- Вкладки контент -->
+            <div id="prodTabCatalog">
+            <!-- сюда переедет существующий контент (фильтры, поиск, сетка) -->
+            </div>
+
+            <div id="prodTabStats" style="display:none;"></div>
+            <div id="prodTabMovements" style="display:none;"></div>
+
+            <!-- Фильтры -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="productFilters">
+                <button class="filter-chip active" data-product-filter="all">Усі</button>
+                <button class="filter-chip" data-product-filter="low">Закінчуються</button>
+                <button class="filter-chip" data-product-filter="out">Немає в наявності</button>
+                <button class="filter-chip" data-product-filter="for-sale">Продаються</button>
+            </div>
+            
+            <!-- Поиск -->
+            <div style="margin-bottom:20px;">
+                <input type="text" id="productSearch" placeholder="Пошук товару..." 
+                    style="width:100%;max-width:400px;padding:12px 16px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
+            </div>
+            
+            <!-- Сетка товаров -->
+            <div id="productsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+        </div>
+
+        <!-- SERVICES -->
+        <div class="admin-section" id="ad-services">
+            <div class="admin-head">
+                <h1>Послуги <em>та ціни</em></h1>
+                <div class="head-meta">
+                    <button class="admin-cta" onclick="openServiceModal()">+ Послуга</button>
+                </div>
+            </div>
+
+            <div id="servicesList" class="table-card">
+                <div class="svc-row head">
+                    <div>Фото</div><div>Назва</div><div>Категорія</div><div>Ціна</div><div>Час</div><div>Статус</div>
+                </div>
+                <div id="servicesRows">
+                    <div style="padding: 40px; text-align: center; color: var(--ink-mute);">Завантаження...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Modal -->
+        <div class="modal-overlay" id="serviceModal" onclick="if(event.target===this) closeServiceModal()">
+            <div class="modal-card" style="max-width: 720px;">
                 <div class="modal-head">
-                    <h2>Поля анкети клієнта</h2>
-                    <button class="modal-close" onclick="closeClientFieldsModal()">×</button>
+                    <h2 id="serviceModalTitle">Нова послуга</h2>
+                    <button class="modal-close" onclick="closeServiceModal()">×</button>
                 </div>
                 <div class="modal-body">
-                    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:16px;line-height:1.5;">
-                        Тут ви налаштовуєте які поля побачите в анкеті кожного клієнта. Наприклад: тип волосся, алергії, довжина.
+                    <input type="hidden" id="svcId" value="">
+                    
+                    <div class="form-group">
+                        <label>Назва послуги</label>
+                        <input type="text" id="svcName" placeholder="Біозавивка">
                     </div>
-                    <div id="fieldsMgmtList"></div>
-                    <button type="button" class="admin-cta ghost" onclick="addCustomField()" style="width:100%;margin-top:14px;padding:12px;font-size:11px;">+ Додати поле</button>
+                    <div class="form-group">
+                        <label>Опис</label>
+                        <textarea id="svcDescription" rows="3" placeholder="Короткий опис послуги"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Базова ціна (₴)</label>
+                            <input type="number" id="svcPrice" placeholder="1800">
+                        </div>
+                        <div class="form-group">
+                            <label>Тривалість (хв)</label>
+                            <input type="number" id="svcDuration" placeholder="90">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Фото послуги</label>
+                        <div id="svcImageUploader"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="svcActive" checked>
+                            <span>Активна (показується клієнтам)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="options-section">
+                        <div class="options-header">
+                            <h3>Опції послуги</h3>
+                            <button type="button" class="admin-cta ghost small" onclick="addOptionGroup()">+ Група опцій</button>
+                        </div>
+                        <div class="options-hint">Наприклад: «Довжина волосся» з варіантами «Короткі / Середні / Довгі». Ціна опції додається до базової ціни послуги.</div>
+                        <div id="optionGroupsList"></div>
+                    </div>
+
+                    <!-- ===== РОЗХІДНИКИ ПОСЛУГИ ===== -->
+        <div class="form-group" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <label style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Розхідники базові</label>
+                <button type="button" class="admin-cta ghost" onclick="addServiceConsumable()" style="padding:6px 14px;font-size:11px;">+ Товар</button>
+            </div>
+            
+            <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
+                Що витрачається при кожній цій послузі. Списується при статусі "Виконано".
+            </div>
+            
+            <div id="serviceConsumablesList" style="display:flex;flex-direction:column;gap:8px;">
+                <!-- буде заповнено через JS -->
+            </div>
+        </div>
+                    
+                    <div id="svcError" class="auth-error" style="display:none;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button class="admin-cta ghost" onclick="closeClientFieldsModal()">Закрити</button>
+                    <button class="admin-cta ghost" onclick="closeServiceModal()">Скасувати</button>
+                    <button class="admin-cta" id="svcSaveBtn" onclick="saveService()">Зберегти</button>
+                    <button class="admin-cta danger" id="svcDeleteBtn" onclick="deleteService()" style="display:none;">Видалити</button>
                 </div>
             </div>
         </div>
 
-<!-- ============ ТОВАРИ ============ -->
-<div class="admin-section" id="ad-products"">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-        <h2 style="font-family:'Fraunces',serif;font-size:32px;color:var(--ink);margin:0;">Товари <span style="color:var(--beige);font-style:italic;">складу</span></h2>
-        <div style="display:flex;gap:8px;">
-            <button class="admin-cta ghost" onclick="openProductCategoriesModal()" style="padding:10px 18px;font-size:11px;">Категорії</button>
-            <button class="admin-cta" onclick="openProductModal()" style="padding:10px 22px;font-size:11px;">+ Товар</button>
-        </div>
-    </div>
-    
-    <!-- Подвкладки внутри Товари -->
-    <div style="display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:20px;" id="productsTabs">
-        <button class="prod-tab active" data-prod-tab="catalog" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid var(--beige);color:var(--beige);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Каталог</button>
-        <button class="prod-tab" data-prod-tab="stats" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Статистика</button>
-        <button class="prod-tab" data-prod-tab="movements" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--ink-mute);font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Журнал руху</button>
-    </div>
-
-    <!-- Вкладки контент -->
-    <div id="prodTabCatalog">
-    <!-- сюда переедет существующий контент (фильтры, поиск, сетка) -->
-    </div>
-
-    <div id="prodTabStats" style="display:none;"></div>
-    <div id="prodTabMovements" style="display:none;"></div>
-
-    <!-- Фильтры -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="productFilters">
-        <button class="filter-chip active" data-product-filter="all">Усі</button>
-        <button class="filter-chip" data-product-filter="low">Закінчуються</button>
-        <button class="filter-chip" data-product-filter="out">Немає в наявності</button>
-        <button class="filter-chip" data-product-filter="for-sale">Продаються</button>
-    </div>
-    
-    <!-- Поиск -->
-    <div style="margin-bottom:20px;">
-        <input type="text" id="productSearch" placeholder="Пошук товару..." 
-               style="width:100%;max-width:400px;padding:12px 16px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);font-family:Inter,sans-serif;font-size:14px;border-radius:4px;">
-    </div>
-    
-    <!-- Сетка товаров -->
-    <div id="productsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
-</div>
-
-  <!-- SERVICES -->
-<div class="admin-section" id="ad-services">
-    <div class="admin-head">
-        <h1>Послуги <em>та ціни</em></h1>
-        <div class="head-meta">
-            <button class="admin-cta" onclick="openServiceModal()">+ Послуга</button>
-        </div>
-    </div>
-
-    <div id="servicesList" class="table-card">
-        <div class="svc-row head">
-            <div>Фото</div><div>Назва</div><div>Категорія</div><div>Ціна</div><div>Час</div><div>Статус</div>
-        </div>
-        <div id="servicesRows">
-            <div style="padding: 40px; text-align: center; color: var(--ink-mute);">Завантаження...</div>
-        </div>
-    </div>
-</div>
-
-<!-- Service Modal -->
-<div class="modal-overlay" id="serviceModal" onclick="if(event.target===this) closeServiceModal()">
-    <div class="modal-card" style="max-width: 720px;">
-        <div class="modal-head">
-            <h2 id="serviceModalTitle">Нова послуга</h2>
-            <button class="modal-close" onclick="closeServiceModal()">×</button>
-        </div>
-        <div class="modal-body">
-            <input type="hidden" id="svcId" value="">
-            
-            <div class="form-group">
-                <label>Назва послуги</label>
-                <input type="text" id="svcName" placeholder="Біозавивка">
-            </div>
-            <div class="form-group">
-                <label>Опис</label>
-                <textarea id="svcDescription" rows="3" placeholder="Короткий опис послуги"></textarea>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Базова ціна (₴)</label>
-                    <input type="number" id="svcPrice" placeholder="1800">
-                </div>
-                <div class="form-group">
-                    <label>Тривалість (хв)</label>
-                    <input type="number" id="svcDuration" placeholder="90">
+        <!-- REPORTS -->
+        <div class="admin-section" id="ad-reports">
+            <div class="admin-head">
+                <h1>Звітність <em>за період</em></h1>
+                <div class="head-meta">
+                    <button class="admin-cta ghost" onclick="exportReports()">CSV</button>
+                    <button class="admin-cta ghost" onclick="window.print()">Друк / PDF</button>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Фото послуги</label>
-                <div id="svcImageUploader"></div>
+
+            <div class="filter-bar" id="reportsFilters">
+                <button class="filter-chip" data-period="month">Місяць</button>
+                <button class="filter-chip" data-period="3months">3 місяці</button>
+                <button class="filter-chip active" data-period="6months">Півроку</button>
+                <button class="filter-chip" data-period="year">Рік</button>
             </div>
-            <div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="svcActive" checked>
-                    <span>Активна (показується клієнтам)</span>
-                </label>
+
+            <div id="reportsStats" class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">—</div></div>
+                <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">—</div></div>
+                <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">—</div></div>
+                <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">—</div></div>
             </div>
-            
-            <div class="options-section">
-                <div class="options-header">
-                    <h3>Опції послуги</h3>
-                    <button type="button" class="admin-cta ghost small" onclick="addOptionGroup()">+ Група опцій</button>
+
+            <div class="chart-card">
+                <div class="chart-card-head"><h3>Динаміка</h3></div>
+                <div id="reportsTimeline" style="min-height:220px;"></div>
+            </div>
+
+            <!-- Главная фича — статистика по мастерам -->
+            <div class="chart-card">
+                <div class="chart-card-head">
+                    <h3>Статистика майстрів</h3>
+                    <span style="font-size:11px;color:var(--ink-mute);">Кількість робіт та виручка</span>
                 </div>
-                <div class="options-hint">Наприклад: «Довжина волосся» з варіантами «Короткі / Середні / Довгі». Ціна опції додається до базової ціни послуги.</div>
-                <div id="optionGroupsList"></div>
+                <div id="reportsMasters" class="masters-stats"></div>
             </div>
 
-            <!-- ===== РОЗХІДНИКИ ПОСЛУГИ ===== -->
-<div class="form-group" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <label style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Розхідники базові</label>
-        <button type="button" class="admin-cta ghost" onclick="addServiceConsumable()" style="padding:6px 14px;font-size:11px;">+ Товар</button>
-    </div>
-    
-    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:14px;line-height:1.5;">
-        Що витрачається при кожній цій послузі. Списується при статусі "Виконано".
-    </div>
-    
-    <div id="serviceConsumablesList" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- буде заповнено через JS -->
-    </div>
-</div>
-            
-            <div id="svcError" class="auth-error" style="display:none;"></div>
+            <!-- Заробіток майстрів -->
+        <div class="chart-card">
+            <div class="chart-card-head">
+                <h3>Заробіток майстрів</h3>
+                <span style="font-size:11px;color:var(--ink-mute);">% від послуг та опцій</span>
+            </div>
+            <div id="reportsMasterSalary"></div>
         </div>
-        <div class="modal-footer">
-            <button class="admin-cta ghost" onclick="closeServiceModal()">Скасувати</button>
-            <button class="admin-cta" id="svcSaveBtn" onclick="saveService()">Зберегти</button>
-            <button class="admin-cta danger" id="svcDeleteBtn" onclick="deleteService()" style="display:none;">Видалити</button>
+
+        <div class="two-col">
+            <div class="chart-card" style="margin-bottom:0;">
+                <div class="chart-card-head"><h3>Популярні послуги</h3></div>
+                <div id="reportsTopServices"></div>
+            </div>
+            <div class="chart-card" style="margin-bottom:0;">
+                <div class="chart-card-head"><h3>Скасування</h3></div>
+                <div id="reportsCancellations"></div>
+            </div>
         </div>
     </div>
-</div>
-
-  <!-- REPORTS -->
-<div class="admin-section" id="ad-reports">
-    <div class="admin-head">
-        <h1>Звітність <em>за період</em></h1>
-        <div class="head-meta">
-            <button class="admin-cta ghost" onclick="exportReports()">CSV</button>
-            <button class="admin-cta ghost" onclick="window.print()">Друк / PDF</button>
-        </div>
-    </div>
-
-    <div class="filter-bar" id="reportsFilters">
-        <button class="filter-chip" data-period="month">Місяць</button>
-        <button class="filter-chip" data-period="3months">3 місяці</button>
-        <button class="filter-chip active" data-period="6months">Півроку</button>
-        <button class="filter-chip" data-period="year">Рік</button>
-    </div>
-
-    <div id="reportsStats" class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Виручка</div><div class="stat-value">—</div></div>
-        <div class="stat-card"><div class="stat-label">Заявок</div><div class="stat-value">—</div></div>
-        <div class="stat-card"><div class="stat-label">Скасовано</div><div class="stat-value">—</div></div>
-        <div class="stat-card"><div class="stat-label">Прибуток</div><div class="stat-value">—</div></div>
-    </div>
-
-    <div class="chart-card">
-        <div class="chart-card-head"><h3>Динаміка</h3></div>
-        <div id="reportsTimeline" style="min-height:220px;"></div>
-    </div>
-
-    <!-- Главная фича — статистика по мастерам -->
-    <div class="chart-card">
-        <div class="chart-card-head">
-            <h3>Статистика майстрів</h3>
-            <span style="font-size:11px;color:var(--ink-mute);">Кількість робіт та виручка</span>
-        </div>
-        <div id="reportsMasters" class="masters-stats"></div>
-    </div>
-
-    <!-- Заробіток майстрів -->
-<div class="chart-card">
-    <div class="chart-card-head">
-        <h3>Заробіток майстрів</h3>
-        <span style="font-size:11px;color:var(--ink-mute);">% від послуг та опцій</span>
-    </div>
-    <div id="reportsMasterSalary"></div>
-</div>
-
-    <div class="two-col">
-        <div class="chart-card" style="margin-bottom:0;">
-            <div class="chart-card-head"><h3>Популярні послуги</h3></div>
-            <div id="reportsTopServices"></div>
-        </div>
-        <div class="chart-card" style="margin-bottom:0;">
-            <div class="chart-card-head"><h3>Скасування</h3></div>
-            <div id="reportsCancellations"></div>
-        </div>
-    </div>
-</div>
 
   <!-- EXPENSES -->
 <div class="admin-section" id="ad-expenses">
@@ -3642,408 +3652,408 @@ function applySettings() {
         });
     }
     
-    // Hero image або video
-const heroImg = document.getElementById('heroImg');
-const heroVideo = document.getElementById('heroVideo');
-const heroVideoUrl = publicSettings.hero_video_url;
-const heroSpeed = parseFloat(publicSettings.hero_video_speed || '0.5');
+            // Hero image або video
+        const heroImg = document.getElementById('heroImg');
+        const heroVideo = document.getElementById('heroVideo');
+        const heroVideoUrl = publicSettings.hero_video_url;
+        const heroSpeed = parseFloat(publicSettings.hero_video_speed || '0.5');
 
-if (heroVideoUrl && heroVideo) {
-    heroVideo.src = heroVideoUrl;
-    heroVideo.playbackRate = heroSpeed;
-    heroVideo.classList.add('show');
-    if (heroImg) heroImg.style.display = 'none';
-    
-    // ПІНГ-ПОНГ ЦИКЛ (вперед-назад)
-    let pingPongDirection = 1; // 1 = вперед, -1 = назад
-    let pingPongRaf = null;
-    let lastTime = null;
-    
-    function pingPongLoop(now) {
-        if (!heroVideo.duration || isNaN(heroVideo.duration)) {
-            pingPongRaf = requestAnimationFrame(pingPongLoop);
-            return;
-        }
-        
-        if (lastTime === null) lastTime = now;
-        const deltaSec = (now - lastTime) / 1000;
-        lastTime = now;
-        
-        const newTime = heroVideo.currentTime + (deltaSec * heroSpeed * pingPongDirection);
-        
-        if (newTime >= heroVideo.duration) {
-            heroVideo.currentTime = heroVideo.duration;
-            pingPongDirection = -1; // повертаємось назад
-        } else if (newTime <= 0) {
-            heroVideo.currentTime = 0;
-            pingPongDirection = 1; // знову вперед
-        } else {
-            heroVideo.currentTime = newTime;
-        }
-        
-        pingPongRaf = requestAnimationFrame(pingPongLoop);
-    }
-    
-    heroVideo.addEventListener('loadedmetadata', () => {
-        // Пауза автозапуску — будемо рулити вручну
-        heroVideo.pause();
-        heroVideo.currentTime = 0;
-        pingPongDirection = 1;
-        lastTime = null;
-        
-        if (pingPongRaf) cancelAnimationFrame(pingPongRaf);
-        pingPongRaf = requestAnimationFrame(pingPongLoop);
-    }, { once: true });
-    
-    // Fallback на випадок коли pingPong не зміг запуститись
-    heroVideo.play().catch(() => {});
-    
-} else if (publicSettings.hero_image_url) {
-    document.querySelectorAll('[data-bind-hero]').forEach(el => {
-        el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
-    });
-}
-    
-    // Favicon
-    if (publicSettings.favicon_url) {
-        let link = document.querySelector('link[rel="icon"]');
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-        }
-        link.href = publicSettings.favicon_url;
-    }
-    
-    // Текстовые поля через data-bind
-    document.querySelectorAll('[data-bind]').forEach(el => {
-        const key = el.dataset.bind;
-        const val = publicSettings[key];
-        if (val !== undefined && val !== null && val !== '') {
-            el.textContent = val;
-        }
-    });
-    
-    // Ссылки через data-bind-href (для соцсетей и контактов)
-    document.querySelectorAll('[data-bind-href]').forEach(el => {
-        const key = el.dataset.bindHref;
-        const val = publicSettings[key];
-        if (val) {
-            el.href = val;
-            el.style.display = '';
-        } else {
-            el.style.display = 'none'; // скрыть ссылку если её не настроили
-        }
-    });
-    
-    // Телефон — особый случай (показываем display, ссылка идёт на чистый номер)
-    if (publicSettings.phone) {
-        document.querySelectorAll('a[data-bind-phone]').forEach(el => {
-            el.href = 'tel:' + publicSettings.phone.replace(/[^+\d]/g, '');
-            el.textContent = publicSettings.phone_display || publicSettings.phone;
-        });
-    }
-    
-    // Email — то же самое
-    if (publicSettings.email) {
-        document.querySelectorAll('a[data-bind-email]').forEach(el => {
-            el.href = 'mailto:' + publicSettings.email;
-            el.textContent = publicSettings.email;
-        });
-    }
-
-    // График работы в футере
-    renderFooterHours();
-    
-    // Год
-    const yearEl = document.getElementById('footerYear');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-}
-
-function renderFooterHours() {
-    const list = document.getElementById('footerHoursList');
-    if (!list) return;
-    
-    const days = [
-        { key: 'mon', label: 'Пн' },
-        { key: 'tue', label: 'Вт' },
-        { key: 'wed', label: 'Ср' },
-        { key: 'thu', label: 'Чт' },
-        { key: 'fri', label: 'Пт' },
-        { key: 'sat', label: 'Сб' },
-        { key: 'sun', label: 'Нд' },
-    ];
-    
-    const jsDay = new Date().getDay();
-    const todayKey = ['sun','mon','tue','wed','thu','fri','sat'][jsDay];
-    
-    const html = days.map(d => {
-        let hours = { open: '—', close: '—', closed: false };
-        try {
-            const stored = publicSettings['working_hours_' + d.key];
-            if (stored) hours = { ...hours, ...JSON.parse(stored) };
-        } catch (e) {}
-        
-        const timeStr = hours.closed ? 'Вихідний' : `${hours.open} — ${hours.close}`;
-        const todayClass = d.key === todayKey ? ' today' : '';
-        
-        return `<div class="hours-item${todayClass}">
-            <span class="day">${d.label}</span>
-            <span class="time">${timeStr}</span>
-        </div>`;
-    }).join('');
-    
-    list.innerHTML = html;
-}
-
-function loadGoogleFonts(headingFont, bodyFont) {
-    // Удаляем старую ссылку если была
-    const old = document.getElementById('dynamic-fonts');
-    if (old) old.remove();
-    
-    const fonts = [];
-    if (headingFont) fonts.push(headingFont.replace(/\s+/g, '+') + ':ital,wght@0,300;0,400;0,500;1,300');
-    if (bodyFont && bodyFont !== headingFont) fonts.push(bodyFont.replace(/\s+/g, '+') + ':wght@300;400;500;600');
-    
-    if (fonts.length === 0) return;
-    
-    const link = document.createElement('link');
-    link.id = 'dynamic-fonts';
-    link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${fonts.join('&family=')}&display=swap`;
-    document.head.appendChild(link);
-    
-    // Применяем в CSS
-    let style = document.getElementById('dynamic-font-styles');
-    if (!style) {
-        style = document.createElement('style');
-        style.id = 'dynamic-font-styles';
-        document.head.appendChild(style);
-    }
-    style.textContent = `
-        body { font-family: '${bodyFont || 'Inter'}', sans-serif; }
-        h1, h2, h3, .brand, .auth-brand, .hero-title, .s-name, .mc-name, .ms-name { font-family: '${headingFont || 'Fraunces'}', serif; }
-    `;
-}
-
-// Вызов при старте
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadPublicSettings);
-} else {
-    loadPublicSettings();
-}
-
-// ============================================
-// ЗАВЕРШЕННЯ БРОНІ З СПИСАННЯМ
-// ============================================
-let currentCompleteBookingId = null;
-let currentCompleteConsumables = [];
-
-async function openCompleteModal(bookingId) {
-    currentCompleteBookingId = bookingId;
-    currentCompleteConsumables = [];
-    
-    const modal = document.getElementById('completeModal');
-    const list = document.getElementById('completeConsumablesList');
-    const warning = document.getElementById('completeWarning');
-    
-    list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
-    warning.style.display = 'none';
-    
-    modal.style.display = 'flex';
-    
-    try {
-        const res = await fetch('/api/admin/booking-consumables-preview.php?booking_id=' + bookingId, { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        
-        const d = data.data || data;
-        
-        if (d.already_consumed) {
-            warning.textContent = '⚠ Розхідники по цій броні вже списані раніше';
-            warning.style.display = 'block';
-        }
-        
-        document.getElementById('completeServiceName').textContent = d.service_name || '—';
-        
-        // Загрузим товары для добавления вручную
-        if (!allProducts || allProducts.length === 0) {
-            const pRes = await fetch('/api/admin/products-list.php', { credentials: 'include' });
-            const pData = await pRes.json();
-            if (pData.success) allProducts = pData.data || [];
-        }
-        
-        currentCompleteConsumables = (d.consumables || []).map(c => ({
-            product_id: c.product_id,
-            product_name: c.product_name,
-            unit: c.unit,
-            current_stock: c.current_stock,
-            quantity: c.quantity,
-            sources: c.sources,
-            auto: true
-        }));
-        
-        renderCompleteConsumables();
-        
-    } catch (err) {
-        list.innerHTML = `<div style="padding:14px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
-    }
-}
-
-function closeCompleteModal() {
-    document.getElementById('completeModal').style.display = 'none';
-    currentCompleteBookingId = null;
-    currentCompleteConsumables = [];
-}
-
-function renderCompleteConsumables() {
-    const list = document.getElementById('completeConsumablesList');
-    
-    if (currentCompleteConsumables.length === 0) {
-        list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;border-radius:4px;">Немає прив\'язаних розхідників. Можна додати вручну.</div>';
-        return;
-    }
-    
-    const activeProducts = (allProducts || []).filter(p => parseInt(p.is_active));
-    
-    list.innerHTML = currentCompleteConsumables.map((c, i) => {
-        const unit = c.unit ? getUnitLabel(c.unit) : (c.product_id ? getUnitLabel(activeProducts.find(p => p.id == c.product_id)?.unit) : '');
-        const shortage = (c.current_stock !== undefined) ? Math.max(0, c.quantity - c.current_stock) : 0;
-        const shortageWarning = shortage > 0 ? `<div style="font-size:10px;color:#e8d599;margin-top:4px;">⚠ Не вистачає: ${shortage} ${unit}</div>` : '';
-        
-        if (c.auto && c.product_name) {
-            // Авто-расходник (привязан к услуге/опции) — показываем по-другому
-            return `
-                <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:13px;color:var(--ink);">${escapeHtml(c.product_name)}</div>
-                            <div style="font-size:10px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(c.sources || '')} · залишок: ${c.current_stock} ${unit}</div>
-                            ${shortageWarning}
-                        </div>
-                        <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
-                            <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity}" min="0" step="${getStepForUnit(c.unit)}" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
-                            <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;">${unit}</span>
-                        </div>
-                        <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
-                    </div>
-                </div>
-            `;
-        } else {
-            // Ручной — selector товара
-            return `
-                <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;gap:10px;">
-                    <select class="complete-product" data-index="${i}" style="flex:1;min-width:0;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;border-radius:4px;">
-                        <option value="">— Оберіть товар —</option>
-                        ${activeProducts.map(p => `<option value="${p.id}" data-unit="${p.unit}" ${c.product_id == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (залишок: ${p.current_stock} ${getUnitLabel(p.unit)})</option>`).join('')}
-                    </select>
-                    <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
-                        <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="0.1" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
-                        <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;" id="complete-unit-${i}">${unit}</span>
-                    </div>
-                    <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
-                </div>
-            `;
-        }
-    }).join('');
-    
-    // Обработчики
-    list.querySelectorAll('.complete-qty').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const i = parseInt(e.target.dataset.index);
-            currentCompleteConsumables[i].quantity = parseFloat(e.target.value) || 0;
-        });
-    });
-    
-    list.querySelectorAll('.complete-product').forEach(sel => {
-        sel.addEventListener('change', (e) => {
-            const i = parseInt(e.target.dataset.index);
-            const pid = parseInt(e.target.value);
-            const product = activeProducts.find(p => p.id == pid);
-            currentCompleteConsumables[i].product_id = pid;
-            currentCompleteConsumables[i].product_name = product?.name || '';
-            currentCompleteConsumables[i].unit = product?.unit;
-            currentCompleteConsumables[i].current_stock = parseFloat(product?.current_stock) || 0;
+        if (heroVideoUrl && heroVideo) {
+            heroVideo.src = heroVideoUrl;
+            heroVideo.playbackRate = heroSpeed;
+            heroVideo.classList.add('show');
+            if (heroImg) heroImg.style.display = 'none';
             
-            const unitSpan = document.getElementById(`complete-unit-${i}`);
-            if (unitSpan) unitSpan.textContent = product?.unit ? getUnitLabel(product.unit) : '';
-        });
-    });
-}
-
-function addCompleteConsumable() {
-    currentCompleteConsumables.push({
-        product_id: 0,
-        quantity: 0,
-        auto: false
-    });
-    renderCompleteConsumables();
-}
-
-function removeCompleteConsumable(index) {
-    currentCompleteConsumables.splice(index, 1);
-    renderCompleteConsumables();
-}
-
-async function confirmCompleteWithConsumption() {
-    if (!currentCompleteBookingId) return;
-    
-    const consumables = currentCompleteConsumables
-        .filter(c => c.product_id > 0 && c.quantity > 0)
-        .map(c => ({
-            product_id: c.product_id,
-            quantity: c.quantity
-        }));
-    
-    try {
-        const res = await fetch('/api/admin/booking-complete.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                booking_id: currentCompleteBookingId,
-                consumables,
-                skip_consumption: false
-            })
-        });
-        const data = await res.json();
-        if (!data.success) {
-            alert(data.error);
-            return;
+            // ПІНГ-ПОНГ ЦИКЛ (вперед-назад)
+            let pingPongDirection = 1; // 1 = вперед, -1 = назад
+            let pingPongRaf = null;
+            let lastTime = null;
+            
+            function pingPongLoop(now) {
+                if (!heroVideo.duration || isNaN(heroVideo.duration)) {
+                    pingPongRaf = requestAnimationFrame(pingPongLoop);
+                    return;
+                }
+                
+                if (lastTime === null) lastTime = now;
+                const deltaSec = (now - lastTime) / 1000;
+                lastTime = now;
+                
+                const newTime = heroVideo.currentTime + (deltaSec * heroSpeed * pingPongDirection);
+                
+                if (newTime >= heroVideo.duration) {
+                    heroVideo.currentTime = heroVideo.duration;
+                    pingPongDirection = -1; // повертаємось назад
+                } else if (newTime <= 0) {
+                    heroVideo.currentTime = 0;
+                    pingPongDirection = 1; // знову вперед
+                } else {
+                    heroVideo.currentTime = newTime;
+                }
+                
+                pingPongRaf = requestAnimationFrame(pingPongLoop);
+            }
+            
+            heroVideo.addEventListener('loadedmetadata', () => {
+                // Пауза автозапуску — будемо рулити вручну
+                heroVideo.pause();
+                heroVideo.currentTime = 0;
+                pingPongDirection = 1;
+                lastTime = null;
+                
+                if (pingPongRaf) cancelAnimationFrame(pingPongRaf);
+                pingPongRaf = requestAnimationFrame(pingPongLoop);
+            }, { once: true });
+            
+            // Fallback на випадок коли pingPong не зміг запуститись
+            heroVideo.play().catch(() => {});
+            
+        } else if (publicSettings.hero_image_url) {
+            document.querySelectorAll('[data-bind-hero]').forEach(el => {
+                el.style.backgroundImage = `url('${publicSettings.hero_image_url}')`;
+            });
         }
-        closeCompleteModal();
-        // Перезавантажуємо заявки
-        if (typeof loadBookings === 'function') loadBookings();
-    } catch (err) {
-        alert('Помилка');
-    }
-}
+            
+            // Favicon
+            if (publicSettings.favicon_url) {
+                let link = document.querySelector('link[rel="icon"]');
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.href = publicSettings.favicon_url;
+            }
+            
+            // Текстовые поля через data-bind
+            document.querySelectorAll('[data-bind]').forEach(el => {
+                const key = el.dataset.bind;
+                const val = publicSettings[key];
+                if (val !== undefined && val !== null && val !== '') {
+                    el.textContent = val;
+                }
+            });
+            
+            // Ссылки через data-bind-href (для соцсетей и контактов)
+            document.querySelectorAll('[data-bind-href]').forEach(el => {
+                const key = el.dataset.bindHref;
+                const val = publicSettings[key];
+                if (val) {
+                    el.href = val;
+                    el.style.display = '';
+                } else {
+                    el.style.display = 'none'; // скрыть ссылку если её не настроили
+                }
+            });
+            
+            // Телефон — особый случай (показываем display, ссылка идёт на чистый номер)
+            if (publicSettings.phone) {
+                document.querySelectorAll('a[data-bind-phone]').forEach(el => {
+                    el.href = 'tel:' + publicSettings.phone.replace(/[^+\d]/g, '');
+                    el.textContent = publicSettings.phone_display || publicSettings.phone;
+                });
+            }
+            
+            // Email — то же самое
+            if (publicSettings.email) {
+                document.querySelectorAll('a[data-bind-email]').forEach(el => {
+                    el.href = 'mailto:' + publicSettings.email;
+                    el.textContent = publicSettings.email;
+                });
+            }
 
-async function confirmCompleteWithoutConsumption() {
-    if (!currentCompleteBookingId) return;
-    if (!confirm('Завершити бронь без списання товарів зі складу?')) return;
-    
-    try {
-        const res = await fetch('/api/admin/booking-complete.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                booking_id: currentCompleteBookingId,
-                skip_consumption: true
-            })
-        });
-        const data = await res.json();
-        if (!data.success) {
-            alert(data.error);
-            return;
+            // График работы в футере
+            renderFooterHours();
+            
+            // Год
+            const yearEl = document.getElementById('footerYear');
+            if (yearEl) yearEl.textContent = new Date().getFullYear();
         }
-        closeCompleteModal();
-        if (typeof loadBookings === 'function') loadBookings();
-    } catch (err) {
-        alert('Помилка');
-    }
-}
+
+        function renderFooterHours() {
+            const list = document.getElementById('footerHoursList');
+            if (!list) return;
+            
+            const days = [
+                { key: 'mon', label: 'Пн' },
+                { key: 'tue', label: 'Вт' },
+                { key: 'wed', label: 'Ср' },
+                { key: 'thu', label: 'Чт' },
+                { key: 'fri', label: 'Пт' },
+                { key: 'sat', label: 'Сб' },
+                { key: 'sun', label: 'Нд' },
+            ];
+            
+            const jsDay = new Date().getDay();
+            const todayKey = ['sun','mon','tue','wed','thu','fri','sat'][jsDay];
+            
+            const html = days.map(d => {
+                let hours = { open: '—', close: '—', closed: false };
+                try {
+                    const stored = publicSettings['working_hours_' + d.key];
+                    if (stored) hours = { ...hours, ...JSON.parse(stored) };
+                } catch (e) {}
+                
+                const timeStr = hours.closed ? 'Вихідний' : `${hours.open} — ${hours.close}`;
+                const todayClass = d.key === todayKey ? ' today' : '';
+                
+                return `<div class="hours-item${todayClass}">
+                    <span class="day">${d.label}</span>
+                    <span class="time">${timeStr}</span>
+                </div>`;
+            }).join('');
+            
+            list.innerHTML = html;
+        }
+
+        function loadGoogleFonts(headingFont, bodyFont) {
+            // Удаляем старую ссылку если была
+            const old = document.getElementById('dynamic-fonts');
+            if (old) old.remove();
+            
+            const fonts = [];
+            if (headingFont) fonts.push(headingFont.replace(/\s+/g, '+') + ':ital,wght@0,300;0,400;0,500;1,300');
+            if (bodyFont && bodyFont !== headingFont) fonts.push(bodyFont.replace(/\s+/g, '+') + ':wght@300;400;500;600');
+            
+            if (fonts.length === 0) return;
+            
+            const link = document.createElement('link');
+            link.id = 'dynamic-fonts';
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${fonts.join('&family=')}&display=swap`;
+            document.head.appendChild(link);
+            
+            // Применяем в CSS
+            let style = document.getElementById('dynamic-font-styles');
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'dynamic-font-styles';
+                document.head.appendChild(style);
+            }
+            style.textContent = `
+                body { font-family: '${bodyFont || 'Inter'}', sans-serif; }
+                h1, h2, h3, .brand, .auth-brand, .hero-title, .s-name, .mc-name, .ms-name { font-family: '${headingFont || 'Fraunces'}', serif; }
+            `;
+        }
+
+        // Вызов при старте
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPublicSettings);
+        } else {
+            loadPublicSettings();
+        }
+
+        // ============================================
+        // ЗАВЕРШЕННЯ БРОНІ З СПИСАННЯМ
+        // ============================================
+        let currentCompleteBookingId = null;
+        let currentCompleteConsumables = [];
+
+        async function openCompleteModal(bookingId) {
+            currentCompleteBookingId = bookingId;
+            currentCompleteConsumables = [];
+            
+            const modal = document.getElementById('completeModal');
+            const list = document.getElementById('completeConsumablesList');
+            const warning = document.getElementById('completeWarning');
+            
+            list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+            warning.style.display = 'none';
+            
+            modal.style.display = 'flex';
+            
+            try {
+                const res = await fetch('/api/admin/booking-consumables-preview.php?booking_id=' + bookingId, { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                const d = data.data || data;
+                
+                if (d.already_consumed) {
+                    warning.textContent = '⚠ Розхідники по цій броні вже списані раніше';
+                    warning.style.display = 'block';
+                }
+                
+                document.getElementById('completeServiceName').textContent = d.service_name || '—';
+                
+                // Загрузим товары для добавления вручную
+                if (!allProducts || allProducts.length === 0) {
+                    const pRes = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+                    const pData = await pRes.json();
+                    if (pData.success) allProducts = pData.data || [];
+                }
+                
+                currentCompleteConsumables = (d.consumables || []).map(c => ({
+                    product_id: c.product_id,
+                    product_name: c.product_name,
+                    unit: c.unit,
+                    current_stock: c.current_stock,
+                    quantity: c.quantity,
+                    sources: c.sources,
+                    auto: true
+                }));
+                
+                renderCompleteConsumables();
+                
+            } catch (err) {
+                list.innerHTML = `<div style="padding:14px;color:var(--danger);font-size:12px;">Помилка: ${err.message}</div>`;
+            }
+        }
+
+        function closeCompleteModal() {
+            document.getElementById('completeModal').style.display = 'none';
+            currentCompleteBookingId = null;
+            currentCompleteConsumables = [];
+        }
+
+        function renderCompleteConsumables() {
+            const list = document.getElementById('completeConsumablesList');
+            
+            if (currentCompleteConsumables.length === 0) {
+                list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;border-radius:4px;">Немає прив\'язаних розхідників. Можна додати вручну.</div>';
+                return;
+            }
+            
+            const activeProducts = (allProducts || []).filter(p => parseInt(p.is_active));
+            
+            list.innerHTML = currentCompleteConsumables.map((c, i) => {
+                const unit = c.unit ? getUnitLabel(c.unit) : (c.product_id ? getUnitLabel(activeProducts.find(p => p.id == c.product_id)?.unit) : '');
+                const shortage = (c.current_stock !== undefined) ? Math.max(0, c.quantity - c.current_stock) : 0;
+                const shortageWarning = shortage > 0 ? `<div style="font-size:10px;color:#e8d599;margin-top:4px;">⚠ Не вистачає: ${shortage} ${unit}</div>` : '';
+                
+                if (c.auto && c.product_name) {
+                    // Авто-расходник (привязан к услуге/опции) — показываем по-другому
+                    return `
+                        <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:13px;color:var(--ink);">${escapeHtml(c.product_name)}</div>
+                                    <div style="font-size:10px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(c.sources || '')} · залишок: ${c.current_stock} ${unit}</div>
+                                    ${shortageWarning}
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
+                                    <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity}" min="0" step="${getStepForUnit(c.unit)}" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                                    <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;">${unit}</span>
+                                </div>
+                                <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Ручной — selector товара
+                    return `
+                        <div style="padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;gap:10px;">
+                            <select class="complete-product" data-index="${i}" style="flex:1;min-width:0;padding:8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;border-radius:4px;">
+                                <option value="">— Оберіть товар —</option>
+                                ${activeProducts.map(p => `<option value="${p.id}" data-unit="${p.unit}" ${c.product_id == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (залишок: ${p.current_stock} ${getUnitLabel(p.unit)})</option>`).join('')}
+                            </select>
+                            <div style="display:flex;align-items:center;gap:6px;width:160px;flex-shrink:0;">
+                                <input type="number" class="complete-qty" data-index="${i}" value="${c.quantity || 0}" min="0" step="0.1" style="flex:1;min-width:0;padding:8px 20px 8px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);font-size:12px;text-align:right;border-radius:4px;">
+                                <span style="color:var(--ink-mute);font-size:12px;width:24px;text-align:left;flex-shrink:0;" id="complete-unit-${i}">${unit}</span>
+                            </div>
+                            <button type="button" onclick="removeCompleteConsumable(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:14px;border-radius:4px;">✕</button>
+                        </div>
+                    `;
+                }
+            }).join('');
+            
+            // Обработчики
+            list.querySelectorAll('.complete-qty').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const i = parseInt(e.target.dataset.index);
+                    currentCompleteConsumables[i].quantity = parseFloat(e.target.value) || 0;
+                });
+            });
+            
+            list.querySelectorAll('.complete-product').forEach(sel => {
+                sel.addEventListener('change', (e) => {
+                    const i = parseInt(e.target.dataset.index);
+                    const pid = parseInt(e.target.value);
+                    const product = activeProducts.find(p => p.id == pid);
+                    currentCompleteConsumables[i].product_id = pid;
+                    currentCompleteConsumables[i].product_name = product?.name || '';
+                    currentCompleteConsumables[i].unit = product?.unit;
+                    currentCompleteConsumables[i].current_stock = parseFloat(product?.current_stock) || 0;
+                    
+                    const unitSpan = document.getElementById(`complete-unit-${i}`);
+                    if (unitSpan) unitSpan.textContent = product?.unit ? getUnitLabel(product.unit) : '';
+                });
+            });
+        }
+
+        function addCompleteConsumable() {
+            currentCompleteConsumables.push({
+                product_id: 0,
+                quantity: 0,
+                auto: false
+            });
+            renderCompleteConsumables();
+        }
+
+        function removeCompleteConsumable(index) {
+            currentCompleteConsumables.splice(index, 1);
+            renderCompleteConsumables();
+        }
+
+        async function confirmCompleteWithConsumption() {
+            if (!currentCompleteBookingId) return;
+            
+            const consumables = currentCompleteConsumables
+                .filter(c => c.product_id > 0 && c.quantity > 0)
+                .map(c => ({
+                    product_id: c.product_id,
+                    quantity: c.quantity
+                }));
+            
+            try {
+                const res = await fetch('/api/admin/booking-complete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        booking_id: currentCompleteBookingId,
+                        consumables,
+                        skip_consumption: false
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert(data.error);
+                    return;
+                }
+                closeCompleteModal();
+                // Перезавантажуємо заявки
+                if (typeof loadBookings === 'function') loadBookings();
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
+
+        async function confirmCompleteWithoutConsumption() {
+            if (!currentCompleteBookingId) return;
+            if (!confirm('Завершити бронь без списання товарів зі складу?')) return;
+            
+            try {
+                const res = await fetch('/api/admin/booking-complete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        booking_id: currentCompleteBookingId,
+                        skip_consumption: true
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert(data.error);
+                    return;
+                }
+                closeCompleteModal();
+                if (typeof loadBookings === 'function') loadBookings();
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
 
 // ============================================
 // РОЗХІДНИКИ ПОСЛУГИ
@@ -4511,6 +4521,7 @@ function renderClientsList() {
                 }
                 
                 renderClientCustomFields(data.custom_fields, data.field_values);
+                renderClientProductUsage(data.product_usage);
                 renderClientBookings(data.bookings);
                 renderClientPhotos(data.photos);
                 
@@ -4550,6 +4561,115 @@ function renderClientsList() {
         function closeClientModal() {
             document.getElementById('clientModal').classList.remove('show');
             currentClientData = null;
+        }
+
+                // ============================================
+        // ВИКОРИСТАНІ МАТЕРІАЛИ КЛІЄНТА
+        // ============================================
+        let clientProductUsage = [];
+
+        function renderClientProductUsage(products) {
+            clientProductUsage = (products || []).map(p => ({
+                product_id: parseInt(p.product_id),
+                product_name: p.product_name || '',
+                unit: p.unit || '',
+                quantity: parseFloat(p.quantity) || 0,
+                note: p.note || ''
+            }));
+            
+            renderProductUsageList();
+        }
+
+        function renderProductUsageList() {
+            const list = document.getElementById('cliProductUsageList');
+            if (!list) return;
+            
+            if (clientProductUsage.length === 0) {
+                list.innerHTML = '<div style="padding:14px;background:var(--bg-2);border:1px dashed var(--line);color:var(--ink-mute);font-size:12px;text-align:center;border-radius:4px;">Поки немає записів</div>';
+                return;
+            }
+            
+            list.innerHTML = clientProductUsage.map((p, i) => {
+                const unit = typeof getUnitLabel === 'function' ? getUnitLabel(p.unit) : (p.unit || '');
+                return `
+                    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:6px;">
+                        <div style="flex:1;min-width:0;">
+                            <select class="pu-product" data-index="${i}" style="width:100%;">
+                                <option value="">— Оберіть товар —</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:4px;width:120px;flex-shrink:0;">
+                            <input type="number" class="pu-qty" data-index="${i}" value="${p.quantity}" min="0" step="0.1" style="width:70px;text-align:right;">
+                            <span style="font-size:11px;color:var(--ink-mute);width:30px;" id="puUnit${i}">${unit}</span>
+                        </div>
+                        <button type="button" onclick="removeProductUsageRow(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 8px;cursor:pointer;font-size:12px;border-radius:4px;flex-shrink:0;">✕</button>
+                    </div>
+                `;
+            }).join('');
+            
+            // Заповнюємо select'и товарами
+            loadProductsForUsage();
+        }
+
+        async function loadProductsForUsage() {
+            try {
+                if (!window._allProductsCache) {
+                    const res = await fetch('/api/admin/products-list.php', { credentials: 'include' });
+                    const data = await res.json();
+                    window._allProductsCache = (data.data || []).filter(p => parseInt(p.is_active));
+                }
+                
+                const products = window._allProductsCache;
+                
+                document.querySelectorAll('.pu-product').forEach(sel => {
+                    const i = parseInt(sel.dataset.index);
+                    const current = clientProductUsage[i];
+                    
+                    sel.innerHTML = '<option value="">— Оберіть товар —</option>' +
+                        products.map(p => {
+                            const unit = typeof getUnitLabel === 'function' ? getUnitLabel(p.unit) : (p.unit || '');
+                            return `<option value="${p.id}" data-unit="${p.unit}" ${current.product_id == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (${unit})</option>`;
+                        }).join('');
+                    
+                    sel.addEventListener('change', function() {
+                        const idx = parseInt(this.dataset.index);
+                        const pid = parseInt(this.value) || 0;
+                        const product = products.find(p => p.id == pid);
+                        clientProductUsage[idx].product_id = pid;
+                        clientProductUsage[idx].product_name = product?.name || '';
+                        clientProductUsage[idx].unit = product?.unit || '';
+                        
+                        const unitSpan = document.getElementById('puUnit' + idx);
+                        if (unitSpan) unitSpan.textContent = product?.unit ? getUnitLabel(product.unit) : '';
+                    });
+                });
+                
+                document.querySelectorAll('.pu-qty').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const idx = parseInt(this.dataset.index);
+                        clientProductUsage[idx].quantity = parseFloat(this.value) || 0;
+                    });
+                });
+                
+            } catch (err) {
+                console.error('loadProductsForUsage error:', err);
+            }
+        }
+
+        function addProductUsageRow() {
+            clientProductUsage.push({
+                product_id: 0,
+                product_name: '',
+                unit: '',
+                quantity: 0,
+                note: ''
+            });
+            renderProductUsageList();
+        }
+
+        function removeProductUsageRow(index) {
+            clientProductUsage.splice(index, 1);
+            renderProductUsageList();
         }
 
         // ============================================
@@ -4972,6 +5092,7 @@ function renderClientsList() {
                 phone,
                 email: document.getElementById('cliEmail').value.trim(),
                 notes: document.getElementById('cliNotes').value.trim(),
+                products: clientProductUsage.filter(p => p.product_id > 0 && p.quantity > 0),
                 photo_url: cliImageUploader ? cliImageUploader.getValue() : '',
                 field_values: fieldValues
             };
@@ -4985,6 +5106,24 @@ function renderClientsList() {
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error);
+
+                // Зберігаємо матеріали
+                const cId = data.id || id;
+                if (cId && payload.products && payload.products.length > 0) {
+                    try {
+                        await fetch('/api/admin/client-products-save.php', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                client_id: cId,
+                                products: payload.products
+                            })
+                        });
+                    } catch (e) {
+                        console.error('Products save error:', e);
+                    }
+                }
                 
                 showToast('Збережено');
                 closeClientModal();
@@ -5026,22 +5165,116 @@ function renderClientsList() {
                     return;
                 }
                 
-                const typeLabels = { text: 'Текст', textarea: 'Багаторядковий', select: 'Вибір', checkbox: 'Галочка', number: 'Число', date: 'Дата' };
+                const typeLabels = { text: 'Текст', textarea: 'Багаторядковий', select: 'Вибір зі списку', checkbox: 'Галочка', number: 'Число', date: 'Дата' };
                 
                 list.innerHTML = fields.map(f => {
                     const options = f.field_type === 'select' && f.field_options ? JSON.parse(f.field_options).join(', ') : '';
                     return `
-                        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:8px;">
+                        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:8px;" id="fieldRow${f.id}">
                             <div style="flex:1;">
                                 <div style="font-size:14px;color:var(--ink);">${escapeHtml(f.field_name)}</div>
                                 <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${typeLabels[f.field_type] || f.field_type}${options ? ' · ' + escapeHtml(options) : ''}</div>
                             </div>
+                            <button type="button" onclick="editCustomField(${f.id})" style="background:none;border:1px solid var(--line);color:var(--beige);padding:6px 10px;cursor:pointer;font-size:11px;border-radius:4px;">✎</button>
                             <button type="button" onclick="deleteCustomField(${f.id})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 10px;cursor:pointer;font-size:12px;border-radius:4px;">✕</button>
                         </div>
                     `;
                 }).join('');
             } catch (err) {
                 list.innerHTML = `<div style="color:var(--danger);">${err.message}</div>`;
+            }
+        }
+
+        async function editCustomField(id) {
+            // Завантажуємо дані поля
+            try {
+                const res = await fetch('/api/admin/client-fields-list.php', { credentials: 'include' });
+                const data = await res.json();
+                const field = (data.data || []).find(f => f.id == id);
+                if (!field) return;
+                
+                const row = document.getElementById('fieldRow' + id);
+                if (!row) return;
+                
+                const options = field.field_type === 'select' && field.field_options 
+                    ? JSON.parse(field.field_options).join('\n') 
+                    : '';
+                
+                row.outerHTML = `
+                    <div id="fieldEdit${id}" style="padding:16px;background:var(--bg-1);border:1px solid var(--beige);border-radius:6px;margin-bottom:10px;">
+                        <div class="form-group">
+                            <label>Назва поля</label>
+                            <input type="text" id="fe${id}_name" value="${escapeHtml(field.field_name)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Тип поля</label>
+                            <select id="fe${id}_type" onchange="document.getElementById('fe${id}_opts').style.display = this.value==='select'?'block':'none'">
+                                <option value="text" ${field.field_type === 'text' ? 'selected' : ''}>Текст (один рядок)</option>
+                                <option value="textarea" ${field.field_type === 'textarea' ? 'selected' : ''}>Текст (кілька рядків)</option>
+                                <option value="select" ${field.field_type === 'select' ? 'selected' : ''}>Вибір зі списку</option>
+                                <option value="checkbox" ${field.field_type === 'checkbox' ? 'selected' : ''}>Галочка (так/ні)</option>
+                                <option value="number" ${field.field_type === 'number' ? 'selected' : ''}>Число</option>
+                                <option value="date" ${field.field_type === 'date' ? 'selected' : ''}>Дата</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="fe${id}_opts" style="display:${field.field_type === 'select' ? 'block' : 'none'};">
+                            <label>Варіанти (кожен з нового рядка)</label>
+                            <textarea id="fe${id}_options" rows="3">${escapeHtml(options)}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Підказка (placeholder)</label>
+                            <input type="text" id="fe${id}_placeholder" value="${escapeHtml(field.placeholder || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Порядок сортування</label>
+                            <input type="number" id="fe${id}_sort" value="${field.sort_order || 0}" style="width:80px;">
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:12px;">
+                            <button type="button" class="admin-cta ghost" style="flex:1;" onclick="loadClientFields()">Скасувати</button>
+                            <button type="button" class="admin-cta" style="flex:1;" onclick="updateCustomField(${id})">Зберегти</button>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        async function updateCustomField(id) {
+            const name = document.getElementById('fe' + id + '_name').value.trim();
+            const type = document.getElementById('fe' + id + '_type').value;
+            const placeholder = document.getElementById('fe' + id + '_placeholder').value.trim();
+            const sortOrder = parseInt(document.getElementById('fe' + id + '_sort').value) || 0;
+            
+            if (!name) { alert('Введіть назву'); return; }
+            
+            let options = null;
+            if (type === 'select') {
+                const raw = document.getElementById('fe' + id + '_options').value.trim();
+                if (raw) options = raw.split('\n').map(o => o.trim()).filter(Boolean);
+            }
+            
+            try {
+                const res = await fetch('/api/admin/client-field-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id,
+                        field_name: name,
+                        field_type: type,
+                        field_options: options,
+                        placeholder,
+                        sort_order: sortOrder
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                loadClientFields();
+                showToast('Поле оновлено');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
             }
         }
 
@@ -8321,61 +8554,61 @@ async function renderMasterServicesList(selectedIds) {
     `).join('');
 }
 
-async function saveMaster() {
-    const errorEl = document.getElementById('mstError');
-    const btn = document.getElementById('mstSaveBtn');
-    errorEl.style.display = 'none';
+        async function saveMaster() {
+            const errorEl = document.getElementById('mstError');
+            const btn = document.getElementById('mstSaveBtn');
+            errorEl.style.display = 'none';
 
-    const service_ids = [];
-    document.querySelectorAll('.mst-svc-cb:checked').forEach(cb => {
-        service_ids.push(parseInt(cb.dataset.svcId));
-    });
+            const service_ids = [];
+            document.querySelectorAll('.mst-svc-cb:checked').forEach(cb => {
+                service_ids.push(parseInt(cb.dataset.svcId));
+            });
 
-    const payload = {
-        id: parseInt(document.getElementById('mstId').value) || 0,
-        name: document.getElementById('mstName').value.trim(),
-        role: document.getElementById('mstRole').value.trim(),
-        phone: document.getElementById('mstPhone').value.trim(),
-        email: document.getElementById('mstEmail').value.trim(),
-        bio: document.getElementById('mstBio').value.trim(),
-        photo_url: mstPhotoUploader ? mstPhotoUploader.getValue() : '',
-        username: document.getElementById('mUsername').value.trim() || null,
-        password: document.getElementById('mPassword').value || null, // только если ввели — отправим
-        experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
-        is_active: document.getElementById('mstActive').checked ? 1 : 0,
-        google_calendar_id: document.getElementById('mGoogleCalendarId').value || null,
-        service_ids
-        
-    };
+            const payload = {
+                id: parseInt(document.getElementById('mstId').value) || 0,
+                name: document.getElementById('mstName').value.trim(),
+                role: document.getElementById('mstRole').value.trim(),
+                phone: document.getElementById('mstPhone').value.trim(),
+                email: document.getElementById('mstEmail').value.trim(),
+                bio: document.getElementById('mstBio').value.trim(),
+                photo_url: mstPhotoUploader ? mstPhotoUploader.getValue() : '',
+                username: document.getElementById('mUsername').value.trim() || null,
+                password: document.getElementById('mPassword').value || null, // только если ввели — отправим
+                experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
+                is_active: document.getElementById('mstActive').checked ? 1 : 0,
+                google_calendar_id: document.getElementById('mGoogleCalendarId').value || null,
+                service_ids
+                
+            };
 
-    if (!payload.name) { showMstError('Введіть імʼя'); return; }
+            if (!payload.name) { showMstError('Введіть імʼя'); return; }
 
-    btn.disabled = true;
-    btn.textContent = 'Збереження...';
+            btn.disabled = true;
+            btn.textContent = 'Збереження...';
 
-    try {
-        const res = await fetch('/api/admin/masters-save.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        closeMasterModal();
-        await loadMasters();
-        // Зберегти правила зарплати
-    const savedMasterId = data.id || parseInt(document.getElementById('mId')?.value);
-    if (savedMasterId) {
-        await saveSalaryRules(savedMasterId);
-    }
-    } catch (err) {
-        showMstError(err.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Зберегти';
-    }
-}
+            try {
+                const res = await fetch('/api/admin/masters-save.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                closeMasterModal();
+                await loadMasters();
+                // Зберегти правила зарплати
+            const savedMasterId = data.id || parseInt(document.getElementById('mId')?.value);
+            if (savedMasterId) {
+                await saveSalaryRules(savedMasterId);
+            }
+            } catch (err) {
+                showMstError(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Зберегти';
+            }
+        }
 
 async function deleteMaster() {
     const id = parseInt(document.getElementById('mstId').value);
@@ -10387,16 +10620,16 @@ if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
 if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.getValue();
     
     // Час роботи (JSON)
-    document.querySelectorAll('.hours-row').forEach(row => {
-        const day = row.dataset.day;
-        if (!day) return;
-        const data = {
-            open: row.querySelector('.hr-open').value,
-            close: row.querySelector('.hr-close').value,
-            closed: row.querySelector('.hr-closed').checked
-        };
-        updates['working_hours_' + day] = JSON.stringify(data);
-    });
+            document.querySelectorAll('.hours-row').forEach(row => {
+                const day = row.dataset.day;
+                if (!day) return;
+                const data = {
+                    open: row.querySelector('.hr-open').value,
+                    close: row.querySelector('.hr-close').value,
+                    closed: row.querySelector('.hr-closed').checked
+                };
+                updates['working_hours_' + day] = JSON.stringify(data);
+            });
     
     try {
         const res = await fetch('/api/admin/settings-save.php', {

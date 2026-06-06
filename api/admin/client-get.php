@@ -69,13 +69,26 @@ try {
     ");
     $pStmt->execute([$id]);
     $photos = $pStmt->fetchAll();
+
+        // Використані матеріали (ручні)
+    $puStmt = $pdo->prepare("
+        SELECT cpu.id, cpu.product_id, cpu.quantity, cpu.note,
+            p.name AS product_name, p.unit
+        FROM client_product_usage cpu
+        JOIN products p ON p.id = cpu.product_id
+        WHERE cpu.client_id = ? AND cpu.booking_id IS NULL
+        ORDER BY cpu.created_at ASC
+    ");
+    $puStmt->execute([$id]);
+    $productUsage = $puStmt->fetchAll();
     
     jsonOk([
-        'client' => $client,
-        'bookings' => $bookings,
-        'custom_fields' => $fields,
-        'field_values' => $values,
-        'photos' => $photos,
+    'client' => $client,
+    'bookings' => $bookings,
+    'custom_fields' => $fields,
+    'field_values' => $values,
+    'photos' => $photos,
+    'product_usage' => $productUsage,
     ]);
     
 } catch (Throwable $e) {
