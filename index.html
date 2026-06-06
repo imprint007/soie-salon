@@ -7196,7 +7196,19 @@ function renderTimeSlots(slots) {
             updateReview();
         }
 
+        function showMasterInfo(slot) {
+            if (slot.available_masters && slot.available_masters.length > 1) {
+                showMasterPicker(slot.available_masters);
+            } else {
+                showSingleMaster(slot);
+            }
+        }
 
+        function hideMasterInfo() {
+            document.getElementById('masterReveal').classList.remove('show');
+            document.getElementById('masterReveal').innerHTML = '';
+            document.getElementById('noMaster')?.classList.remove('show');
+        }
 
 async function loadGoogleCalendarsForMaster() {
     const select = document.getElementById('mGoogleCalendarId');
