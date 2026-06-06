@@ -82,20 +82,36 @@ if ($depositRequired === '1') {
     
     // Запис у БД
     $stmt = $pdo->prepare("
-        INSERT INTO bookings 
-        (booking_code, service_id, master_id, client_name, client_phone, client_email, client_comment, 
-         booking_date, booking_time, duration_min, total_price, deposit_amount, deposit_paid, 
-         selected_options, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'pending', NOW())
+    INSERT INTO bookings 
+    (booking_code, service_id, master_id, client_id, client_name, client_phone, client_email, client_comment, 
+     booking_date, booking_time, duration_min, total_price, deposit_amount, deposit_paid, 
+     selected_options, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'pending', NOW())
     ");
     $stmt->execute([
         $code,
         $realServiceId,
         $masterId > 0 ? $masterId : null,
+        $clientId,
         $name, $phone, $email, $comment,
         $bookingDate, $bookingTime, $duration,
         $totalPrice, $deposit, $optionsJson,
     ]);
+
+    // Автоматично створюємо/знаходимо клієнта
+        $clientId = null;
+        try {
+            $clientStmt = $pdo->prepare("INSERT INTO clients (name, phone, email) VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    name = IF(VALUES(name) != '', VALUES(name), name),
+                    email = IF(VALUES(email) != '', VALUES(email), email),
+                    id = LAST_INSERT_ID(id)");
+            $clientStmt->execute([$name, $phone, $email]);
+            $clientId = (int)$pdo->lastInsertId();
+        } catch (Throwable $e) {
+            error_log('Client auto-create error: ' . $e->getMessage());
+        }
+
     $bookingId = (int)$pdo->lastInsertId();
     
     // ============================================
