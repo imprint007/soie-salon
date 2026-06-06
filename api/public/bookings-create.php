@@ -242,7 +242,7 @@ try {
         $emailLog['error'] = $emailErr->getMessage();
     }
     
-        // ============================================
+    // ============================================
     // TELEGRAM УВЕДОМЛЕНИЕ
     // ============================================
     try {
@@ -257,16 +257,16 @@ try {
         $monthNamesUa = ['', 'січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
         $tgDateFormatted = $dayNamesUa[(int)$tgDateObj->format('w')] . ', ' . (int)$tgDateObj->format('d') . ' ' . $monthNamesUa[(int)$tgDateObj->format('n')];
         
-        $tgMessage = "🔔 <b>Нова бронь!</b>\n\n";
-        $tgMessage .= "📦 <b>Послуга:</b> $tgServiceName\n";
-        $tgMessage .= "👤 <b>Клієнт:</b> $name\n";
-        $tgMessage .= "📱 <b>Телефон:</b> $phone\n";
+        $tgMessage = "✨ <b>Нова бронь!</b>\n\n";
+        $tgMessage .= "💇‍♀️ <b>Послуга:</b> $tgServiceName\n";
+        $tgMessage .= "👩 <b>Клієнт:</b> $name\n";
+        $tgMessage .= "📞 <b>Телефон:</b> $phone\n";
         $tgMessage .= "📅 <b>Дата:</b> $tgDateFormatted\n";
-        $tgMessage .= "🕐 <b>Час:</b> " . substr($bookingTime, 0, 5) . "\n";
-        $tgMessage .= "💄 <b>Майстер:</b> $tgMasterName\n";
-        $tgMessage .= "💰 <b>Сума:</b> " . number_format($totalPrice, 0, '.', ' ') . " ₴\n";
-        $tgMessage .= "🏷 <b>Код:</b> $code";
-        
+        $tgMessage .= "⏰ <b>Час:</b> " . substr($bookingTime, 0, 5) . "\n";
+        $tgMessage .= "💇 <b>Майстер:</b> $tgMasterName\n";
+        $tgMessage .= "💵 <b>Сума:</b> " . number_format($totalPrice, 0, '.', ' ') . " ₴\n";
+        $tgMessage .= "🔖 <b>Код:</b> $code";
+
         if (!empty($comment)) {
             $tgMessage .= "\n💬 <b>Коментар:</b> $comment";
         }
