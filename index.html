@@ -1892,7 +1892,15 @@ body select:-webkit-autofill {
     caret-color: #ede6d9 !important;
 }
 
+/* === ВИБІР МАЙСТРА === */
+.master-pick-card:hover {
+    border-color: var(--beige-soft) !important;
+    transform: translateY(-2px);
+}
 
+.master-pick-card.selected {
+    border-color: var(--beige) !important;
+}
 
 }
 
@@ -7086,45 +7094,109 @@ function renderTimeSlots(slots) {
     }).join('');
 }
 
-function selectTimeSlot(slot) {
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-    event.currentTarget.classList.add('selected');
-    
-    state.selectedTime = slot.time;
-    state.masterId = slot.master_id;
-    state.masterName = slot.master_name;
-    
-    // Показуємо інформацію про майстра
-    showMasterInfo(slot);
-    
-    document.getElementById('dateBtn').disabled = false;
-}
+        function selectTimeSlot(slot) {
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            state.selectedTime = slot.time;
+            
+            // Якщо є кілька вільних майстрів — показуємо вибір
+            if (slot.available_masters && slot.available_masters.length > 1) {
+                showMasterPicker(slot.available_masters);
+            } else {
+                // Один майстер — як раніше
+                state.masterId = slot.master_id;
+                state.masterName = slot.master_name;
+                showSingleMaster(slot);
+            }
+            
+            document.getElementById('dateBtn').disabled = false;
+        }
 
-function showMasterInfo(slot) {
-    const reveal = document.getElementById('masterReveal');
-    const noMaster = document.getElementById('noMaster');
-    
-    if (!slot.master_id) {
-        reveal.classList.remove('show');
-        noMaster.classList.add('show');
-        return;
-    }
-    
-    document.getElementById('masterAvatar').style.backgroundImage = `url('${slot.master_photo || ''}')`;
-    document.getElementById('masterName').textContent = slot.master_name || '—';
-    document.getElementById('masterRole').textContent = slot.master_role || 'Вільний майстер';
-    document.getElementById('masterExp').textContent = slot.free_masters_count > 1 
-        ? `Доступно ${slot.free_masters_count} майстрів на цей час` 
-        : 'Єдиний вільний майстер';
-    
-    reveal.classList.add('show');
-    noMaster.classList.remove('show');
-}
+        function showSingleMaster(slot) {
+            const reveal = document.getElementById('masterReveal');
+            const noMaster = document.getElementById('noMaster');
+            
+            if (!slot.master_id) {
+                reveal.classList.remove('show');
+                noMaster.classList.add('show');
+                return;
+            }
+            
+            reveal.innerHTML = `
+                <div class="master-avatar" style="background-image:url('${slot.master_photo || ''}')"></div>
+                <div class="master-info">
+                    <div class="m-role">${escapeHtml(slot.master_role || '')}</div>
+                    <div class="m-name">${escapeHtml(slot.master_name || '')}</div>
+                    <div class="m-exp">Єдиний вільний майстер</div>
+                </div>
+            `;
+            
+            reveal.classList.add('show');
+            noMaster.classList.remove('show');
+        }
 
-function hideMasterInfo() {
-    document.getElementById('masterReveal').classList.remove('show');
-    document.getElementById('noMaster').classList.remove('show');
-}
+        function showMasterPicker(masters) {
+            const reveal = document.getElementById('masterReveal');
+            const noMaster = document.getElementById('noMaster');
+            
+            // Вибираємо першого за замовчуванням
+            state.masterId = masters[0].id;
+            state.masterName = masters[0].name;
+            
+            reveal.innerHTML = `
+                <div style="width:100%;">
+                    <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--beige);margin-bottom:12px;">
+                        Оберіть майстра (${masters.length} доступно)
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        ${masters.map((m, i) => `
+                            <div class="master-pick-card ${i === 0 ? 'selected' : ''}" 
+                                data-master-id="${m.id}"
+                                onclick="selectMaster(${m.id}, '${escapeHtml(m.name).replace(/'/g, "\\'")}', '${escapeHtml(m.photo || '').replace(/'/g, "\\'")}', '${escapeHtml(m.role || '').replace(/'/g, "\\'")}')"
+                                style="flex:1;min-width:140px;padding:14px;background:var(--bg-2);border:1px solid ${i === 0 ? 'var(--beige)' : 'var(--line)'};border-radius:6px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                <div style="width:56px;height:56px;border-radius:50%;background-size:cover;background-position:center;background-image:url('${m.photo || ''}');margin:0 auto 10px;border:2px solid ${i === 0 ? 'var(--beige)' : 'transparent'};"></div>
+                                <div style="font-family:'Fraunces',serif;font-size:15px;color:var(--ink);">${escapeHtml(m.name)}</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">${escapeHtml(m.role || '')}</div>
+                                ${i === 0 ? '<div style="font-size:10px;color:var(--beige);margin-top:6px;letter-spacing:0.1em;text-transform:uppercase;">✓ Обрано</div>' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            reveal.classList.add('show');
+            noMaster.classList.remove('show');
+        }
+
+        function selectMaster(id, name, photo, role) {
+            state.masterId = id;
+            state.masterName = name;
+            
+            // Оновлюємо стилі карточок
+            document.querySelectorAll('.master-pick-card').forEach(card => {
+                const isSelected = parseInt(card.dataset.masterId) === id;
+                card.style.borderColor = isSelected ? 'var(--beige)' : 'var(--line)';
+                card.querySelector('div:first-child').style.borderColor = isSelected ? 'var(--beige)' : 'transparent';
+                
+                // Видаляємо або додаємо мітку "Обрано"
+                const badge = card.querySelector('.master-selected-badge');
+                if (badge) badge.remove();
+                
+                if (isSelected) {
+                    const badgeEl = document.createElement('div');
+                    badgeEl.className = 'master-selected-badge';
+                    badgeEl.style.cssText = 'font-size:10px;color:var(--beige);margin-top:6px;letter-spacing:0.1em;text-transform:uppercase;';
+                    badgeEl.textContent = '✓ Обрано';
+                    card.appendChild(badgeEl);
+                }
+            });
+            
+            // Оновлюємо на екрані Контактів
+            updateReview();
+        }
+
+
 
 async function loadGoogleCalendarsForMaster() {
     const select = document.getElementById('mGoogleCalendarId');
