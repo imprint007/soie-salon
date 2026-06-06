@@ -7169,30 +7169,41 @@ function renderTimeSlots(slots) {
             noMaster.classList.remove('show');
         }
 
+        let currentAvailableMasters = [];
+
         function selectMaster(id, name, photo, role) {
             state.masterId = id;
             state.masterName = name;
             
-            // Оновлюємо стилі карточок
+            // Перемальовуємо карточки з правильним вибором
             document.querySelectorAll('.master-pick-card').forEach(card => {
                 const isSelected = parseInt(card.dataset.masterId) === id;
+                
+                // Рамка
                 card.style.borderColor = isSelected ? 'var(--beige)' : 'var(--line)';
-                card.querySelector('div:first-child').style.borderColor = isSelected ? 'var(--beige)' : 'transparent';
                 
-                // Видаляємо або додаємо мітку "Обрано"
-                const badge = card.querySelector('.master-selected-badge');
-                if (badge) badge.remove();
+                // Рамка фото
+                const photoDiv = card.querySelector('div[style*="border-radius:50%"]');
+                if (photoDiv) {
+                    photoDiv.style.borderColor = isSelected ? 'var(--beige)' : 'transparent';
+                }
                 
+                // Видаляємо всі бейджі "Обрано"
+                card.querySelectorAll('div').forEach(div => {
+                    if (div.textContent.trim() === '✓ Обрано') {
+                        div.remove();
+                    }
+                });
+                
+                // Додаємо бейдж обраному
                 if (isSelected) {
-                    const badgeEl = document.createElement('div');
-                    badgeEl.className = 'master-selected-badge';
-                    badgeEl.style.cssText = 'font-size:10px;color:var(--beige);margin-top:6px;letter-spacing:0.1em;text-transform:uppercase;';
-                    badgeEl.textContent = '✓ Обрано';
-                    card.appendChild(badgeEl);
+                    const badge = document.createElement('div');
+                    badge.style.cssText = 'font-size:10px;color:var(--beige);margin-top:6px;letter-spacing:0.1em;text-transform:uppercase;';
+                    badge.textContent = '✓ Обрано';
+                    card.appendChild(badge);
                 }
             });
             
-            // Оновлюємо на екрані Контактів
             updateReview();
         }
 
