@@ -4790,14 +4790,17 @@ function renderClientsList() {
                     `;
                 }
                 
-                // Коментар
                 const commentHtml = b.client_comment 
                     ? `<div style="margin-top:10px;font-size:12px;color:var(--ink-mute);font-style:italic;">💬 ${escapeHtml(b.client_comment)}</div>` 
                     : '';
                 
+                // Кнопка анкети для виконаних
+                const anketaBtn = b.status === 'done' 
+                    ? `<button onclick="event.stopPropagation();openVisitAnketa(${b.id})" style="padding:6px 14px;background:var(--bg-1);border:1px solid var(--beige);color:var(--beige);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all 0.2s;" onmouseover="this.style.background='var(--beige)';this.style.color='var(--bg)'" onmouseout="this.style.background='var(--bg-1)';this.style.color='var(--beige)'">📋 Анкета</button>` 
+                    : '';
+                
                 return `
                     <div style="margin-bottom:8px;border:1px solid var(--line);border-radius:6px;overflow:hidden;">
-                        <!-- Заголовок (клікабельний) -->
                         <div onclick="toggleBookingDetail(${i})" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg-2);cursor:pointer;transition:background 0.15s;"
                             onmouseover="this.style.background='var(--bg-1)'" onmouseout="this.style.background='var(--bg-2)'">
                             <div style="display:flex;align-items:center;gap:12px;">
@@ -4807,13 +4810,15 @@ function renderClientsList() {
                                     <div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">${escapeHtml(b.service_name || '—')} · ${time} · ${escapeHtml(b.master_name || '—')}</div>
                                 </div>
                             </div>
-                            <div style="text-align:right;flex-shrink:0;">
-                                <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);">${parseInt(b.total_price).toLocaleString('uk-UA')} ₴</div>
-                                <div style="margin-top:4px;"><span style="padding:3px 10px;border-radius:999px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${statusColors[b.status]};background:${statusColors[b.status]}15;">${statusLabels[b.status] || b.status}</span></div>
+                            <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                                ${anketaBtn}
+                                <div style="text-align:right;">
+                                    <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);">${parseInt(b.total_price).toLocaleString('uk-UA')} ₴</div>
+                                    <div style="margin-top:4px;"><span style="padding:3px 10px;border-radius:999px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${statusColors[b.status]};background:${statusColors[b.status]}15;">${statusLabels[b.status] || b.status}</span></div>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Деталі (приховані) -->
                         <div id="bookingDetail${i}" style="display:none;padding:16px;background:var(--bg-1);border-top:1px solid var(--line);">
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
                                 <div>
