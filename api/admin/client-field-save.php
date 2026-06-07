@@ -16,6 +16,8 @@ try {
     $placeholder = trim($input['placeholder'] ?? '');
     $isRequired = !empty($input['is_required']) ? 1 : 0;
     $sortOrder = (int)($input['sort_order'] ?? 0);
+    $fieldScope = $input['field_scope'] ?? 'profile';
+    if (!in_array($fieldScope, ['profile', 'visit'])) $fieldScope = 'profile';
     
     $validTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'date'];
     if (!in_array($type, $validTypes)) $type = 'text';
@@ -29,11 +31,11 @@ try {
     }
     
     if ($id > 0) {
-        $pdo->prepare("UPDATE client_custom_fields SET field_name=?, field_type=?, field_options=?, placeholder=?, is_required=?, sort_order=? WHERE id=?")
-            ->execute([$name, $type, $optionsJson, $placeholder, $isRequired, $sortOrder, $id]);
+        $pdo->prepare("UPDATE client_custom_fields SET field_name=?, field_type=?, field_options=?, placeholder=?, is_required=?, sort_order=?, field_scope=? WHERE id=?")
+            ->execute([$name, $type, $optionsJson, $placeholder, $isRequired, $sortOrder, $fieldScope, $id]);
     } else {
-        $pdo->prepare("INSERT INTO client_custom_fields (field_name, field_type, field_options, placeholder, is_required, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
-            ->execute([$name, $type, $optionsJson, $placeholder, $isRequired, $sortOrder]);
+        $pdo->prepare("INSERT INTO client_custom_fields (field_name, field_type, field_options, placeholder, is_required, sort_order, field_scope) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            ->execute([$name, $type, $optionsJson, $placeholder, $isRequired, $sortOrder, $fieldScope]);
         $id = (int)$pdo->lastInsertId();
     }
     
