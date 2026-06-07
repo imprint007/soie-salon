@@ -9028,25 +9028,30 @@ function statusBadge(status) {
     return `<span style="display:inline-block;padding:3px 8px;background:${s.bg};color:${s.color};border-radius:3px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">${s.label}</span>`;
 }
 
-function renderBookings() {
-    const tbody = document.getElementById('bookingsRows');
-    if (currentBookings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink-mute);">Немає заявок</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = currentBookings.map(b => `
-        <tr onclick="openBookingModal(${b.id})" style="cursor:pointer;">
-            <td class="mono">${escapeHtml(b.booking_code || '')}</td>
-            <td>${escapeHtml(b.client_name)}</td>
-            <td class="hide-mobile">${escapeHtml(b.service_name || '—')}</td>
-            <td class="hide-mobile">${escapeHtml(b.master_name || '—')}</td>
-            <td class="mono">${fmtDateShort(b.booking_date)} · ${(b.booking_time || '').slice(0,5)}</td>
-            <td class="hide-mobile mono" style="color:var(--beige);">${fmtMoney(b.total_price)}</td>
-            <td>${statusBadge(b.status)}</td>
-        </tr>
-    `).join('');
-}
+        function renderBookings() {
+            const tbody = document.getElementById('bookingsRows');
+            if (currentBookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink-mute);">Немає заявок</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = currentBookings.map(b => {
+                // Іконка анкети для виконаних бронювань
+                const anketaIcon = b.status === 'done' 
+                    ? `<span onclick="event.stopPropagation();openVisitAnketa(${b.id})" title="Анкета візиту" style="cursor:pointer;margin-left:8px;font-size:16px;opacity:${b.anketa_filled == 1 ? '1' : '0.4'};transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='${b.anketa_filled == 1 ? '1' : '0.4'}'">📋</span>` 
+                    : '';
+                
+                return `<tr onclick="openBookingModal(${b.id})" style="cursor:pointer;">
+                    <td class="mono">${escapeHtml(b.booking_code || '')}</td>
+                    <td>${escapeHtml(b.client_name)}</td>
+                    <td class="hide-mobile">${escapeHtml(b.service_name || '—')}</td>
+                    <td class="hide-mobile">${escapeHtml(b.master_name || '—')}</td>
+                    <td class="mono">${fmtDateShort(b.booking_date)} · ${(b.booking_time || '').slice(0,5)}</td>
+                    <td class="hide-mobile mono" style="color:var(--beige);">${fmtMoney(b.total_price)}</td>
+                    <td>${statusBadge(b.status)}${anketaIcon}</td>
+                </tr>`;
+            }).join('');
+        }
 
 
 document.addEventListener('click', e => {
@@ -10898,6 +10903,280 @@ document.addEventListener('click', (e) => {
     }
 });
 
+        // ============================================
+        // АНКЕТА ВІЗИТУ
+        // ============================================
+        let currentVisitBookingId = null;
+        let currentVisitPhotos = [];
+
+        async function openVisitAnketa(bookingId) {
+            currentVisitBookingId = bookingId;
+            const modal = document.getElementById('visitAnketaModal');
+            const body = document.getElementById('visitAnketaBody');
+            
+            body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+            modal.classList.add('show');
+            
+            try {
+                const res = await fetch('/api/admin/visit-anketa-get.php?booking_id=' + bookingId, { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                renderVisitAnketa(data);
+            } catch (err) {
+                body.innerHTML = `<div style="padding:20px;color:var(--danger);">${err.message}</div>`;
+            }
+        }
+
+        function closeVisitAnketa() {
+            document.getElementById('visitAnketaModal').classList.remove('show');
+            currentVisitBookingId = null;
+        }
+
+        function renderVisitAnketa(data) {
+            const b = data.booking;
+            const body = document.getElementById('visitAnketaBody');
+            
+            const date = new Date(b.booking_date).toLocaleDateString('uk-UA', { day: '2-digit', month: 'long', year: 'numeric', weekday: 'short' });
+            const time = (b.booking_time || '').substring(0, 5);
+            
+            document.getElementById('visitAnketaTitle').textContent = 'Анкета · ' + date;
+            
+            // Опції
+            let optionsHtml = '';
+            if (b.selected_options && b.selected_options.length > 0) {
+                optionsHtml = b.selected_options.map(o => `<span style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--ink-mute);">${escapeHtml(o.name || '')}</span>`).join(' ');
+            }
+            
+            // Списані товари
+            let consumablesHtml = '';
+            if (data.consumables && data.consumables.length > 0) {
+                consumablesHtml = data.consumables.map(c => {
+                    const qty = Math.abs(parseFloat(c.quantity));
+                    const unit = typeof getUnitLabel === 'function' ? getUnitLabel(c.unit) : (c.unit || '');
+                    return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span>${escapeHtml(c.product_name)}</span><span style="color:var(--ink-mute);">${qty} ${unit}</span></div>`;
+                }).join('');
+            }
+            
+            // Поля анкети
+            let fieldsHtml = (data.custom_fields || []).map(f => {
+                const val = (data.field_values || {})[f.id] || '';
+                
+                if (f.field_type === 'select') {
+                    const options = f.field_options ? JSON.parse(f.field_options) : [];
+                    return `<div class="form-group"><label>${escapeHtml(f.field_name)}</label>
+                        <select class="va-field" data-field-id="${f.id}">
+                            <option value="">— Оберіть —</option>
+                            ${options.map(o => `<option value="${escapeHtml(o)}" ${val === o ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
+                        </select></div>`;
+                }
+                if (f.field_type === 'textarea') {
+                    return `<div class="form-group"><label>${escapeHtml(f.field_name)}</label>
+                        <textarea class="va-field" data-field-id="${f.id}" rows="2" placeholder="${escapeHtml(f.placeholder || '')}">${escapeHtml(val)}</textarea></div>`;
+                }
+                if (f.field_type === 'checkbox') {
+                    return `<div class="form-group"><label class="checkbox-label"><input type="checkbox" class="va-field" data-field-id="${f.id}" ${val === '1' ? 'checked' : ''}><span>${escapeHtml(f.field_name)}</span></label></div>`;
+                }
+                return `<div class="form-group"><label>${escapeHtml(f.field_name)}</label>
+                    <input type="${f.field_type === 'number' ? 'number' : 'text'}" class="va-field" data-field-id="${f.id}" value="${escapeHtml(val)}" placeholder="${escapeHtml(f.placeholder || '')}"></div>`;
+            }).join('');
+            
+            // Фото візиту
+            currentVisitPhotos = data.photos || [];
+            
+            body.innerHTML = `
+                <!-- Інфо про бронь (readonly) -->
+                <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <div>
+                            <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--ink);">${escapeHtml(b.service_name || '—')}</div>
+                            <div style="font-size:12px;color:var(--ink-mute);margin-top:4px;">${date} · ${time} · ${escapeHtml(b.master_name || '—')}</div>
+                        </div>
+                        <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--beige);">${parseInt(b.total_price).toLocaleString('uk-UA')} ₴</div>
+                    </div>
+                    ${optionsHtml ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${optionsHtml}</div>` : ''}
+                </div>
+                
+                ${consumablesHtml ? `
+                <div style="padding:14px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:20px;">
+                    <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--beige);margin-bottom:10px;">Використані матеріали</div>
+                    ${consumablesHtml}
+                </div>` : ''}
+                
+                <!-- Поля анкети -->
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Анкета</div>
+                    ${fieldsHtml || '<div style="color:var(--ink-mute);font-size:12px;">Поля анкети не налаштовані</div>'}
+                </div>
+                
+                <!-- Фото візиту -->
+                <div style="padding-top:20px;border-top:1px solid var(--line);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--beige);">Фото До / Після</div>
+                        <button type="button" class="admin-cta ghost" onclick="addVisitPhoto()" style="padding:6px 14px;font-size:11px;">+ Фото</button>
+                    </div>
+                    <div id="visitPhotosList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+                        ${renderVisitPhotosInline(currentVisitPhotos)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVisitPhotosInline(photos) {
+            if (!photos || photos.length === 0) {
+                return '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;border:1px dashed var(--line);border-radius:4px;">Додайте фото результату</div>';
+            }
+            
+            const typeLabels = { before: 'До', after: 'Після', result: 'Результат', other: 'Інше' };
+            
+            return photos.map((p, i) => `
+                <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--line);cursor:pointer;" onclick="openLightbox(${JSON.stringify(photos.map(x => ({url: x.photo_url})))}, ${i})">
+                    <div style="aspect-ratio:1;background:center/cover url('${escapeHtml(p.photo_url)}');"></div>
+                    <div style="padding:6px;background:var(--bg-2);font-size:10px;color:var(--beige);letter-spacing:0.1em;text-transform:uppercase;">${typeLabels[p.photo_type] || ''}</div>
+                    <button onclick="event.stopPropagation();deleteVisitPhoto(${p.id})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;color:#fff;cursor:pointer;font-size:11px;">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addVisitPhoto() {
+            if (!currentVisitBookingId) return;
+            
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:20001;display:flex;align-items:center;justify-content:center;padding:20px;';
+            
+            const card = document.createElement('div');
+            card.style.cssText = 'background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:24px;max-width:420px;width:100%;';
+            card.innerHTML = `
+                <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--beige);margin-bottom:14px;">Додати фото</div>
+                <div id="vpUploadArea" style="border:2px dashed var(--line);border-radius:6px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px;"
+                    onclick="document.getElementById('vpFileInput').click()">
+                    <div style="font-size:24px;margin-bottom:6px;">📤</div>
+                    <div style="color:var(--ink);font-size:12px;">Натисніть або перетягніть</div>
+                    <input type="file" id="vpFileInput" accept="image/*" style="display:none;" onchange="uploadVisitPhotoFile(this.files[0])">
+                </div>
+                <div id="vpPreview" style="display:none;margin-bottom:14px;">
+                    <div id="vpPreviewImg" style="width:100%;aspect-ratio:4/3;background-size:cover;background-position:center;border-radius:6px;border:1px solid var(--line);"></div>
+                </div>
+                <div id="vpProgress" style="display:none;margin-bottom:14px;">
+                    <div style="height:4px;background:var(--bg-2);border-radius:2px;overflow:hidden;"><div id="vpProgressBar" style="height:100%;background:var(--beige);width:0%;transition:width 0.3s;"></div></div>
+                </div>
+                <input type="hidden" id="vpPhotoUrl" value="">
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select id="vpPhotoType">
+                        <option value="before">До</option>
+                        <option value="after">Після</option>
+                        <option value="result">Результат</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:14px;">
+                    <button type="button" class="admin-cta ghost" style="flex:1;" id="vpCancelBtn">Скасувати</button>
+                    <button type="button" class="admin-cta" style="flex:1;" id="vpSaveBtn">Зберегти</button>
+                </div>
+            `;
+            
+            overlay.appendChild(card);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            card.querySelector('#vpCancelBtn').addEventListener('click', () => overlay.remove());
+            card.querySelector('#vpSaveBtn').addEventListener('click', async () => {
+                const url = document.getElementById('vpPhotoUrl').value;
+                if (!url) { alert('Завантажте фото'); return; }
+                
+                try {
+                    const res = await fetch('/api/admin/visit-photo-save.php', {
+                        method: 'POST', credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            booking_id: currentVisitBookingId,
+                            photo_url: url,
+                            photo_type: document.getElementById('vpPhotoType').value
+                        })
+                    });
+                    const data = await res.json();
+                    if (!data.success) throw new Error(data.error);
+                    overlay.remove();
+                    openVisitAnketa(currentVisitBookingId);
+                } catch (err) { alert(err.message); }
+            });
+            document.body.appendChild(overlay);
+        }
+
+        async function uploadVisitPhotoFile(file) {
+            if (!file) return;
+            const progress = document.getElementById('vpProgress');
+            const bar = document.getElementById('vpProgressBar');
+            const area = document.getElementById('vpUploadArea');
+            
+            progress.style.display = 'block';
+            area.style.display = 'none';
+            bar.style.width = '50%';
+            
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('prefix', 'clients');
+                
+                const res = await fetch('/api/admin/upload.php', { method: 'POST', credentials: 'include', body: fd });
+                const data = await res.json();
+                bar.style.width = '100%';
+                
+                if (!data.success) throw new Error(data.error || 'Помилка');
+                const url = data.url || data.path || data.file_url;
+                document.getElementById('vpPhotoUrl').value = url;
+                
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    document.getElementById('vpPreview').style.display = 'block';
+                    document.getElementById('vpPreviewImg').style.backgroundImage = `url('${url}')`;
+                }, 300);
+            } catch (err) {
+                progress.style.display = 'none';
+                area.style.display = 'block';
+                alert(err.message);
+            }
+        }
+
+        async function deleteVisitPhoto(id) {
+            if (!confirm('Видалити фото?')) return;
+            try {
+                await fetch('/api/admin/client-photo-delete.php', {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                openVisitAnketa(currentVisitBookingId);
+            } catch (err) { alert('Помилка'); }
+        }
+
+        async function saveVisitAnketa() {
+            if (!currentVisitBookingId) return;
+            
+            const fieldValues = {};
+            document.querySelectorAll('.va-field').forEach(el => {
+                const fid = el.dataset.fieldId;
+                fieldValues[fid] = el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value;
+            });
+            
+            try {
+                const res = await fetch('/api/admin/visit-anketa-save.php', {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        booking_id: currentVisitBookingId,
+                        field_values: fieldValues
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                closeVisitAnketa();
+                showToast('Анкету збережено');
+                if (typeof loadBookings === 'function') loadBookings();
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
 // ============================================
 // ЗАРОБІТОК МАЙСТРІВ
 // ============================================
@@ -11171,6 +11450,23 @@ setInterval(forceDarkInputs, 800);
             
             <!-- Лічильник -->
             <div id="lightboxCounter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:0.1em;"></div>
+        </div>
+
+                <!-- ============ МОДАЛКА АНКЕТИ ВІЗИТУ ============ -->
+        <div class="modal-overlay" id="visitAnketaModal" onclick="if(event.target===this) closeVisitAnketa()">
+            <div class="modal-card" style="max-width:650px;">
+                <div class="modal-head">
+                    <h2 id="visitAnketaTitle">Анкета візиту</h2>
+                    <button class="modal-close" onclick="closeVisitAnketa()">×</button>
+                </div>
+                <div class="modal-body" id="visitAnketaBody">
+                    <div style="padding:30px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="admin-cta ghost" onclick="closeVisitAnketa()">Закрити</button>
+                    <button class="admin-cta" onclick="saveVisitAnketa()">Зберегти анкету</button>
+                </div>
+            </div>
         </div>
 
 </body>
