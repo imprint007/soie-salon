@@ -6048,7 +6048,7 @@ function renderPublicPackages() {
         return;
     }
     
-    if (countEl) countEl.textContent = `${publicPackages.length} комплекта`;
+    if (countEl) countEl.textContent = `${publicPackages.length} Акція`;
     
     container.innerHTML = publicPackages.map(p => {
         const saving = p.original_price > p.sale_price 
