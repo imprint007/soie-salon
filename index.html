@@ -4479,6 +4479,18 @@ function renderClientsList() {
         // ПРОФІЛЬ КЛІЄНТА
         // ============================================
         function switchClientTab(tab) {
+            // Автоматично переміщуємо матеріали в вкладку Анкета
+            const pu = document.getElementById('cliProductUsage');
+            const profileTab = document.querySelector('.client-tab-content[data-ctab="profile"]');
+            if (pu && profileTab && pu.parentElement !== profileTab) {
+                const cliError = document.getElementById('cliError');
+                if (cliError && cliError.parentElement === profileTab) {
+                    profileTab.insertBefore(pu, cliError);
+                } else {
+                    profileTab.appendChild(pu);
+                }
+            }
+            
             document.querySelectorAll('[data-client-tab]').forEach(t => {
                 t.classList.toggle('active', t.dataset.clientTab === tab);
             });
