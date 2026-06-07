@@ -4851,12 +4851,16 @@ function renderClientsList() {
                 return;
             }
             
-            list.innerHTML = photos.map(p => {
-                const typeLabels = { before: 'До', after: 'Після', result: 'Результат', other: 'Інше' };
+            // Зберігаємо для лайтбоксу
+            window._clientPhotos = photos.map(p => ({ url: p.photo_url, caption: p.caption }));
+            
+            const typeLabels = { before: 'До', after: 'Після', result: 'Результат', other: 'Інше' };
+            
+            list.innerHTML = photos.map((p, i) => {
                 const dateStr = p.booking_date ? new Date(p.booking_date).toLocaleDateString('uk-UA') : '';
                 
                 return `
-                    <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--line);cursor:pointer;" onclick="viewPhoto('${escapeHtml(p.photo_url)}')">
+                    <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--line);cursor:pointer;" onclick="openLightbox(window._clientPhotos, ${i})">
                         <div style="aspect-ratio:1;background:center/cover url('${escapeHtml(p.photo_url)}');"></div>
                         <div style="padding:8px;background:var(--bg-2);">
                             <div style="font-size:10px;color:var(--beige);letter-spacing:0.1em;text-transform:uppercase;">${typeLabels[p.photo_type] || 'Фото'}</div>
@@ -4869,9 +4873,6 @@ function renderClientsList() {
             }).join('');
         }
 
-        function viewPhoto(url) {
-            window.open(url, '_blank');
-        }
 
         async function addClientPhoto() {
             const clientId = parseInt(document.getElementById('cliId').value);
@@ -11092,7 +11093,73 @@ function forceDarkInputs() {
 document.addEventListener('DOMContentLoaded', forceDarkInputs);
 setInterval(forceDarkInputs, 800);
 
-</script>
+        // ============================================
+        // ЛАЙТБОКС ДЛЯ ФОТО
+        // ============================================
+        let lightboxPhotos = [];
+        let lightboxIndex = 0;
+
+        function openLightbox(photos, startIndex) {
+            lightboxPhotos = photos;
+            lightboxIndex = startIndex || 0;
+            
+            const lb = document.getElementById('photoLightbox');
+            lb.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            showLightboxPhoto();
+        }
+
+        function closeLightbox() {
+            document.getElementById('photoLightbox').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function lightboxNav(dir) {
+            lightboxIndex += dir;
+            if (lightboxIndex < 0) lightboxIndex = lightboxPhotos.length - 1;
+            if (lightboxIndex >= lightboxPhotos.length) lightboxIndex = 0;
+            showLightboxPhoto();
+        }
+
+        function showLightboxPhoto() {
+            if (!lightboxPhotos[lightboxIndex]) return;
+            
+            const img = document.getElementById('lightboxImg');
+            img.src = lightboxPhotos[lightboxIndex].url || lightboxPhotos[lightboxIndex];
+            
+            document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+            
+            document.getElementById('lightboxPrev').style.display = lightboxPhotos.length > 1 ? 'flex' : 'none';
+            document.getElementById('lightboxNext').style.display = lightboxPhotos.length > 1 ? 'flex' : 'none';
+        }
+
+        // Клавіатура
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('photoLightbox').style.display !== 'block') return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') lightboxNav(-1);
+            if (e.key === 'ArrowRight') lightboxNav(1);
+        });
+
+    </script>
+
+            <!-- ============ ЛАЙТБОКС ФОТО ============ -->
+        <div id="photoLightbox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:20000;cursor:pointer;" onclick="closeLightbox()">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vw;max-height:85vh;">
+                <img id="lightboxImg" src="" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:6px;">
+            </div>
+            
+            <!-- Навігація -->
+            <button id="lightboxPrev" onclick="event.stopPropagation();lightboxNav(-1)" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:32px;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+            <button id="lightboxNext" onclick="event.stopPropagation();lightboxNav(1)" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:32px;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">›</button>
+            
+            <!-- Закрити -->
+            <button onclick="event.stopPropagation();closeLightbox()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:24px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+            
+            <!-- Лічильник -->
+            <div id="lightboxCounter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:0.1em;"></div>
+        </div>
 
 </body>
 </html>
