@@ -9036,7 +9036,6 @@ function statusBadge(status) {
             }
             
             tbody.innerHTML = currentBookings.map(b => {
-                // Іконка анкети для виконаних бронювань
                 const anketaIcon = b.status === 'done' 
                     ? `<span onclick="event.stopPropagation();openVisitAnketa(${b.id})" title="Анкета візиту" style="cursor:pointer;margin-left:8px;font-size:16px;opacity:${b.anketa_filled == 1 ? '1' : '0.4'};transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='${b.anketa_filled == 1 ? '1' : '0.4'}'">📋</span>` 
                     : '';
