@@ -2816,16 +2816,7 @@ body select:-webkit-autofill {
                         </div>
                     </div>
                     
-                    <!-- Використані матеріали -->
-                    <div id="cliProductUsage" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Використані матеріали</div>
-                            <button type="button" class="admin-cta ghost" onclick="addProductUsageRow()" style="padding:6px 14px;font-size:11px;">+ Додати</button>
-                        </div>
-                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:12px;">Для інформації — зі складу не списується</div>
-                        <div id="cliProductUsageList"></div>
-                    </div>
-                    </div>
+                    
                     <!-- ВКЛАДКА ІСТОРІЯ -->
                     <div class="client-tab-content" data-ctab="history" style="display:none;">
                         <div id="cliBookingsList"></div>
@@ -2840,6 +2831,16 @@ body select:-webkit-autofill {
                         <div id="cliPhotosList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div>
                     </div>
                     
+                            <!-- Використані матеріали -->
+                    <div id="cliProductUsage" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Використані матеріали</div>
+                            <button type="button" class="admin-cta ghost" onclick="addProductUsageRow()" style="padding:6px 14px;font-size:11px;">+ Додати</button>
+                        </div>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:12px;">Для інформації — зі складу не списується</div>
+                        <div id="cliProductUsageList"></div>
+                    </div>
+
                     <div id="cliError" class="auth-error" style="display:none;"></div>
                 </div>
                 <div class="modal-footer">
