@@ -4534,7 +4534,9 @@ function renderClientsList() {
                 }
                 
                 renderClientCustomFields(data.custom_fields, data.field_values);
-                renderClientProductUsage(data.product_usage);
+                // Матеріали тепер в анкетах візитів
+                const puBlock = document.getElementById('cliProductUsage');
+                if (puBlock) puBlock.style.display = 'none';
                 renderClientBookings(data.bookings);
                 renderClientPhotos(data.photos);
                 
@@ -4842,6 +4844,10 @@ function renderClientsList() {
                             ${optionsHtml}
                             ${consumablesHtml}
                             ${commentHtml}
+                            ${b.status === 'done' ? `
+                            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);text-align:right;">
+                                <button onclick="event.stopPropagation();openVisitAnketa(${b.id})" style="padding:8px 18px;background:transparent;border:1px solid var(--beige);color:var(--beige);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all 0.2s;" onmouseover="this.style.background='var(--beige)';this.style.color='var(--bg)'" onmouseout="this.style.background='transparent';this.style.color='var(--beige)'">✎ Редагувати анкету</button>
+                            </div>` : ''}
                         </div>
                     </div>
                 `;
