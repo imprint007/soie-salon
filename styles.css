@@ -1,3 +1,14 @@
+/* Контент прихований поки прелоадер активний */
+body:has(#pagePreloader:not(.hidden)) .app-root,
+body:has(#pagePreloader:not(.hidden)) .admin-wrap {
+    opacity: 0;
+}
+
+.app-root,
+.admin-wrap {
+    transition: opacity 0.4s ease;
+}
+
 :root {
     --bg-0: #0d0c0b;
     --bg-1: #131211;

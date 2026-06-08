@@ -17,6 +17,136 @@ try {
 </head>
 <body>
 
+    <!-- ============ ПРЕЛОАДЕР ============ -->
+    <div id="pagePreloader">
+        <style>
+            #pagePreloader {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: #0e0d0c;
+                transition: opacity 0.6s ease, visibility 0.6s ease;
+            }
+            
+            /* Світла тема */
+            [data-theme="light"] #pagePreloader {
+                background: #f0ece7;
+            }
+            
+            .preloader-logo {
+                font-family: 'Fraunces', Georgia, serif;
+                font-size: 32px;
+                letter-spacing: 0.05em;
+                color: #e0c9a8;
+                margin-bottom: 32px;
+                opacity: 0;
+                transform: translateY(10px);
+                animation: preloaderFadeIn 0.8s ease 0.1s forwards;
+            }
+            
+            .preloader-logo em {
+                font-style: italic;
+                color: #9e968a;
+            }
+            
+            [data-theme="light"] .preloader-logo {
+                color: #a68b5b;
+            }
+            
+            [data-theme="light"] .preloader-logo em {
+                color: #c5bdb2;
+            }
+            
+            /* Анімація — три крапки */
+            .preloader-dots {
+                display: flex;
+                gap: 8px;
+                opacity: 0;
+                animation: preloaderFadeIn 0.6s ease 0.4s forwards;
+            }
+            
+            .preloader-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #e0c9a8;
+                animation: preloaderPulse 1.4s ease-in-out infinite;
+            }
+            
+            [data-theme="light"] .preloader-dot {
+                background: #a68b5b;
+            }
+            
+            .preloader-dot:nth-child(2) { animation-delay: 0.2s; }
+            .preloader-dot:nth-child(3) { animation-delay: 0.4s; }
+            
+            /* Лінія під логотипом */
+            .preloader-line {
+                width: 60px;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #e0c9a8, transparent);
+                margin-bottom: 20px;
+                opacity: 0;
+                animation: preloaderFadeIn 0.8s ease 0.3s forwards;
+            }
+            
+            [data-theme="light"] .preloader-line {
+                background: linear-gradient(90deg, transparent, #a68b5b, transparent);
+            }
+            
+            /* Підтекст */
+            .preloader-sub {
+                font-family: 'Inter', sans-serif;
+                font-size: 10px;
+                letter-spacing: 0.25em;
+                text-transform: uppercase;
+                color: #9e968a;
+                margin-top: 24px;
+                opacity: 0;
+                animation: preloaderFadeIn 0.6s ease 0.6s forwards;
+            }
+            
+            [data-theme="light"] .preloader-sub {
+                color: #a09890;
+            }
+            
+            @keyframes preloaderFadeIn {
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes preloaderPulse {
+                0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+                40% { opacity: 1; transform: scale(1.2); }
+            }
+            
+            #pagePreloader.hidden {
+                opacity: 0;
+                visibility: hidden;
+            }
+        </style>
+        
+        <div class="preloader-logo">Unique <em>Curls</em></div>
+        <div class="preloader-line"></div>
+        <div class="preloader-dots">
+            <div class="preloader-dot"></div>
+            <div class="preloader-dot"></div>
+            <div class="preloader-dot"></div>
+        </div>
+        <div class="preloader-sub">завантаження</div>
+    </div>
+
+    <script>
+        // Миттєво застосувати тему (до рендеру)
+        try {
+            const t = localStorage.getItem('theme_mode');
+            if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch(e) {}
+    </script>
+
 <!-- Hidden admin login modal -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-card">
@@ -9750,6 +9880,23 @@ setInterval(forceDarkInputs, 800);
             if (e.key === 'ArrowLeft') lightboxNav(-1);
             if (e.key === 'ArrowRight') lightboxNav(1);
         });
+
+        // Ховаємо прелоадер після завантаження
+        function hidePreloader() {
+            const preloader = document.getElementById('pagePreloader');
+            if (preloader) {
+                preloader.classList.add('hidden');
+                setTimeout(() => preloader.remove(), 700);
+            }
+        }
+
+        // Ховаємо коли DOM готовий + невелика затримка для красивості
+        window.addEventListener('load', () => {
+            setTimeout(hidePreloader, 400);
+        });
+
+        // Страховка — якщо load не спрацював за 5 сек
+        setTimeout(hidePreloader, 5000);
 
     </script>
 
