@@ -17,25 +17,326 @@
     --success: #8fa285;
   }
 
-  /* === СВІТЛА ТЕМА === */
+ /* ================================================================
+   СВІТЛА ТЕМА — ПОВНИЙ НАБІР
+   ================================================================ */
+
 [data-theme="light"] {
-    --bg: #f5f2ee;
-    --bg-1: #f8f6f3;
+    --bg: #f0ece7;
+    --bg-1: #f7f5f2;
     --bg-2: #ffffff;
-    --ink: #1a1917;
-    --ink-mute: #7a7468;
-    --beige: #b8976a;
-    --beige-soft: rgba(184, 151, 106, 0.15);
-    --line: rgba(0, 0, 0, 0.08);
-    --line-2: rgba(0, 0, 0, 0.15);
+    --bg-3: #eae5df;
+    --ink: #1c1a17;
+    --ink-mute: #6b6560;
+    --beige: #a68b5b;
+    --beige-soft: rgba(166, 139, 91, 0.12);
+    --line: rgba(0, 0, 0, 0.07);
+    --line-2: rgba(0, 0, 0, 0.13);
     --danger: #c44e3a;
+    --success: #3a8a5c;
+}
+
+/* --- ФОНИ ТА ТЕКСТИ --- */
+[data-theme="light"] body {
+    background: #f0ece7;
+    color: #1c1a17;
+}
+
+/* --- САЙДБАР --- */
+[data-theme="light"] .admin-sidebar,
+[data-theme="light"] .admin-nav {
+    background: #1c1a17 !important;
+    color: #ede6d9 !important;
+}
+
+[data-theme="light"] .admin-nav a {
+    color: rgba(237, 230, 217, 0.7) !important;
+}
+
+[data-theme="light"] .admin-nav a.active,
+[data-theme="light"] .admin-nav a:hover {
+    color: #ede6d9 !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="light"] .admin-user {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="light"] .au-name {
+    color: #ede6d9 !important;
+}
+
+[data-theme="light"] .au-role {
+    color: rgba(237, 230, 217, 0.5) !important;
+}
+
+[data-theme="light"] .au-avatar {
+    background: #a68b5b !important;
+    color: #1c1a17 !important;
+}
+
+/* --- ОСНОВНА ЗОНА --- */
+[data-theme="light"] .admin-main {
+    background: #f0ece7;
+}
+
+[data-theme="light"] .admin-head h1 {
+    color: #1c1a17;
+}
+
+[data-theme="light"] .admin-head h1 em {
+    color: #a68b5b;
+}
+
+/* --- КАРТОЧКИ --- */
+[data-theme="light"] .settings-card,
+[data-theme="light"] .card,
+[data-theme="light"] .master-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .settings-card-head h3 {
+    color: #1c1a17;
+}
+
+[data-theme="light"] .settings-card-head p {
+    color: #6b6560;
+}
+
+/* --- ТАБЛИЦІ --- */
+[data-theme="light"] table {
+    background: #ffffff;
+}
+
+[data-theme="light"] th {
+    background: #f0ece7 !important;
+    color: #6b6560 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] td {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    color: #1c1a17;
+}
+
+[data-theme="light"] tr:hover td {
+    background: rgba(166, 139, 91, 0.06) !important;
+}
+
+/* --- ВКЛАДКИ (TABS) --- */
+[data-theme="light"] .settings-tab {
+    color: #6b6560 !important;
+    border-color: transparent !important;
+}
+
+[data-theme="light"] .settings-tab.active {
+    color: #a68b5b !important;
+    border-color: #a68b5b !important;
+    background: transparent !important;
+}
+
+[data-theme="light"] .settings-tab:hover:not(.active) {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .master-tab {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .master-tab.active {
+    color: #a68b5b !important;
+    border-color: #a68b5b !important;
+}
+
+/* --- КНОПКИ --- */
+[data-theme="light"] .admin-cta:not(.ghost):not(.danger) {
+    background: #a68b5b !important;
+    border-color: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .admin-cta:not(.ghost):not(.danger):hover {
+    background: #8f7749 !important;
+}
+
+[data-theme="light"] .admin-cta.ghost {
+    background: transparent !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .admin-cta.ghost:hover {
+    border-color: #a68b5b !important;
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .admin-cta.danger {
+    color: #c44e3a !important;
+    border-color: #c44e3a !important;
+}
+
+/* --- МОДАЛКИ --- */
+[data-theme="light"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .modal-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .modal-head {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    background: #f7f5f2 !important;
+}
+
+[data-theme="light"] .modal-head h2 {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .modal-close {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .modal-body {
+    background: #ffffff !important;
+}
+
+[data-theme="light"] .modal-footer {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    background: #f7f5f2 !important;
+}
+
+/* --- ФОРМИ --- */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    color: #1c1a17 !important;
+    -webkit-text-fill-color: #1c1a17 !important;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] select:focus {
+    border-color: #a68b5b !important;
+    box-shadow: 0 0 0 3px rgba(166, 139, 91, 0.1) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+    color: #a09890 !important;
+    -webkit-text-fill-color: #a09890 !important;
+}
+
+[data-theme="light"] label {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="time"] {
+    color-scheme: light !important;
+}
+
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: none !important;
 }
 
 [data-theme="light"] input:-webkit-autofill,
 [data-theme="light"] input:-webkit-autofill:hover,
 [data-theme="light"] input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-    -webkit-text-fill-color: #1a1917 !important;
+    -webkit-box-shadow: 0 0 0 1000px #f7f5f2 inset !important;
+    -webkit-text-fill-color: #1c1a17 !important;
+}
+
+/* --- СТАТУС БЕЙДЖІ --- */
+[data-theme="light"] .booking-detail-row .k {
+    color: #6b6560;
+}
+
+[data-theme="light"] .booking-detail-row .v {
+    color: #1c1a17;
+}
+
+/* --- ФІЛЬТРИ/ТАБС ЗАЯВОК --- */
+[data-theme="light"] .filter-btn,
+[data-theme="light"] .booking-filters button {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .filter-btn.active,
+[data-theme="light"] .booking-filters button.active {
+    background: #a68b5b !important;
+    border-color: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+/* --- ГРАФІК МАСТЕРА --- */
+[data-theme="light"] .schedule-day {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .schedule-day .day-name {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .exception-item {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- ТОСТ --- */
+[data-theme="light"] div[style*="z-index:10000"][style*="fixed"] {
+    background: #1c1a17 !important;
+    color: #f7f5f2 !important;
+    border-color: #a68b5b !important;
+}
+
+/* --- СКРОЛЛБАР --- */
+[data-theme="light"] ::-webkit-scrollbar {
+    width: 8px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f0ece7;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #c5bdb2;
+    border-radius: 4px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: #a68b5b;
+}
+
+/* --- ЧЕКБОКСИ --- */
+[data-theme="light"] input[type="checkbox"] {
+    accent-color: #a68b5b !important;
+}
+
+/* --- ЛОГО В САЙДБАРІ --- */
+[data-theme="light"] .admin-logo {
+    color: #ede6d9 !important;
+}
+
+/* --- МОНОХРОМ ТЕКСТ --- */
+[data-theme="light"] .mono {
+    color: #1c1a17;
+}
+
+/* --- HEAD META --- */
+[data-theme="light"] .head-meta {
+    color: #6b6560;
 }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
