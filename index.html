@@ -7619,14 +7619,15 @@ function getStepForUnit(unit) {
             }
         }
 
-        // Застосувати тему при завантаженні
-        (function() {
-            try {
-                // Спочатку з localStorage (миттєво, без мигання)
-                const saved = localStorage.getItem('theme_mode');
-                if (saved) applyTheme(saved);
-            } catch(e) {}
-        })();
+        // Миттєво застосувати тему ДО завантаження (без мигання)
+            (function() {
+                try {
+                    const saved = localStorage.getItem('theme_mode');
+                    if (saved && saved !== 'dark') {
+                        document.documentElement.setAttribute('data-theme', saved);
+                    }
+                } catch(e) {}
+            })();
 
 
         // ============================================
@@ -8940,10 +8941,10 @@ async function saveSettings() {
     
     // Аплоадери (логотип, фавікон і т.д.) — якщо вкладка "Бренд" зараз відкрита
     if (logoUploader) updates.logo_url = logoUploader.getValue();
-if (faviconUploader) updates.favicon_url = faviconUploader.getValue();
-if (heroImageUploader) updates.hero_image_url = heroImageUploader.getValue();
-if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
-if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.getValue();
+    if (faviconUploader) updates.favicon_url = faviconUploader.getValue();
+    if (heroImageUploader) updates.hero_image_url = heroImageUploader.getValue();
+    if (ogImageUploader) updates.og_image_url = ogImageUploader.getValue();
+    if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.getValue();
     
     // Час роботи (JSON)
             document.querySelectorAll('.hours-row').forEach(row => {
@@ -8969,6 +8970,12 @@ if (window.heroVideoUploader) updates.hero_video_url = window.heroVideoUploader.
         
         // Оновлюємо локальний кеш
         allSettings = { ...allSettings, ...updates };
+        // Зберігаємо тему в localStorage
+        try {
+            const theme = updates['theme_mode'] || allSettings['theme_mode'] || 'dark';
+            localStorage.setItem('theme_mode', theme);
+            applyTheme(theme);
+        } catch(e) {}
         
         showSettingsStatus(`✓ Збережено ${data.saved} параметрів`);
     } catch (err) {
