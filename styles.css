@@ -1014,6 +1014,88 @@
     background: rgb(0 0 0 / 0%) !important;
 }
 
+/* --- ОПЦІЇ ПОСЛУГИ (вибрані) --- */
+[data-theme="light"] .option-row.selected .opt-name {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .opt-price.plus {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .opt-name {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .opt-price {
+    color: #6b6560 !important;
+}
+
+/* --- ПІДСУМОК БРОНИ --- */
+[data-theme="light"] .review-row .val {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .review-row .lbl {
+    color: #6b6560 !important;
+}
+
+/* --- СЕКЦІЯ ХЕДЕР --- */
+[data-theme="light"] .section-head .more {
+    color: #a68b5b !important;
+}
+
+/* --- КАРТКА ВИБОРУ МАЙСТРА --- */
+[data-theme="light"] .master-pick-card div[style*="font-family:'Fraunces'"],
+[data-theme="light"] .master-pick-card div[style*="color:var(--ink)"] {
+    color: #1c1a17 !important;
+}
+
+/* --- ГЛОБАЛЬНО: будь-який елемент з var(--ink) inline --- */
+[data-theme="light"] [style*="color:var(--ink)"] {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] [style*="color: var(--ink)"] {
+    color: #1c1a17 !important;
+}
+
+/* --- ГЛОБАЛЬНО: елементи з var(--beige) inline --- */
+[data-theme="light"] [style*="color:var(--beige)"] {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] [style*="color: var(--beige)"] {
+    color: #a68b5b !important;
+}
+
+/* --- ГЛОБАЛЬНО: фони з var(--bg-2) inline --- */
+[data-theme="light"] [style*="background:var(--bg-2)"],
+[data-theme="light"] [style*="background: var(--bg-2)"],
+[data-theme="light"] [style*="background-color:var(--bg-2)"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+
+[data-theme="light"] [style*="background:var(--bg-1)"],
+[data-theme="light"] [style*="background: var(--bg-1)"] {
+    background: #f7f5f2 !important;
+    background-color: #f7f5f2 !important;
+}
+
+/* --- ГЛОБАЛЬНО: бордери --- */
+[data-theme="light"] [style*="border-color:var(--line)"],
+[data-theme="light"] [style*="border: 1px solid var(--line)"],
+[data-theme="light"] [style*="border:1px solid var(--line)"] {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- ГЛОБАЛЬНО: muted текст --- */
+[data-theme="light"] [style*="color:var(--ink-mute)"],
+[data-theme="light"] [style*="color: var(--ink-mute)"] {
+    color: #6b6560 !important;
+}
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { background: var(--bg-0); color: var(--ink); font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.01em; overflow-x: hidden; min-height: 100vh; }
   body { background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224, 201, 168, 0.05), transparent 60%), var(--bg-0); }
