@@ -3065,92 +3065,92 @@ body select:-webkit-autofill {
         </div>
     </div>
 
-  <!-- EXPENSES -->
-<div class="admin-section" id="ad-expenses">
-    <div class="admin-head">
-        <h1>Витрати <em>салону</em></h1>
-        <div class="head-meta">
-            <button class="admin-cta ghost" onclick="exportExpenses()">CSV</button>
-            <button class="admin-cta" onclick="openExpenseModal()">+ Витрата</button>
+        <!-- EXPENSES -->
+        <div class="admin-section" id="ad-expenses">
+            <div class="admin-head">
+                <h1>Витрати <em>салону</em></h1>
+                <div class="head-meta">
+                    <button class="admin-cta ghost" onclick="exportExpenses()">CSV</button>
+                    <button class="admin-cta" onclick="openExpenseModal()">+ Витрата</button>
+                </div>
+            </div>
+
+            <div class="filter-bar" id="expensesFilters">
+                <button class="filter-chip active" data-period="month">Місяць</button>
+                <button class="filter-chip" data-period="3months">3 місяці</button>
+                <button class="filter-chip" data-period="year">Рік</button>
+            </div>
+
+            <div id="expensesSummary" class="expenses-summary">
+                <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">—</div></div>
+                <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">—</div></div>
+                <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">—</div></div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-head">
+                    <h3>Операції</h3>
+                </div>
+                <table class="a-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Категорія</th>
+                            <th class="hide-mobile">Опис</th>
+                            <th>Сума</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesRows">
+                        <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <div class="filter-bar" id="expensesFilters">
-        <button class="filter-chip active" data-period="month">Місяць</button>
-        <button class="filter-chip" data-period="3months">3 місяці</button>
-        <button class="filter-chip" data-period="year">Рік</button>
-    </div>
-
-    <div id="expensesSummary" class="expenses-summary">
-        <div class="stat-card"><div class="stat-label">Усього витрат</div><div class="stat-value">—</div></div>
-        <div class="stat-card"><div class="stat-label">Категорій</div><div class="stat-value">—</div></div>
-        <div class="stat-card"><div class="stat-label">Операцій</div><div class="stat-value">—</div></div>
-    </div>
-
-    <div class="table-card">
-        <div class="table-head">
-            <h3>Операції</h3>
+        <!-- Expense Modal -->
+        <div class="modal-overlay" id="expenseModal" onclick="if(event.target===this) closeExpenseModal()">
+            <div class="modal-card" style="max-width: 480px;">
+                <div class="modal-head">
+                    <h2 id="expenseModalTitle">Нова витрата</h2>
+                    <button class="modal-close" onclick="closeExpenseModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+            <label>Тип витрати</label>
+            <div style="display:flex;gap:8px;">
+                <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
+                    <input type="radio" name="expType" value="regular" checked onchange="toggleExpenseType()" style="width:auto;">
+                    <span style="font-size:13px;">Звичайна</span>
+                </label>
+                <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
+                    <input type="radio" name="expType" value="purchase" onchange="toggleExpenseType()" style="width:auto;">
+                    <span style="font-size:13px;">Закупка товару</span>
+                </label>
+            </div>
         </div>
-        <table class="a-table">
-            <thead>
-                <tr>
-                    <th>Дата</th>
-                    <th>Категорія</th>
-                    <th class="hide-mobile">Опис</th>
-                    <th>Сума</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="expensesRows">
-                <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<!-- Expense Modal -->
-<div class="modal-overlay" id="expenseModal" onclick="if(event.target===this) closeExpenseModal()">
-    <div class="modal-card" style="max-width: 480px;">
-        <div class="modal-head">
-            <h2 id="expenseModalTitle">Нова витрата</h2>
-            <button class="modal-close" onclick="closeExpenseModal()">×</button>
-        </div>
-        <div class="modal-body">
+        <!-- Блок закупки — показується тільки якщо обрано "Закупка" -->
+        <div id="purchaseBlock" style="display:none;padding:14px;background:var(--bg-2);border:1px solid var(--beige);border-radius:4px;margin-bottom:16px;">
             <div class="form-group">
-    <label>Тип витрати</label>
-    <div style="display:flex;gap:8px;">
-        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
-            <input type="radio" name="expType" value="regular" checked onchange="toggleExpenseType()" style="width:auto;">
-            <span style="font-size:13px;">Звичайна</span>
-        </label>
-        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;cursor:pointer;">
-            <input type="radio" name="expType" value="purchase" onchange="toggleExpenseType()" style="width:auto;">
-            <span style="font-size:13px;">Закупка товару</span>
-        </label>
-    </div>
-</div>
-
-<!-- Блок закупки — показується тільки якщо обрано "Закупка" -->
-<div id="purchaseBlock" style="display:none;padding:14px;background:var(--bg-2);border:1px solid var(--beige);border-radius:4px;margin-bottom:16px;">
-    <div class="form-group">
-        <label>Товар *</label>
-        <select id="exProduct">
-            <option value="">— Оберіть товар —</option>
-        </select>
-    </div>
+                <label>Товар *</label>
+                <select id="exProduct">
+                    <option value="">— Оберіть товар —</option>
+                </select>
+            </div>
     
-    <div class="form-row">
-        <div class="form-group">
-            <label>Кількість *</label>
-            <input type="number" id="exQuantity" step="0.001" min="0" placeholder="0">
-            <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;" id="exUnitHint"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Кількість *</label>
+                    <input type="number" id="exQuantity" step="0.001" min="0" placeholder="0">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;" id="exUnitHint"></div>
+                </div>
+                <div class="form-group">
+                    <label>Ціна за одиницю</label>
+                    <div id="exPricePerUnit" style="padding:12px 14px;font-size:14px;color:var(--beige);font-family:'Fraunces',serif;">— ₴</div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Ціна за одиницю</label>
-            <div id="exPricePerUnit" style="padding:12px 14px;font-size:14px;color:var(--beige);font-family:'Fraunces',serif;">— ₴</div>
-        </div>
-    </div>
-</div>
             <input type="hidden" id="expId" value="">
             <div class="form-group">
                 <label>Дата</label>
@@ -3240,18 +3240,18 @@ body select:-webkit-autofill {
                 </div>
             </div>
             
-<div class="form-row">
-    <div class="form-group">
-        <label>Закупочна ціна за <span id="pCostUnit">шт</span> (₴)</label>
-        <input type="number" id="pCostPrice" step="0.01" min="0" value="0" placeholder="0" readonly style="cursor:not-allowed;background:var(--bg-2);">
-        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Автоматично рахується при закупці</div>
-    </div>
-    <div class="form-group">
-        <label>Ціна продажу <span id="pSellPriceLabel">за упаковку</span> (₴)</label>
-        <input type="number" id="pSellPrice" step="0.01" min="0" value="0" placeholder="0">
-        <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">0 = не продається. Якщо одиниця "шт" — це ціна за 1 шт</div>
-    </div>
-</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Закупочна ціна за <span id="pCostUnit">шт</span> (₴)</label>
+                    <input type="number" id="pCostPrice" step="0.01" min="0" value="0" placeholder="0" readonly style="cursor:not-allowed;background:var(--bg-2);">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">Автоматично рахується при закупці</div>
+                </div>
+                <div class="form-group">
+                    <label>Ціна продажу <span id="pSellPriceLabel">за упаковку</span> (₴)</label>
+                    <input type="number" id="pSellPrice" step="0.01" min="0" value="0" placeholder="0">
+                    <div style="font-size:11px;color:var(--ink-mute);margin-top:4px;">0 = не продається. Якщо одиниця "шт" — це ціна за 1 шт</div>
+                </div>
+            </div>
             
             <div class="form-group">
                 <label>Поріг низького залишку</label>
@@ -3362,6 +3362,7 @@ body select:-webkit-autofill {
         <button class="settings-tab" data-tab="email">Email</button>
         <button class="settings-tab" data-tab="telegram">Telegram</button>
         <button class="settings-tab" data-tab="integrations">Інтеграції</button>
+        <button class="settings-tab" data-tab="admin">Профіль</button>
     </div>
 
     <div id="settingsContent">
@@ -3370,6 +3371,7 @@ body select:-webkit-autofill {
 
     <div id="settingsStatus" class="settings-status"></div>
 </div>
+
 
 
 
@@ -7502,65 +7504,65 @@ function renderProductCategories() {
     `).join('');
 }
 
-async function saveNewProductCategory() {
-    const input = document.getElementById('newProductCatName');
-    const name = input.value.trim();
-    if (!name) return;
-    
-    try {
-        const res = await fetch('/api/admin/product-category-save.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ name })
-        });
-        const data = await res.json();
-        if (data.success) {
-            input.value = '';
-            // Перезагружаем категории
-            const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
-            const catData = await catRes.json();
-            if (catData.success) {
-                allProductCategories = catData.data || [];
-                renderProductCategories();
+        async function saveNewProductCategory() {
+            const input = document.getElementById('newProductCatName');
+            const name = input.value.trim();
+            if (!name) return;
+            
+            try {
+                const res = await fetch('/api/admin/product-category-save.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ name })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    input.value = '';
+                    // Перезагружаем категории
+                    const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
+                    const catData = await catRes.json();
+                    if (catData.success) {
+                        allProductCategories = catData.data || [];
+                        renderProductCategories();
+                    }
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert('Помилка');
             }
-        } else {
-            alert(data.error);
         }
-    } catch (err) {
-        alert('Помилка');
-    }
-}
 
-async function deleteProductCategory(id) {
-    if (!confirm('Видалити категорію? Товари залишаться, але без категорії.')) return;
-    try {
-        await fetch('/api/admin/product-category-delete.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ id })
+        async function deleteProductCategory(id) {
+            if (!confirm('Видалити категорію? Товари залишаться, але без категорії.')) return;
+            try {
+                await fetch('/api/admin/product-category-delete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ id })
+                });
+                const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
+                const catData = await catRes.json();
+                if (catData.success) {
+                    allProductCategories = catData.data || [];
+                    renderProductCategories();
+                }
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
+
+        // Фильтры товаров
+        document.addEventListener('click', (e) => {
+            const chip = e.target.closest('#productFilters .filter-chip');
+            if (!chip) return;
+            document.querySelectorAll('#productFilters .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            productFilter = chip.dataset.productFilter;
+            renderProducts();
         });
-        const catRes = await fetch('/api/admin/product-categories-list.php', { credentials: 'include' });
-        const catData = await catRes.json();
-        if (catData.success) {
-            allProductCategories = catData.data || [];
-            renderProductCategories();
-        }
-    } catch (err) {
-        alert('Помилка');
-    }
-}
-
-// Фильтры товаров
-document.addEventListener('click', (e) => {
-    const chip = e.target.closest('#productFilters .filter-chip');
-    if (!chip) return;
-    document.querySelectorAll('#productFilters .filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    productFilter = chip.dataset.productFilter;
-    renderProducts();
-});
 
 // Поиск
 document.addEventListener('input', (e) => {
@@ -9563,6 +9565,7 @@ function getStepForUnit(unit) {
                 email: renderEmailSettings,
                 telegram: renderTelegramSettings,
                 integrations: renderIntegrationsSettings,
+                admin: renderAdminSettings,
             };
             
             const renderer = renderers[tab];
@@ -9574,6 +9577,120 @@ function getStepForUnit(unit) {
                 renderSettingsTab(e.target.dataset.tab);
             }
         });
+
+
+        // ============================================
+        // ПРОФІЛЬ АДМІНІСТРАТОРА
+        // ============================================
+
+        async function renderAdminSettings() {
+            const content = document.getElementById('settingsContent');
+            content.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>';
+            
+            let admin = {};
+            try {
+                const res = await fetch('/api/admin/admin-profile-get.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) admin = data.admin || {};
+            } catch (e) {}
+            
+            const initial = (admin.full_name || admin.username || 'A').charAt(0).toUpperCase();
+            
+            content.innerHTML = `
+                <div class="settings-panel active">
+                    <div class="settings-card">
+                        <div class="settings-card-head">
+                            <h3>Профіль адміністратора</h3>
+                            <p>Ваші дані для входу в адмінку</p>
+                        </div>
+                        
+                        <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:24px;display:flex;gap:16px;align-items:center;">
+                            <div style="width:50px;height:50px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--bg);font-family:'Fraunces',serif;flex-shrink:0;">${initial}</div>
+                            <div>
+                                <div style="font-size:15px;color:var(--ink);font-weight:500;">${escapeHtml(admin.username || '—')}</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${admin.role === 'admin' ? 'Адміністратор' : escapeHtml(admin.role || '')}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label>Повне імʼя</label>
+                                <input type="text" id="adminName" value="${escapeHtml(admin.full_name || '')}" placeholder="Ваше імʼя">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="adminEmail" value="${escapeHtml(admin.email || '')}" placeholder="admin@example.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-card-head">
+                            <h3>Змінити пароль</h3>
+                            <p>Залиште порожнім якщо не хочете міняти</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Поточний пароль</label>
+                            <input type="password" id="adminCurrentPass" placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                        
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label>Новий пароль</label>
+                                <input type="password" id="adminNewPass" placeholder="Мінімум 6 символів" autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label>Підтвердження</label>
+                                <input type="password" id="adminConfirmPass" placeholder="Повторіть пароль" autocomplete="new-password">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-status" id="adminStatus"></div>
+                    <button class="admin-cta" onclick="saveAdminProfile()" style="padding:14px 28px;">Зберегти профіль</button>
+                </div>
+            `;
+        }
+
+        async function saveAdminProfile() {
+            const name = document.getElementById('adminName').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const currentPassword = document.getElementById('adminCurrentPass').value;
+            const newPassword = document.getElementById('adminNewPass').value;
+            const confirmPassword = document.getElementById('adminConfirmPass').value;
+            
+            if (!name) { alert('Введіть імʼя'); return; }
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                alert('Новий пароль і підтвердження не збігаються');
+                return;
+            }
+            
+            const payload = { name, email };
+            if (newPassword) {
+                payload.current_password = currentPassword;
+                payload.new_password = newPassword;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/admin-profile-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                showToast('Профіль збережено');
+                document.getElementById('adminCurrentPass').value = '';
+                document.getElementById('adminNewPass').value = '';
+                document.getElementById('adminConfirmPass').value = '';
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
 
         // ====== БРЕНД ======
         function renderBrandSettings() {
