@@ -2282,10 +2282,10 @@ body select:-webkit-autofill {
       Налаштування
     </a>
   </nav>
-  <div class="admin-user">
-    <div class="au-avatar">С</div>
-    <div class="au-info"><div class="au-name">Світлана</div><div class="au-role">Адміністратор</div></div>
-  </div>
+    <div class="admin-user">
+        <div class="au-avatar" id="sidebarAvatar">—</div>
+        <div class="au-info"><div class="au-name" id="sidebarName">Завантаження...</div><div class="au-role" id="sidebarRole">Адміністратор</div></div>
+    </div>
   <button class="admin-logout" onclick="logout()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     Вийти
@@ -5734,65 +5734,68 @@ async function assignRandomMaster() {
     }
   }
 
-  function showAuthError(message) {
-    const errorEl = document.getElementById('authError');
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-    errorEl.style.animation = 'none';
-    setTimeout(() => { errorEl.style.animation = ''; }, 10);
-  }
+        function showAuthError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            errorEl.style.animation = 'none';
+            setTimeout(() => { errorEl.style.animation = ''; }, 10);
+        }
 
-  function enterAdmin() {
-    closeAuth();
-    document.getElementById('clientWrap').classList.add('hide');
-    document.getElementById('adminWrap').classList.add('show');
-    window.scrollTo({ top: 0 });
-    loadDashboard();
-    setTimeout(() => {
-      const circle = document.getElementById('authBio').querySelector('.bio-circle');
-      const label = document.getElementById('authBio').querySelector('.bio-label');
-      circle.classList.remove('scanning');
-      label.textContent = 'Увійти за Face ID';
-    }, 500);
-  }
+        function enterAdmin() {
+            closeAuth();
+            document.getElementById('clientWrap').classList.add('hide');
+            document.getElementById('adminWrap').classList.add('show');
+            window.scrollTo({ top: 0 });
+            loadDashboard();
+            setTimeout(() => {
+            const circle = document.getElementById('authBio').querySelector('.bio-circle');
+            const label = document.getElementById('authBio').querySelector('.bio-label');
+            circle.classList.remove('scanning');
+            label.textContent = 'Увійти за Face ID';
+            }, 500);
+        }
 
-  async function logout() {
-    try {
-      await fetch('/api/admin/logout.php', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
+        async function logout() {
+            try {
+            await fetch('/api/admin/logout.php', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            } catch (err) {
+            console.error('Logout error:', err);
+            }
 
-    document.getElementById('clientWrap').classList.remove('hide');
-    document.getElementById('adminWrap').classList.remove('show');
-    window.scrollTo({ top: 0 });
+            document.getElementById('clientWrap').classList.remove('hide');
+            document.getElementById('adminWrap').classList.remove('show');
+            window.scrollTo({ top: 0 });
 
-    const u = document.getElementById('loginUsername');
-    const p = document.getElementById('loginPassword');
-    if (u) u.value = '';
-    if (p) p.value = '';
-  }
+            const u = document.getElementById('loginUsername');
+            const p = document.getElementById('loginPassword');
+            if (u) u.value = '';
+            if (p) p.value = '';
+        }
 
-  function setAdminSection(name, el) {
-    document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('ad-' + name).classList.add('active');
-    
-    if (name === 'services') loadServices();
-    if (name === 'masters') loadMasters();
-    if (name === 'packages') loadPackages();
-    if (name === 'bookings') loadBookings();
-    if (name === 'products') loadProducts();
-    if (name === 'expenses') loadExpenses();
-    if (name === 'clients') loadClients();
-    if (name === 'reports') loadReports();
-    if (name === 'dashboard') loadDashboard();
-    if (name === 'settings') loadSettings();
-}
+        function setAdminSection(name, el) {
+            document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('ad-' + name).classList.add('active');
+            
+            if (name === 'services') loadServices();
+            if (name === 'masters') loadMasters();
+            if (name === 'packages') loadPackages();
+            if (name === 'bookings') loadBookings();
+            if (name === 'products') loadProducts();
+            if (name === 'expenses') loadExpenses();
+            if (name === 'clients') loadClients();
+            if (name === 'reports') loadReports();
+            if (name === 'dashboard') loadDashboard();
+            if (name === 'settings') loadSettings();
+        }
+
+    // Завантажити імʼя адміна в сайдбар
+        loadSidebarAdmin();
 
   async function checkSession() {
     try {
@@ -9521,6 +9524,21 @@ function getStepForUnit(unit) {
             a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        async function loadSidebarAdmin() {
+            try {
+                const res = await fetch('/api/admin/admin-profile-get.php', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success || !data.admin) return;
+                
+                const a = data.admin;
+                const name = a.full_name || a.username || 'Admin';
+                
+                document.getElementById('sidebarName').textContent = name;
+                document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('sidebarRole').textContent = a.role === 'admin' ? 'Адміністратор' : (a.role || '');
+            } catch (e) {}
         }
 
         // ============================================
