@@ -621,6 +621,403 @@
 [data-theme="light"] .exception-type-extra_work { background: rgba(166, 139, 91, 0.1); color: #a68b5b; }
 [data-theme="light"] .exception-type-custom_hours { background: rgba(106, 90, 205, 0.1); color: #6a5acd; }
 
+/* ================================================================
+   СВІТЛА ТЕМА — ПУБЛІЧНА СТОРІНКА (БРОНЮВАННЯ)
+   ================================================================ */
+
+/* --- HERO --- */
+[data-theme="light"] .hero {
+    background: #f7f5f2 !important;
+}
+
+[data-theme="light"] .hero-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .hero-title em,
+[data-theme="light"] .hero-title i {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .hero-desc {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .hero-tagline {
+    color: #a68b5b !important;
+}
+
+/* --- ЕКРАНИ БРОНЮВАННЯ --- */
+[data-theme="light"] .screen {
+    background: #f0ece7 !important;
+}
+
+[data-theme="light"] .section-head {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .section-head em,
+[data-theme="light"] .section-head i {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .kicker {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .display {
+    color: #1c1a17 !important;
+}
+
+/* --- ПЛИТКИ ПОСЛУГ --- */
+[data-theme="light"] .tile {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .tile:hover {
+    border-color: #a68b5b !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .tile-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .tile-body {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .tile-price {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .tile-num {
+    color: #a09890 !important;
+}
+
+/* --- ПАКЕТИ --- */
+[data-theme="light"] .pack-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .pack-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .pack-badge {
+    background: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .pack-items {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .pack-old {
+    color: #a09890 !important;
+}
+
+[data-theme="light"] .pack-new,
+[data-theme="light"] .pack-save {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .pack-pricing {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* --- КАЛЕНДАР --- */
+[data-theme="light"] .cal-head {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .cal-month {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .cal-nav button {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .cal-nav button:hover {
+    border-color: #a68b5b !important;
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .cal-weekdays {
+    color: #a09890 !important;
+}
+
+[data-theme="light"] .cal-grid .day {
+    color: #1c1a17 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    background: #ffffff !important;
+}
+
+[data-theme="light"] .cal-grid .day:hover {
+    border-color: #a68b5b !important;
+}
+
+[data-theme="light"] .cal-grid .day.active,
+[data-theme="light"] .cal-grid .day.selected {
+    background: #a68b5b !important;
+    color: #ffffff !important;
+    border-color: #a68b5b !important;
+}
+
+[data-theme="light"] .cal-grid .day.today {
+    border-color: #a68b5b !important;
+}
+
+[data-theme="light"] .cal-grid .day.disabled,
+[data-theme="light"] .cal-grid .day[style*="opacity"] {
+    color: #c5bdb2 !important;
+    background: #f0ece7 !important;
+}
+
+/* --- СЛОТИ ЧАСУ --- */
+[data-theme="light"] .times-head {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .times-grid .time,
+[data-theme="light"] .time-slot {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .times-grid .time:hover,
+[data-theme="light"] .time-slot:hover {
+    border-color: #a68b5b !important;
+}
+
+[data-theme="light"] .times-grid .time.selected,
+[data-theme="light"] .time-slot.selected {
+    background: #a68b5b !important;
+    color: #ffffff !important;
+    border-color: #a68b5b !important;
+}
+
+/* --- ОПЦІЇ ПОСЛУГИ --- */
+[data-theme="light"] .options-section {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .options-header {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .options-hint {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .svc-row {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .svc-row .lbl {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .svc-row .val {
+    color: #a68b5b !important;
+}
+
+/* --- МАЙСТЕР --- */
+[data-theme="light"] .master-reveal {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .m-name {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .m-role {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .m-exp {
+    color: #a09890 !important;
+}
+
+[data-theme="light"] .no-master {
+    color: #c44e3a !important;
+}
+
+[data-theme="light"] .master-pick-card {
+    background: #f7f5f2 !important;
+}
+
+/* --- КЛІЄНТ ФОРМА --- */
+[data-theme="light"] .client-wrap {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .input-label {
+    color: #6b6560 !important;
+}
+
+/* --- ПІДСУМОК БРОНИ --- */
+[data-theme="light"] .review-section {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .review-row {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .review-total {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .rt-row {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .rt-total {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .rt-deposit {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .rt-payable {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .deposit-note {
+    color: #a09890 !important;
+}
+
+/* --- КНОПКИ ПУБЛІЧНІ --- */
+[data-theme="light"] .cta,
+[data-theme="light"] .btn {
+    background: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .cta:hover,
+[data-theme="light"] .btn:hover {
+    background: #8f7749 !important;
+}
+
+[data-theme="light"] .cta.ghost,
+[data-theme="light"] .btn.ghost {
+    background: transparent !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .subtle {
+    color: #6b6560 !important;
+}
+
+/* --- УСПІХ --- */
+[data-theme="light"] .success-wrap {
+    background: #ffffff !important;
+}
+
+[data-theme="light"] .success-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .success-sub {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .success-details {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .booking-code {
+    color: #a68b5b !important;
+}
+
+/* --- ФУТЕР --- */
+[data-theme="light"] .site-footer {
+    background: #1c1a17 !important;
+    color: #ede6d9 !important;
+}
+
+[data-theme="light"] .footer-h {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .footer-link {
+    color: rgba(237, 230, 217, 0.7) !important;
+}
+
+[data-theme="light"] .footer-link:hover {
+    color: #ede6d9 !important;
+}
+
+[data-theme="light"] .footer-hero-name {
+    color: #ede6d9 !important;
+}
+
+[data-theme="light"] .footer-hero-tagline {
+    color: rgba(237, 230, 217, 0.6) !important;
+}
+
+[data-theme="light"] .footer-legal {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(237, 230, 217, 0.4) !important;
+}
+
+[data-theme="light"] .hours-item {
+    border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* --- БРЕНД --- */
+[data-theme="light"] .brand {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .brand-sub {
+    color: #6b6560 !important;
+}
+
+/* --- ІНФО ІКОНКИ --- */
+[data-theme="light"] .info-icons .ic {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .ic-info {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .ic-action {
+    color: #a68b5b !important;
+}
+
+/* --- ДЕТАЛІ ПОСЛУГИ --- */
+[data-theme="light"] .detail-head {
+    background: #f7f5f2 !important;
+}
+
+/* --- ЛІНІЇ --- */
+[data-theme="light"] .line {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- ПРОГРЕС --- */
+[data-theme="light"] .progress {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { background: var(--bg-0); color: var(--ink); font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.01em; overflow-x: hidden; min-height: 100vh; }
   body { background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224, 201, 168, 0.05), transparent 60%), var(--bg-0); }

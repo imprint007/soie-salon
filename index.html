@@ -1511,37 +1511,38 @@ async function loadPublicSettings() {
     }
 }
 
-function ps(key, fallback = '') {
-    return publicSettings[key] || fallback;
-}
-
-function renderAllServices() {
-    const container = document.getElementById('allServicesContainer');
-    const countEl = document.getElementById('allServicesCount');
-    if (!container) return;
-    
-    if (!publicServices || publicServices.length === 0) {
-        container.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Послуг поки немає</div>';
-        if (countEl) countEl.textContent = '';
-        return;
+    function ps(key, fallback = '') {
+        return publicSettings[key] || fallback;
     }
-    
-    if (countEl) countEl.textContent = `${publicServices.length} послуг`;
-    
-    container.innerHTML = publicServices.map((s, i) => {
-        const fallbackImg = 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80';
-        const img = s.image_url || fallbackImg;
-        const num = String(i + 1).padStart(2, '0');
-        return `
-        <div class="tile" onclick="openServiceDetail(${s.id})">
-            <div class="tile-img" style="background-image:url('${escapeAttr(img)}');"></div>
-            <div class="tile-body">
-                <div class="tile-num">${num} / ${(s.option_groups || []).length > 0 ? 'З опціями' : 'Базова'}</div>
-                <div class="tile-title">${escapeText(s.name)}</div>
-                <div class="tile-price">від ${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
-            </div>
-        </div>`;
-    }).join('');
+    // Застосовуємо тему з налаштувань
+    applyTheme(ps('theme_mode', 'dark'));
+    function renderAllServices() {
+        const container = document.getElementById('allServicesContainer');
+        const countEl = document.getElementById('allServicesCount');
+        if (!container) return;
+        
+        if (!publicServices || publicServices.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-mute);">Послуг поки немає</div>';
+            if (countEl) countEl.textContent = '';
+            return;
+        }
+        
+        if (countEl) countEl.textContent = `${publicServices.length} послуг`;
+        
+        container.innerHTML = publicServices.map((s, i) => {
+            const fallbackImg = 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80';
+            const img = s.image_url || fallbackImg;
+            const num = String(i + 1).padStart(2, '0');
+            return `
+            <div class="tile" onclick="openServiceDetail(${s.id})">
+                <div class="tile-img" style="background-image:url('${escapeAttr(img)}');"></div>
+                <div class="tile-body">
+                    <div class="tile-num">${num} / ${(s.option_groups || []).length > 0 ? 'З опціями' : 'Базова'}</div>
+                    <div class="tile-title">${escapeText(s.name)}</div>
+                    <div class="tile-price">від ${Number(s.base_price).toLocaleString('uk-UA')} ₴</div>
+                </div>
+            </div>`;
+        }).join('');
 }
 
 // ============================================
