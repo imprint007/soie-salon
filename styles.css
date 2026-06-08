@@ -442,10 +442,6 @@
     border-color: #a68b5b !important;
 }
 
-[data-theme="light"] .tile-title {
-    color: #1c1a17 !important;
-}
-
 [data-theme="light"] .tile-price {
     color: #a68b5b !important;
 }
@@ -631,7 +627,7 @@
 }
 
 [data-theme="light"] .hero-title {
-    color: #1c1a17 !important;
+    color: #ffe5bd !important;
 }
 
 [data-theme="light"] .hero-title em,
@@ -640,7 +636,7 @@
 }
 
 [data-theme="light"] .hero-desc {
-    color: #6b6560 !important;
+    color: #e4e2e1 !important;
 }
 
 [data-theme="light"] .hero-tagline {
@@ -682,7 +678,7 @@
 }
 
 [data-theme="light"] .tile-title {
-    color: #1c1a17 !important;
+    color: #e3c18e !important;
 }
 
 [data-theme="light"] .tile-body {
@@ -1015,7 +1011,7 @@
 
 /* --- ПРОГРЕС --- */
 [data-theme="light"] .progress {
-    background: rgba(0, 0, 0, 0.08) !important;
+    background: rgb(0 0 0 / 0%) !important;
 }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
