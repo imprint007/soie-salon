@@ -339,6 +339,288 @@
     color: #6b6560;
 }
 
+/* --- ДАШБОРД: СТАТИСТИКА --- */
+[data-theme="light"] .stat-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .stat-value {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .stat-label {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .stats-grid .stat-card:hover {
+    border-color: #a68b5b !important;
+}
+
+/* --- ДАШБОРД: ГРАФІКИ --- */
+[data-theme="light"] .chart-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .chart-card-head {
+    color: #1c1a17 !important;
+}
+
+/* --- ДАШБОРД: ТОП --- */
+[data-theme="light"] .top-item {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .top-name {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .top-meta {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .top-rank {
+    color: #a68b5b !important;
+}
+
+/* --- ТАБЛИЦІ --- */
+[data-theme="light"] .table-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .table-head {
+    background: #f0ece7 !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .a-table th {
+    background: #f0ece7 !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .a-table td {
+    color: #1c1a17 !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .a-table tr:hover td {
+    background: rgba(166, 139, 91, 0.05) !important;
+}
+
+/* --- ФІЛЬТРИ --- */
+[data-theme="light"] .filter-bar {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .filter-chip {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .filter-chip.active,
+[data-theme="light"] .filter-chip:hover {
+    background: #a68b5b !important;
+    border-color: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+/* --- КАРТКИ ПОСЛУГ / МАЙСТРІВ --- */
+[data-theme="light"] .cards-grid > div,
+[data-theme="light"] .tile {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .tile:hover {
+    border-color: #a68b5b !important;
+}
+
+[data-theme="light"] .tile-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .tile-price {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .tile-num {
+    color: #6b6560 !important;
+}
+
+/* --- ПАКЕТИ --- */
+[data-theme="light"] .pack-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .pack-title {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .pack-badge {
+    background: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .pack-old {
+    color: #a09890 !important;
+}
+
+[data-theme="light"] .pack-new {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .pack-items {
+    color: #6b6560 !important;
+}
+
+/* --- ТОВАРИ (ВКЛАДКИ) --- */
+[data-theme="light"] .prod-tab {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .prod-tab.active {
+    background: #a68b5b !important;
+    border-color: #a68b5b !important;
+    color: #ffffff !important;
+}
+
+/* --- ВИТРАТИ --- */
+[data-theme="light"] .expenses-summary {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .summary-bar {
+    background: #f7f5f2 !important;
+}
+
+[data-theme="light"] .sum-label {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .sum-total {
+    color: #1c1a17 !important;
+}
+
+/* --- TOPBAR --- */
+[data-theme="light"] .topbar {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* --- КНОПКА ВИХОДУ --- */
+[data-theme="light"] .admin-logout {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .admin-logout:hover {
+    color: #c44e3a !important;
+}
+
+/* --- БРЕНД В САЙДБАРІ --- */
+[data-theme="light"] .admin-brand {
+    color: #ede6d9 !important;
+}
+
+/* --- СЕРВІСНИЙ ЧЕКЛИСТ --- */
+[data-theme="light"] .services-checklist {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .services-checklist label {
+    color: #1c1a17 !important;
+}
+
+/* --- КОЛІР ІНПУТІВ --- */
+[data-theme="light"] .color-input-group input[type="text"] {
+    background: #f7f5f2 !important;
+    color: #1c1a17 !important;
+}
+
+/* --- НАЛАШТУВАННЯ РЯДКИ --- */
+[data-theme="light"] .settings-row {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .sr-name {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .sr-hint {
+    color: #6b6560 !important;
+}
+
+/* --- РІЗНЕ --- */
+[data-theme="light"] .kicker {
+    color: #a68b5b !important;
+}
+
+[data-theme="light"] .mono {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .head-meta {
+    color: #6b6560 !important;
+}
+
+[data-theme="light"] .line {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .icon-btn {
+    color: #6b6560 !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .icon-btn:hover {
+    color: #a68b5b !important;
+    border-color: #a68b5b !important;
+}
+
+/* --- АВТОРИЗАЦІЯ --- */
+[data-theme="light"] .auth-card {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .auth-brand {
+    color: #1c1a17 !important;
+}
+
+[data-theme="light"] .auth-sub {
+    color: #6b6560 !important;
+}
+
+/* --- СТАТУС ПАНЕЛЬ НАЛАШТУВАНЬ --- */
+[data-theme="light"] .settings-status {
+    color: #3a8a5c !important;
+}
+
+/* --- MASTERS STATS --- */
+[data-theme="light"] .masters-stats {
+    background: #f7f5f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- ВИКЛЮЧЕННЯ --- */
+[data-theme="light"] .exception-type-vacation { background: rgba(58, 138, 92, 0.1); color: #3a8a5c; }
+[data-theme="light"] .exception-type-sick { background: rgba(196, 78, 58, 0.1); color: #c44e3a; }
+[data-theme="light"] .exception-type-day_off { background: rgba(107, 101, 96, 0.1); color: #6b6560; }
+[data-theme="light"] .exception-type-extra_work { background: rgba(166, 139, 91, 0.1); color: #a68b5b; }
+[data-theme="light"] .exception-type-custom_hours { background: rgba(106, 90, 205, 0.1); color: #6a5acd; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { background: var(--bg-0); color: var(--ink); font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.01em; overflow-x: hidden; min-height: 100vh; }
   body { background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224, 201, 168, 0.05), transparent 60%), var(--bg-0); }
