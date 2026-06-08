@@ -9116,6 +9116,13 @@ function openBookingModal(id) {
         ${b.client_comment ? `<div class="booking-detail-row"><span class="k">Коментар</span><span class="v">${escapeHtml(b.client_comment)}</span></div>` : ''}
         <div class="booking-detail-row"><span class="k">Поточний статус</span><span class="v">${statusBadge(b.status)}</span></div>
         
+        ${b.status === 'done' ? `
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="admin-cta ghost small" onclick="event.stopPropagation();closeBookingModal();setTimeout(()=>openCompleteModal(${b.id}),150)" style="flex:1;">✎ Розхідники</button>
+            <button class="admin-cta ghost small" onclick="event.stopPropagation();closeBookingModal();setTimeout(()=>openVisitAnketa(${b.id}),150)" style="flex:1;">📋 Анкета</button>
+        </div>
+        ` : ''}
+        
         <div style="margin-top:14px;font-size:10px;letter-spacing:0.18em;color:var(--ink-mute);text-transform:uppercase;">Змінити статус:</div>
         <div class="booking-status-buttons">
             <button class="admin-cta ghost small" onclick="updateBookingStatus('pending')">Очікує</button>
