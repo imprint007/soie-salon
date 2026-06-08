@@ -55,6 +55,18 @@ function handleMessage($message) {
         return;
     }
     
+    // Команда /link — показує свій Telegram ID
+    if ($text === '/link') {
+        $tgId = $user['id'] ?? '—';
+        botSendMessage($chatId, 
+            "🔗 <b>Ваш Telegram ID:</b>\n\n<code>{$tgId}</code>\n\n" .
+            "Скопіюйте цей номер і передайте адміністратору салону.\n" .
+            "Він додасть його у ваш профіль і ви будете отримувати питання від клієнтів.",
+            botGetMainMenu()
+        );
+        return;
+    }
+
     // Перевіряємо чи користувач в режимі "Питання майстру"
     $pdo = botGetDb();
     $state = getUserState($chatId);
@@ -228,38 +240,57 @@ function handleQuestionText($chatId, $text, $botUser, $masterId = null) {
     $notifyChatId = botGetSetting('telegram_chat_id', '');
     
     if ($notifyToken && $notifyChatId) {
+        // Пересилаємо питання
         $userName = trim(($botUser['first_name'] ?? '') . ' ' . ($botUser['last_name'] ?? ''));
         $userLink = $botUser['telegram_username'] ? "@{$botUser['telegram_username']}" : $userName;
-        
+
         $masterName = 'всім';
-        if ($masterId) {
-            $stmt = $pdo->prepare("SELECT name FROM masters WHERE id = ?");
-            $stmt->execute([$masterId]);
-            $masterName = $stmt->fetchColumn() ?: 'майстру';
-        }
-        
         $msg = "💬 <b>Питання від клієнта</b>\n\n" .
-               "👤 {$userName} ({$userLink})\n" .
-               "👉 Кому: {$masterName}\n\n" .
-               "❓ {$text}";
-        
-        // Відправляємо через бот сповіщень
-        $url = "https://api.telegram.org/bot{$notifyToken}/sendMessage";
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode([
-                'chat_id' => $notifyChatId,
-                'text' => $msg,
-                'parse_mode' => 'HTML',
-            ]),
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_RETURNTRANSFER => true,
-        ]);
-        curl_exec($ch);
-        curl_close($ch);
-    }
+            "👤 {$userName} ({$userLink})\n";
+
+        if ($masterId) {
+            $stmt = $pdo->prepare("SELECT name, telegram_chat_id FROM masters WHERE id = ?");
+            $stmt->execute([$masterId]);
+            $master = $stmt->fetch();
+            $masterName = $master['name'] ?? 'майстру';
+            $msg .= "👉 Кому: {$masterName}\n\n";
+            $msg .= "❓ {$text}";
+            
+            // Якщо у мастера є Telegram — відправляємо напряму через клієнтського бота
+            if (!empty($master['telegram_chat_id'])) {
+                botSendMessage($master['telegram_chat_id'], $msg . "\n\n<i>Відповісти можна в адмінці</i>");
+            }
+        } else {
+            $msg .= "👉 Кому: всім майстрам\n\n";
+            $msg .= "❓ {$text}";
+            
+            // Відправляємо всім мастерам з Telegram ID
+            $allMasters = $pdo->query("SELECT telegram_chat_id FROM masters WHERE is_active = 1 AND telegram_chat_id IS NOT NULL AND telegram_chat_id != ''")->fetchAll();
+            foreach ($allMasters as $am) {
+                botSendMessage($am['telegram_chat_id'], $msg . "\n\n<i>Відповісти можна в адмінці</i>");
+            }
+        }
+
+        // Також в загальний чат (якщо налаштовано)
+        $notifyToken = botGetSetting('telegram_bot_token', '');
+        $notifyChatId = botGetSetting('telegram_chat_id', '');
+        if ($notifyToken && $notifyChatId) {
+            $url = "https://api.telegram.org/bot{$notifyToken}/sendMessage";
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode([
+                    'chat_id' => $notifyChatId,
+                    'text' => $msg,
+                    'parse_mode' => 'HTML',
+                ]),
+                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                CURLOPT_RETURNTRANSFER => true,
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+        }
     
     botSendMessage($chatId,
         "✅ <b>Питання надіслано!</b>\n\nМайстер відповість вам якнайшвидше. Очікуйте 💬",

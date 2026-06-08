@@ -701,6 +701,15 @@ try {
                 <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
                     <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Доступ до особистого кабінету</div>
         
+                    <div class="form-group" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+                        <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Telegram</div>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:10px;line-height:1.5;">
+                            Майстер має написати <b>/start</b> боту <a href="https://t.me/uniquecurls_client_bot" target="_blank" style="color:var(--beige);">@uniquecurls_client_bot</a>, потім <b>/link</b> — і бот покаже ID. Або дізнатись через <a href="https://t.me/userinfobot" target="_blank" style="color:var(--beige);">@userinfobot</a>.
+                        </div>
+                        <label>Telegram Chat ID</label>
+                        <input type="text" id="mstTelegramChatId" placeholder="Наприклад: 123456789">
+                    </div>
+
                      <!-- ===== GOOGLE CALENDAR ===== -->
                     <div class="form-group" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
                          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);margin-bottom:14px;">Google Calendar</div>
@@ -6732,6 +6741,7 @@ async function openMasterModal() {
     document.getElementById('mstDeleteBtn').style.display = 'none';
     document.getElementById('mUsername').value = '';
     document.getElementById('mPassword').value = '';
+    document.getElementById('mstTelegramChatId').value = '';
 
     // Аплоадер фото
     const uploaderContainer = document.getElementById('mstPhotoUploader');
@@ -6776,6 +6786,7 @@ async function editMaster(id) {
     document.getElementById('mstDeleteBtn').style.display = 'inline-block';
     document.getElementById('mUsername').value = m.username || '';
     document.getElementById('mPassword').value = ''; // никогда не показываем пароль
+    document.getElementById('mstTelegramChatId').value = m.telegram_chat_id || '';
 
     const uploaderContainer = document.getElementById('mstPhotoUploader');
     uploaderContainer.className = '';
@@ -6867,6 +6878,7 @@ async function renderMasterServicesList(selectedIds) {
                 experience_years: parseInt(document.getElementById('mstExperience').value) || 0,
                 is_active: document.getElementById('mstActive').checked ? 1 : 0,
                 google_calendar_id: document.getElementById('mGoogleCalendarId').value || null,
+                telegram_chat_id: document.getElementById('mstTelegramChatId').value.trim() || null,
                 service_ids
                 
             };
