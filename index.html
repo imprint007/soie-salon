@@ -9537,7 +9537,8 @@ function getStepForUnit(unit) {
                 
                 document.getElementById('sidebarName').textContent = name;
                 document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
-                document.getElementById('sidebarRole').textContent = a.role === 'admin' ? 'Адміністратор' : (a.role || '');
+                const roleLabels = { admin: 'Адміністратор', owner: 'Власник', manager: 'Менеджер' };
+                document.getElementById('sidebarRole').textContent = roleLabels[a.role] || a.role || '';
             } catch (e) {}
         }
 
@@ -9626,7 +9627,7 @@ function getStepForUnit(unit) {
                             <div style="width:50px;height:50px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--bg);font-family:'Fraunces',serif;flex-shrink:0;">${initial}</div>
                             <div>
                                 <div style="font-size:15px;color:var(--ink);font-weight:500;">${escapeHtml(admin.username || '—')}</div>
-                                <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${admin.role === 'admin' ? 'Адміністратор' : escapeHtml(admin.role || '')}</div>
+                                <div style="font-size:11px;color:var(--ink-mute);margin-top:2px;">${{'admin':'Адміністратор','owner':'Власник','manager':'Менеджер'}[admin.role] || escapeHtml(admin.role || '')}</div>
                             </div>
                         </div>
                         
