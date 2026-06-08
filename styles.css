@@ -646,6 +646,7 @@
 /* --- ЕКРАНИ БРОНЮВАННЯ --- */
 [data-theme="light"] .screen {
     background: #f0ece7 !important;
+    border-radius: 15px 15px 0px 0px;
 }
 
 [data-theme="light"] .section-head {
