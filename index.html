@@ -1617,7 +1617,17 @@ try {
                 
                 <div class="form-group">
                     <label>Фото обкладинки</label>
-                    <div id="artImageUploader"></div>
+                    <div id="artCoverArea" style="border:2px dashed var(--line);border-radius:6px;padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('artCoverInput').click()">
+                        <div id="artCoverPreview" style="display:none;margin-bottom:8px;">
+                            <div id="artCoverImg" style="width:100%;max-height:200px;border-radius:4px;object-fit:cover;"></div>
+                        </div>
+                        <div id="artCoverPlaceholder">
+                            <div style="font-size:24px;margin-bottom:4px;">📤</div>
+                            <div style="font-size:12px;color:var(--ink-mute);">Натисніть для завантаження</div>
+                        </div>
+                        <input type="file" id="artCoverInput" accept="image/*" style="display:none;" onchange="uploadArticleCover(this.files[0])">
+                    </div>
+                    <input type="hidden" id="artImageUrl" value="">
                 </div>
                 
                 <div class="form-group">
@@ -4422,7 +4432,9 @@ async function assignRandomMaster() {
             document.getElementById('artPublished').checked = true;
             document.getElementById('artDeleteBtn').style.display = 'none';
             
-            initArtImageUploader('');
+            setArticleCoverPreview('');
+                articlePhotos = [];
+                renderArticlePhotos();
             document.getElementById('articleModal').classList.add('show');
             document.getElementById('artType').value = 'article';
                 articleSteps = [];
@@ -4445,7 +4457,9 @@ async function assignRandomMaster() {
             document.getElementById('artDeleteBtn').style.display = 'inline-flex';
             
             
-            initArtImageUploader(a.image_url || '');
+            setArticleCoverPreview(a.image_url || '');
+                articlePhotos = a.photos ? (typeof a.photos === 'string' ? JSON.parse(a.photos) : a.photos) : [];
+                renderArticlePhotos();
             document.getElementById('articleModal').classList.add('show');
             document.getElementById('artType').value = a.article_type || 'article';
                 articleSteps = a.steps ? (typeof a.steps === 'string' ? JSON.parse(a.steps) : a.steps) : [];
@@ -4484,7 +4498,7 @@ async function assignRandomMaster() {
             const payload = {
                 id,
                 title,
-                image_url: artImageUploader ? artImageUploader.getValue() : '',
+                image_url: document.getElementById('artImageUrl').value || '',
                 content: document.getElementById('artContent').value.trim(),
                 excerpt: document.getElementById('artExcerpt').value.trim(),
                 is_published: document.getElementById('artPublished').checked ? 1 : 0,
@@ -4509,6 +4523,56 @@ async function assignRandomMaster() {
                 showToast('Статтю збережено');
             } catch (err) {
                 alert('Помилка: ' + err.message);
+            }
+        }
+
+        async function uploadArticleCover(file) {
+            if (!file) return;
+            
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('prefix', 'articles');
+                
+                const res = await fetch('/api/admin/upload.php', { method: 'POST', credentials: 'include', body: fd });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Помилка');
+                
+                const url = data.url || data.path || data.file_url;
+                document.getElementById('artImageUrl').value = url;
+                
+                const img = document.getElementById('artCoverImg');
+                if (img.tagName === 'DIV') {
+                    img.style.backgroundImage = `url('${url}')`;
+                    img.style.height = '180px';
+                    img.style.backgroundSize = 'cover';
+                    img.style.backgroundPosition = 'center';
+                    img.style.borderRadius = '4px';
+                }
+                
+                document.getElementById('artCoverPreview').style.display = 'block';
+                document.getElementById('artCoverPlaceholder').style.display = 'none';
+                showToast('Обкладинку завантажено');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        function setArticleCoverPreview(url) {
+            if (url) {
+                const img = document.getElementById('artCoverImg');
+                img.style.backgroundImage = `url('${url}')`;
+                img.style.height = '180px';
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+                img.style.borderRadius = '4px';
+                document.getElementById('artCoverPreview').style.display = 'block';
+                document.getElementById('artCoverPlaceholder').style.display = 'none';
+                document.getElementById('artImageUrl').value = url;
+            } else {
+                document.getElementById('artCoverPreview').style.display = 'none';
+                document.getElementById('artCoverPlaceholder').style.display = 'block';
+                document.getElementById('artImageUrl').value = '';
             }
         }
 
