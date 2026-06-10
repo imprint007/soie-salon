@@ -4403,7 +4403,9 @@ async function assignRandomMaster() {
             const content = document.getElementById('artContent').value.trim();
             
             if (!title) { alert('Введіть назву'); return; }
-            if (!content) { alert('Введіть текст'); return; }
+            const artType = document.getElementById('artType').value;
+            if (artType === 'article' && !content) { alert('Введіть текст статті'); return; }
+            if (artType === 'instruction' && articleSteps.length === 0) { alert('Додайте хоча б один крок'); return; }
             
             const payload = {
                 id,
