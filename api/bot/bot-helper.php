@@ -148,7 +148,7 @@ function botGetMainMenu() {
             ],
             [
                 ['text' => '💬 Питання майстру', 'callback_data' => 'ask_master'],
-                ['text' => '📋 Мої записи', 'web_app' => ['url' => $webAppUrl . '/manage.html']],
+                ['text' => '📋 Мої записи', 'callback_data' => 'my_bookings'],
             ],
             [
                 ['text' => '📖 Догляд за волоссям', 'callback_data' => 'articles'],

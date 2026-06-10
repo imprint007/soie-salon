@@ -66,7 +66,10 @@ function handleMessage($message) {
         handleQuestionText($chatId, $text, $botUser, $masterId);
         return;
     }
-
+    if ($state === 'awaiting_phone') {
+        handlePhoneInput($chatId, $text, $botUser);
+        return;
+    }
     botSendMessage($chatId, "Оберіть дію з меню 👇", botGetMainMenu());
 }
 
@@ -106,6 +109,23 @@ function handleCallback($callback) {
         showArticle($chatId, $messageId, (int)str_replace('article_', '', $data));
         return;
     }
+    if ($data === 'change_phone') {
+        changePhone($chatId, $messageId);
+        return;
+    }
+    if ($data === 'my_bookings') {
+        startMyBookings($chatId, $messageId);
+        return;
+    }
+    if ($data === 'send_phone') {
+        requestPhone($chatId, $messageId);
+        return;
+    }
+    if (strpos($data, 'manage_') === 0) {
+        $code = str_replace('manage_', '', $data);
+        showBookingManage($chatId, $messageId, $code);
+        return;
+    }
     if ($data === 'contacts') {
         showContacts($chatId, $messageId);
         return;
@@ -114,6 +134,17 @@ function handleCallback($callback) {
         showAbout($chatId, $messageId);
         return;
     }
+}
+
+function changePhone($chatId, $messageId) {
+    $pdo = botGetDb();
+    $pdo->prepare("UPDATE bot_users SET phone = NULL WHERE telegram_user_id = ?")->execute([$chatId]);
+    setUserState($chatId, 'awaiting_phone');
+    
+    safeBotEdit($chatId, $messageId,
+        "📋 <b>Мої записи</b>\n\nВведіть номер телефону яким ви записувались:\n\nНаприклад: <code>+380671234567</code>",
+        ['inline_keyboard' => [[['text' => '✕ Скасувати', 'callback_data' => 'main_menu']]]]
+    );
 }
 
 // ============================================
@@ -435,4 +466,116 @@ function setUserState($chatId, $state) {
     } catch (Throwable $e) {
         error_log('setUserState error: ' . $e->getMessage());
     }
+}
+
+// ============================================
+// МОЇ ЗАПИСИ
+// ============================================
+function startMyBookings($chatId, $messageId) {
+    $pdo = botGetDb();
+    
+    // Перевіряємо чи є збережений телефон
+    $stmt = $pdo->prepare("SELECT phone FROM bot_users WHERE telegram_user_id = ?");
+    $stmt->execute([$chatId]);
+    $phone = $stmt->fetchColumn();
+    
+    if ($phone) {
+        // Телефон є — одразу шукаємо броні
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        showUserBookings($chatId, $phone);
+    } else {
+        // Просимо телефон
+        setUserState($chatId, 'awaiting_phone');
+        safeBotEdit($chatId, $messageId,
+            "📋 <b>Мої записи</b>\n\nЩоб знайти ваші бронювання, напишіть номер телефону яким ви записувались.\n\nНаприклад: <code>+380671234567</code>",
+            ['inline_keyboard' => [[['text' => '✕ Скасувати', 'callback_data' => 'main_menu']]]]
+        );
+    }
+}
+
+function handlePhoneInput($chatId, $text, $botUser) {
+    $phone = preg_replace('/[^0-9+]/', '', $text);
+    
+    if (strlen($phone) < 10) {
+        botSendMessage($chatId, "❌ Невірний формат. Введіть номер телефону, наприклад:\n<code>+380671234567</code>",
+            ['inline_keyboard' => [[['text' => '✕ Скасувати', 'callback_data' => 'main_menu']]]]
+        );
+        return;
+    }
+    
+    setUserState($chatId, '');
+    
+    // Зберігаємо телефон для наступних разів
+    $pdo = botGetDb();
+    $pdo->prepare("UPDATE bot_users SET phone = ? WHERE telegram_user_id = ?")->execute([$phone, $chatId]);
+    
+    // Привʼязуємо до клієнта якщо є
+    $clientStmt = $pdo->prepare("SELECT id FROM clients WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '(', ''), ')', ''), '-', '') LIKE ?");
+    $clientStmt->execute(['%' . substr($phone, -10) . '%']);
+    $clientId = $clientStmt->fetchColumn();
+    if ($clientId) {
+        $pdo->prepare("UPDATE bot_users SET client_id = ? WHERE telegram_user_id = ?")->execute([$clientId, $chatId]);
+    }
+    
+    showUserBookings($chatId, $phone);
+}
+
+function showUserBookings($chatId, $phone) {
+    $pdo = botGetDb();
+    $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+    $last10 = substr($cleanPhone, -10);
+    
+    // Активні броні
+    $stmt = $pdo->prepare("
+        SELECT b.booking_code, b.booking_date, b.booking_time, b.total_price, b.status,
+               s.name AS service_name, m.name AS master_name
+        FROM bookings b
+        LEFT JOIN services s ON s.id = b.service_id
+        LEFT JOIN masters m ON m.id = b.master_id
+        WHERE REPLACE(REPLACE(REPLACE(REPLACE(b.client_phone, ' ', ''), '(', ''), ')', ''), '-', '') LIKE ?
+        AND b.status IN ('pending', 'confirmed')
+        ORDER BY b.booking_date ASC, b.booking_time ASC
+        LIMIT 10
+    ");
+    $stmt->execute(['%' . $last10 . '%']);
+    $bookings = $stmt->fetchAll();
+    
+    if (empty($bookings)) {
+        botSendMessage($chatId,
+            "📋 <b>Мої записи</b>\n\nАктивних бронювань не знайдено для номера <code>{$phone}</code>.\n\nМожливо ви записувались з іншого номера, або запис вже виконано.",
+            ['inline_keyboard' => [
+                [['text' => '🔄 Ввести інший номер', 'callback_data' => 'change_phone']],
+                [['text' => '← Головне меню', 'callback_data' => 'main_menu']],
+            ]]
+        );
+        return;
+    }
+    
+    $webAppUrl = botGetSetting('client_bot_webapp_url', 'https://curls.servicehelp.com.ua');
+    $dayNames = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+    $monthNames = ['','січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
+    
+    $text = "📋 <b>Ваші активні записи:</b>\n\n";
+    $keyboard = [];
+    
+    foreach ($bookings as $b) {
+        $date = new DateTime($b['booking_date']);
+        $dayName = $dayNames[(int)$date->format('w')];
+        $day = (int)$date->format('d');
+        $month = $monthNames[(int)$date->format('n')];
+        $time = substr($b['booking_time'], 0, 5);
+        $statusIcon = $b['status'] === 'confirmed' ? '✅' : '⏳';
+        
+        $text .= "{$statusIcon} <b>{$dayName}, {$day} {$month}</b> о {$time}\n";
+        $text .= "    {$b['service_name']} · {$b['master_name']}\n";
+        $text .= "    💰 {$b['total_price']} ₴\n\n";
+        
+        $manageUrl = $webAppUrl . '/manage.html?code=' . $b['booking_code'];
+        $keyboard[] = [['text' => "✎ {$day} {$month} · {$b['service_name']}", 'web_app' => ['url' => $manageUrl]]];
+    }
+    
+    $keyboard[] = [['text' => '🔄 Інший номер', 'callback_data' => 'change_phone']];
+    $keyboard[] = [['text' => '← Головне меню', 'callback_data' => 'main_menu']];
+    
+    botSendMessage($chatId, $text, ['inline_keyboard' => $keyboard]);
 }
