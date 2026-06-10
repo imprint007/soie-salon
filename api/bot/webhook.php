@@ -358,33 +358,6 @@ function showArticle($chatId, $messageId, $articleId) {
     botSendMessage($chatId, "—", $backKeyboard);
 }
 
-function showArticle($chatId, $messageId, $articleId) {
-    $pdo = botGetDb();
-    $stmt = $pdo->prepare("SELECT * FROM bot_articles WHERE id = ? AND is_published = 1");
-    $stmt->execute([$articleId]);
-    $article = $stmt->fetch();
-    
-    if (!$article) {
-        botEditMessage($chatId, $messageId, "Стаття не знайдена 😔", [
-            'inline_keyboard' => [[['text' => '← До статей', 'callback_data' => 'articles']]]
-        ]);
-        return;
-    }
-    
-    $text = "📖 <b>{$article['title']}</b>\n\n{$article['content']}";
-    
-    if (mb_strlen($text) > 4000) {
-        $text = mb_substr($text, 0, 3990) . '...';
-    }
-    
-    botEditMessage($chatId, $messageId, $text, [
-        'inline_keyboard' => [
-            [['text' => '← До статей', 'callback_data' => 'articles']],
-            [['text' => '🏠 Головне меню', 'callback_data' => 'main_menu']],
-        ]
-    ]);
-}
-
 // ============================================
 // КОНТАКТИ / ПРО САЛОН
 // ============================================
