@@ -4387,7 +4387,7 @@ async function assignRandomMaster() {
                 id,
                 title,
                 image_url: artImageUploader ? artImageUploader.getValue() : '',
-                content,
+                content: document.getElementById('artContent').value.trim(),
                 excerpt: document.getElementById('artExcerpt').value.trim(),
                 is_published: document.getElementById('artPublished').checked ? 1 : 0,
                 sort_order: parseInt(document.getElementById('artSort').value) || 0,
