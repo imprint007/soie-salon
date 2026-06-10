@@ -1738,51 +1738,73 @@ function toggleArticleType() {
     document.getElementById('artModeInstruction').style.display = type === 'instruction' ? 'block' : 'none';
 }
 
-// Кроки інструкції
-function renderInstructionSteps() {
-    const list = document.getElementById('artStepsList');
-    
-    if (articleSteps.length === 0) {
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;border:1px dashed var(--line);border-radius:4px;">Додайте перший крок</div>';
-        return;
-    }
-    
-    list.innerHTML = articleSteps.map((step, i) => `
-        <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:10px;position:relative;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--beige);">Крок ${i + 1}</div>
-                <div style="display:flex;gap:4px;">
-                    ${i > 0 ? `<button type="button" onclick="moveStep(${i},-1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↑</button>` : ''}
-                    ${i < articleSteps.length - 1 ? `<button type="button" onclick="moveStep(${i},1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↓</button>` : ''}
-                    <button type="button" onclick="removeStep(${i})" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:12px;">✕</button>
+    // Кроки інструкції
+        function renderInstructionSteps() {
+            const list = document.getElementById('artStepsList');
+            
+            if (articleSteps.length === 0) {
+                list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;border:1px dashed var(--line);border-radius:4px;">Додайте перший крок</div>';
+                return;
+            }
+            
+            list.innerHTML = articleSteps.map((step, i) => `
+                <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--beige);">Крок ${i + 1}</div>
+                        <div style="display:flex;gap:4px;">
+                            ${i > 0 ? `<button type="button" onclick="moveStep(${i},-1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↑</button>` : ''}
+                            ${i < articleSteps.length - 1 ? `<button type="button" onclick="moveStep(${i},1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↓</button>` : ''}
+                            <button type="button" onclick="removeStep(${i})" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:12px;">✕</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Заголовок кроку</label>
+                        <input type="text" class="step-title" data-step="${i}" value="${escapeHtml(step.title || '')}" placeholder="Наприклад: Нанесіть склад на волосся">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Опис</label>
+                        <textarea class="step-text" data-step="${i}" rows="3" placeholder="Детальний опис кроку...">${escapeHtml(step.text || '')}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Фото кроку</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            ${step.photo ? `
+                                <div style="width:80px;height:60px;border-radius:4px;background:center/cover url('${escapeHtml(step.photo)}');border:1px solid var(--line);flex-shrink:0;"></div>
+                                <button type="button" onclick="clearStepPhoto(${i})" style="padding:4px 10px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:11px;">✕</button>
+                            ` : `
+                                <button type="button" onclick="uploadStepPhoto(${i})" style="padding:8px 16px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:4px;font-size:12px;">📤 Завантажити</button>
+                            `}
+                            <input type="file" id="stepPhotoInput${i}" accept="image/*" style="display:none;" onchange="handleStepPhotoUpload(${i}, this.files[0])">
+                        </div>
+                    </div>
                 </div>
-            </div>
+            `).join('');
             
-            <div class="form-group">
-                <label>Заголовок кроку</label>
-                <input type="text" value="${escapeHtml(step.title || '')}" onchange="articleSteps[${i}].title=this.value" placeholder="Наприклад: Нанесіть склад на волосся">
-            </div>
+            // Навішуємо обробники на поля
+            list.querySelectorAll('.step-title').forEach(input => {
+                input.addEventListener('input', function() {
+                    const idx = parseInt(this.dataset.step);
+                    if (articleSteps[idx]) articleSteps[idx].title = this.value;
+                });
+            });
             
-            <div class="form-group">
-                <label>Опис</label>
-                <textarea rows="3" onchange="articleSteps[${i}].text=this.value" placeholder="Детальний опис кроку...">${escapeHtml(step.text || '')}</textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Фото кроку</label>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    ${step.photo ? `
-                        <div style="width:80px;height:60px;border-radius:4px;background:center/cover url('${escapeHtml(step.photo)}');border:1px solid var(--line);flex-shrink:0;"></div>
-                        <button type="button" onclick="articleSteps[${i}].photo='';renderInstructionSteps()" style="padding:4px 10px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:11px;">✕</button>
-                    ` : `
-                        <button type="button" onclick="uploadStepPhoto(${i})" style="padding:8px 16px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:4px;font-size:12px;">📤 Завантажити фото</button>
-                    `}
-                    <input type="file" id="stepPhotoInput${i}" accept="image/*" style="display:none;" onchange="handleStepPhotoUpload(${i}, this.files[0])">
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
+            list.querySelectorAll('.step-text').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    const idx = parseInt(this.dataset.step);
+                    if (articleSteps[idx]) articleSteps[idx].text = this.value;
+                });
+            });
+        }
+
+        function clearStepPhoto(index) {
+            if (articleSteps[index]) {
+                articleSteps[index].photo = '';
+                renderInstructionSteps();
+            }
+        }
 
 function addInstructionStep() {
     articleSteps.push({ title: '', text: '', photo: '' });
