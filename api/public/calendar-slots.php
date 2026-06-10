@@ -105,6 +105,98 @@ try {
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    // ============================================
+    // ПЕРЕВІРКА ГРАФІКА МАСТЕРІВ
+    // ============================================
+    $weekday = (int)$dateObj->format('w'); // 0=НД, 1=ПН, ..., 6=СБ
+    
+    // Завантажуємо розклади всіх мастерів на цей день тижня
+    $masterIds = array_column($masters, 'id');
+    $masterIdsStr = implode(',', array_map('intval', $masterIds));
+    
+    // Постійний графік
+    $scheduleMap = []; // master_id => {is_working, start_time, end_time}
+    if (!empty($masterIdsStr)) {
+        $schStmt = $pdo->query("SELECT master_id, weekday, is_working, start_time, end_time 
+            FROM master_schedule 
+            WHERE master_id IN ($masterIdsStr) AND weekday = $weekday");
+        foreach ($schStmt->fetchAll() as $sch) {
+            $scheduleMap[(int)$sch['master_id']] = $sch;
+        }
+    }
+    
+    // Виключення на конкретну дату (відпустка, лікарняний, доп. робочий день)
+    $exceptionMap = []; // master_id => {exception_type, start_time, end_time}
+    if (!empty($masterIdsStr)) {
+        $exStmt = $pdo->prepare("SELECT master_id, exception_type, start_time, end_time 
+            FROM master_schedule_exceptions 
+            WHERE master_id IN ($masterIdsStr) AND exception_date = ?");
+        $exStmt->execute([$date]);
+        foreach ($exStmt->fetchAll() as $ex) {
+            $exceptionMap[(int)$ex['master_id']] = $ex;
+        }
+    }
+    
+    // Фільтруємо мастерів та зберігаємо їх робочий час
+    $masterWorkHours = []; // master_id => {start, end} в хвилинах
+    $filteredMasters = [];
+    
+    foreach ($masters as $m) {
+        $mid = (int)$m['id'];
+        
+        // Чи є виключення на цю дату?
+        if (isset($exceptionMap[$mid])) {
+            $ex = $exceptionMap[$mid];
+            
+            // Відпустка, лікарняний, вихідний — мастер НЕ працює
+            if (in_array($ex['exception_type'], ['vacation', 'sick', 'day_off'])) {
+                continue; // Пропускаємо мастера
+            }
+            
+            // Додатковий робочий день або інший час — працює з вказаним часом
+            if (in_array($ex['exception_type'], ['extra_work', 'custom_hours'])) {
+                $mStart = $ex['start_time'] ? timeToMinutes($ex['start_time']) : $openMinutes;
+                $mEnd = $ex['end_time'] ? timeToMinutes($ex['end_time']) : $closeMinutes;
+                $masterWorkHours[$mid] = ['start' => $mStart, 'end' => $mEnd];
+                $filteredMasters[] = $m;
+                continue;
+            }
+        }
+        
+        // Перевіряємо постійний графік
+        if (isset($scheduleMap[$mid])) {
+            $sch = $scheduleMap[$mid];
+            
+            if (!$sch['is_working']) {
+                continue; // Вихідний — пропускаємо
+            }
+            
+            // Працює — беремо його робочі години
+            $mStart = $sch['start_time'] ? timeToMinutes($sch['start_time']) : $openMinutes;
+            $mEnd = $sch['end_time'] ? timeToMinutes($sch['end_time']) : $closeMinutes;
+            $masterWorkHours[$mid] = ['start' => $mStart, 'end' => $mEnd];
+            $filteredMasters[] = $m;
+        } else {
+            // Графік не задано — працює за загальним розкладом салону
+            $masterWorkHours[$mid] = ['start' => $openMinutes, 'end' => $closeMinutes];
+            $filteredMasters[] = $m;
+        }
+    }
+    
+    // Замінюємо масив мастерів на відфільтрований
+    $masters = $filteredMasters;
+    
+    if (empty($masters)) {
+        echo json_encode([
+            'success' => true,
+            'date' => $date,
+            'closed' => false,
+            'message' => 'На цю дату немає доступних майстрів',
+            'slots' => []
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     
     // Існуючі брони на цей день
     $stmt = $pdo->prepare("
@@ -157,11 +249,22 @@ try {
             $busy = $busyMap[$mid] ?? [];
             
             $isFree = true;
-            foreach ($busy as $b) {
-                // Чи перетинається слот з зайнятим часом?
-                if ($current < $b['end'] && $slotEnd > $b['start']) {
+            
+            // Перевірка робочого часу мастера
+            if (isset($masterWorkHours[$mid])) {
+                $mh = $masterWorkHours[$mid];
+                if ($current < $mh['start'] || $slotEnd > $mh['end']) {
                     $isFree = false;
-                    break;
+                }
+            }
+            
+            // Перевірка конфліктів з іншими бронями
+            if ($isFree) {
+                foreach ($busy as $b) {
+                    if ($current < $b['end'] && $slotEnd > $b['start']) {
+                        $isFree = false;
+                        break;
+                    }
                 }
             }
             
