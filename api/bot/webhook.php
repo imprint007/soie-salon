@@ -134,6 +134,10 @@ function handleCallback($callback) {
         showAbout($chatId, $messageId);
         return;
     }
+    if (strpos($data, 'confirm_visit_') === 0) {
+        botAnswerCallback($callbackId, '✅ Дякуємо! Чекаємо на вас!');
+        return;
+    }
 }
 
 function changePhone($chatId, $messageId) {

@@ -114,6 +114,44 @@ if ($depositRequired === '1') {
 
     $bookingId = (int)$pdo->lastInsertId();
     
+// ============================================
+// НАГАДУВАННЯ В TELEGRAM (24г і 2г до візиту)
+// ============================================
+try {
+    $bookingDateTime = new DateTime("{$bookingDate} {$bookingTime}", new DateTimeZone('Europe/Kyiv'));
+    
+    // Нагадування за 24 години
+    $remind24 = (clone $bookingDateTime)->modify('-24 hours');
+    // Нагадування за 2 години
+    $remind2 = (clone $bookingDateTime)->modify('-2 hours');
+    
+    $now = new DateTime('now', new DateTimeZone('Europe/Kyiv'));
+    
+    // Знаходимо bot_user по телефону
+    $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+    $last10 = substr($cleanPhone, -10);
+    
+    $buStmt = $pdo->prepare("SELECT id, telegram_user_id FROM bot_users WHERE REPLACE(REPLACE(phone, ' ', ''), '-', '') LIKE ? LIMIT 1");
+    $buStmt->execute(['%' . $last10 . '%']);
+    $botUser = $buStmt->fetch();
+    
+    if ($botUser && $botUser['telegram_user_id']) {
+        $remStmt = $pdo->prepare("INSERT INTO bot_reminders (booking_id, bot_user_id, telegram_user_id, remind_at, reminder_type) VALUES (?, ?, ?, ?, ?)");
+        
+        // 24г — тільки якщо ще є час
+        if ($remind24 > $now) {
+            $remStmt->execute([$bookingId, $botUser['id'], $botUser['telegram_user_id'], $remind24->format('Y-m-d H:i:s'), '24h']);
+        }
+        
+        // 2г — тільки якщо ще є час
+        if ($remind2 > $now) {
+            $remStmt->execute([$bookingId, $botUser['id'], $botUser['telegram_user_id'], $remind2->format('Y-m-d H:i:s'), '2h']);
+        }
+    }
+} catch (Throwable $remErr) {
+    error_log('Reminder create error: ' . $remErr->getMessage());
+}
+
     // ============================================
 // GOOGLE CALENDAR SYNC
 // ============================================

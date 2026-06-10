@@ -66,6 +66,12 @@ try {
     
     // Відміняємо
     $pdo->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = ?")->execute([$booking['id']]);
+    // Видаляємо нагадування з Telegram
+    try {
+        $pdo->prepare("DELETE FROM bot_reminders WHERE booking_id = ? AND is_sent = 0")->execute([$booking['id']]);
+    } catch (Throwable $remErr) {
+        error_log('Reminder cancel error: ' . $remErr->getMessage());
+    }
     
     // Видаляємо з Google Calendar
     try {
