@@ -135,7 +135,10 @@ function handleCallback($callback) {
         return;
     }
     if (strpos($data, 'confirm_visit_') === 0) {
-        botAnswerCallback($callbackId, '✅ Дякуємо! Чекаємо на вас!');
+        botEditMessage($chatId, $messageId, 
+            "✅ <b>Дякуємо!</b> Чекаємо на вас вчасно! 💫\n\n<i>Гарного дня!</i>",
+            ['inline_keyboard' => [[['text' => '🏠 Головне меню', 'callback_data' => 'main_menu']]]]
+        );
         return;
     }
 }
