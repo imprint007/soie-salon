@@ -16,15 +16,17 @@ try {
     $excerpt = trim($input['excerpt'] ?? '');
     $isPublished = !empty($input['is_published']) ? 1 : 0;
     $sortOrder = (int)($input['sort_order'] ?? 0);
+    $articleType = $input['article_type'] ?? 'article';
+    $steps = !empty($input['steps']) ? json_encode($input['steps'], JSON_UNESCAPED_UNICODE) : null;
     
     if (empty($title)) jsonError('Введіть назву статті');
     if (empty($content)) jsonError('Введіть текст статті');
     
     if ($id > 0) {
-        $pdo->prepare("UPDATE bot_articles SET title=?, image_url=?, content=?, excerpt=?, is_published=?, sort_order=? WHERE id=?")
+        $pdo->prepare("UPDATE bot_articles SET title=?, image_url=?, content=?, excerpt=?, is_published=?, sort_order=?, article_type=?, steps=? WHERE id=?")
             ->execute([$title, $imageUrl, $content, $excerpt, $isPublished, $sortOrder, $id]);
     } else {
-        $pdo->prepare("INSERT INTO bot_articles (title, image_url, content, excerpt, is_published, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
+        $pdo->prepare("INSERT INTO bot_articles (title, image_url, content, excerpt, is_published, sort_order, article_type, steps) VALUES (?, ?, ?, ?, ?, ?)")
             ->execute([$title, $imageUrl, $content, $excerpt, $isPublished, $sortOrder]);
         $id = (int)$pdo->lastInsertId();
     }

@@ -1626,22 +1626,42 @@ try {
                 </div>
                 
                 <div class="form-group">
+                    <label>Тип контенту</label>
+                    <select id="artType" onchange="toggleArticleType()">
+                        <option value="article">📝 Стаття (текст з фото)</option>
+                        <option value="instruction">📋 Інструкція (кроки з фото)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Короткий опис (для списку)</label>
                     <input type="text" id="artExcerpt" placeholder="1-2 речення що в статті">
                 </div>
                 
-                <div class="form-group">
-                    <label>Текст статті</label>
-                    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:8px;line-height:1.5;">
-                        Підтримуються теги Telegram: <code>&lt;b&gt;жирний&lt;/b&gt;</code>, <code>&lt;i&gt;курсив&lt;/i&gt;</code>, <code>&lt;u&gt;підкреслений&lt;/u&gt;</code>, <code>&lt;a href="url"&gt;посилання&lt;/a&gt;</code>. Абзаци — через порожній рядок.
+                <!-- Режим СТАТТЯ -->
+                <div id="artModeArticle">
+                    <div class="form-group">
+                        <label>Текст статті</label>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:8px;line-height:1.5;">
+                            Підтримуються теги: <code>&lt;b&gt;жирний&lt;/b&gt;</code>, <code>&lt;i&gt;курсив&lt;/i&gt;</code>, <code>&lt;u&gt;підкреслений&lt;/u&gt;</code>. Абзаци — через порожній рядок.
+                        </div>
+                        <div style="display:flex;gap:4px;margin-bottom:8px;">
+                            <button type="button" onclick="insertTag('b')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-weight:bold;">B</button>
+                            <button type="button" onclick="insertTag('i')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-style:italic;">I</button>
+                            <button type="button" onclick="insertTag('u')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;text-decoration:underline;">U</button>
+                            <button type="button" onclick="insertLink()" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--beige);cursor:pointer;border-radius:3px;font-size:12px;">🔗</button>
+                        </div>
+                        <textarea id="artContent" rows="12" placeholder="Текст статті..."></textarea>
                     </div>
-                    <div style="display:flex;gap:4px;margin-bottom:8px;">
-                        <button type="button" onclick="insertTag('b')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-weight:bold;">B</button>
-                        <button type="button" onclick="insertTag('i')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-style:italic;">I</button>
-                        <button type="button" onclick="insertTag('u')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;text-decoration:underline;">U</button>
-                        <button type="button" onclick="insertLink()" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--beige);cursor:pointer;border-radius:3px;font-size:12px;">🔗</button>
+                </div>
+
+                <!-- Режим ІНСТРУКЦІЯ -->
+                <div id="artModeInstruction" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Кроки інструкції</div>
+                        <button type="button" class="admin-cta ghost" onclick="addInstructionStep()" style="padding:6px 14px;font-size:11px;">+ Крок</button>
                     </div>
-                    <textarea id="artContent" rows="12" placeholder="Текст статті..."></textarea>
+                    <div id="artStepsList"></div>
                 </div>
                 
                 <div class="form-row">
@@ -1706,6 +1726,106 @@ try {
 </div>
 
 <script>
+
+// ============================================
+// ТИПИ СТАТЕЙ
+// ============================================
+let articleSteps = [];
+
+function toggleArticleType() {
+    const type = document.getElementById('artType').value;
+    document.getElementById('artModeArticle').style.display = type === 'article' ? 'block' : 'none';
+    document.getElementById('artModeInstruction').style.display = type === 'instruction' ? 'block' : 'none';
+}
+
+// Кроки інструкції
+function renderInstructionSteps() {
+    const list = document.getElementById('artStepsList');
+    
+    if (articleSteps.length === 0) {
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-mute);font-size:12px;border:1px dashed var(--line);border-radius:4px;">Додайте перший крок</div>';
+        return;
+    }
+    
+    list.innerHTML = articleSteps.map((step, i) => `
+        <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:10px;position:relative;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--beige);">Крок ${i + 1}</div>
+                <div style="display:flex;gap:4px;">
+                    ${i > 0 ? `<button type="button" onclick="moveStep(${i},-1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↑</button>` : ''}
+                    ${i < articleSteps.length - 1 ? `<button type="button" onclick="moveStep(${i},1)" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink-mute);cursor:pointer;border-radius:3px;font-size:12px;">↓</button>` : ''}
+                    <button type="button" onclick="removeStep(${i})" style="padding:4px 8px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:12px;">✕</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Заголовок кроку</label>
+                <input type="text" value="${escapeHtml(step.title || '')}" onchange="articleSteps[${i}].title=this.value" placeholder="Наприклад: Нанесіть склад на волосся">
+            </div>
+            
+            <div class="form-group">
+                <label>Опис</label>
+                <textarea rows="3" onchange="articleSteps[${i}].text=this.value" placeholder="Детальний опис кроку...">${escapeHtml(step.text || '')}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Фото кроку</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    ${step.photo ? `
+                        <div style="width:80px;height:60px;border-radius:4px;background:center/cover url('${escapeHtml(step.photo)}');border:1px solid var(--line);flex-shrink:0;"></div>
+                        <button type="button" onclick="articleSteps[${i}].photo='';renderInstructionSteps()" style="padding:4px 10px;background:var(--bg-1);border:1px solid var(--line);color:var(--danger);cursor:pointer;border-radius:3px;font-size:11px;">✕</button>
+                    ` : `
+                        <button type="button" onclick="uploadStepPhoto(${i})" style="padding:8px 16px;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:4px;font-size:12px;">📤 Завантажити фото</button>
+                    `}
+                    <input type="file" id="stepPhotoInput${i}" accept="image/*" style="display:none;" onchange="handleStepPhotoUpload(${i}, this.files[0])">
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function addInstructionStep() {
+    articleSteps.push({ title: '', text: '', photo: '' });
+    renderInstructionSteps();
+}
+
+function removeStep(index) {
+    if (!confirm('Видалити крок?')) return;
+    articleSteps.splice(index, 1);
+    renderInstructionSteps();
+}
+
+function moveStep(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= articleSteps.length) return;
+    [articleSteps[index], articleSteps[newIndex]] = [articleSteps[newIndex], articleSteps[index]];
+    renderInstructionSteps();
+}
+
+function uploadStepPhoto(index) {
+    document.getElementById('stepPhotoInput' + index).click();
+}
+
+async function handleStepPhotoUpload(index, file) {
+    if (!file) return;
+    
+    try {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('prefix', 'articles');
+        
+        const res = await fetch('/api/admin/upload.php', { method: 'POST', credentials: 'include', body: fd });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Помилка');
+        
+        articleSteps[index].photo = data.url || data.path || data.file_url;
+        renderInstructionSteps();
+        showToast('Фото завантажено');
+    } catch (err) {
+        alert('Помилка: ' + err.message);
+    }
+}
+
 
 // ============================================
 // КЛИЕНТСКАЯ ЧАСТЬ — загрузка настроек из базы
@@ -4213,6 +4333,9 @@ async function assignRandomMaster() {
             
             initArtImageUploader('');
             document.getElementById('articleModal').classList.add('show');
+            document.getElementById('artType').value = 'article';
+                articleSteps = [];
+                toggleArticleType();
         }
 
         function editArticle(id) {
@@ -4230,6 +4353,10 @@ async function assignRandomMaster() {
             
             initArtImageUploader(a.image_url || '');
             document.getElementById('articleModal').classList.add('show');
+            document.getElementById('artType').value = a.article_type || 'article';
+                articleSteps = a.steps ? (typeof a.steps === 'string' ? JSON.parse(a.steps) : a.steps) : [];
+                toggleArticleType();
+                if (a.article_type === 'instruction') renderInstructionSteps();
         }
 
         function initArtImageUploader(value) {
@@ -4264,6 +4391,8 @@ async function assignRandomMaster() {
                 excerpt: document.getElementById('artExcerpt').value.trim(),
                 is_published: document.getElementById('artPublished').checked ? 1 : 0,
                 sort_order: parseInt(document.getElementById('artSort').value) || 0,
+                article_type: document.getElementById('artType').value,
+                steps: document.getElementById('artType').value === 'instruction' ? articleSteps : null,
             };
             
             try {
