@@ -370,21 +370,38 @@ function showArticle($chatId, $messageId, $articleId) {
         $imgUrl = $article['image_url'];
         if (strpos($imgUrl, 'http') !== 0) $imgUrl = $webAppUrl . $imgUrl;
         botSendPhoto($chatId, $imgUrl, "📖 <b>{$article['title']}</b>");
+    } else {
+        botSendMessage($chatId, "📖 <b>{$article['title']}</b>");
     }
     
-    $text = $article['content'];
-    if (mb_strlen($text) > 4000) {
-        $parts = str_split($text, 3900);
-        foreach ($parts as $part) {
-            botSendMessage($chatId, $part);
+    // Фото статті
+    $articlePhotos = !empty($article['photos']) ? json_decode($article['photos'], true) : [];
+    if (!empty($articlePhotos)) {
+        foreach ($articlePhotos as $ap) {
+            $pUrl = $ap['url'] ?? '';
+            if (empty($pUrl)) continue;
+            if (strpos($pUrl, 'http') !== 0) $pUrl = $webAppUrl . $pUrl;
+            $caption = $ap['caption'] ?? '';
+            botSendPhoto($chatId, $pUrl, $caption);
             usleep(200000);
         }
-    } else {
-        botSendMessage($chatId, $text);
+    }
+    
+    // Текст
+    $text = $article['content'];
+    if (!empty($text)) {
+        if (mb_strlen($text) > 4000) {
+            $parts = str_split($text, 3900);
+            foreach ($parts as $part) {
+                botSendMessage($chatId, $part);
+                usleep(200000);
+            }
+        } else {
+            botSendMessage($chatId, $text);
+        }
     }
     
     botSendMessage($chatId, "—", $backKeyboard);
-}
 
 // ============================================
 // КОНТАКТИ / ПРО САЛОН

@@ -1653,6 +1653,13 @@ try {
                         </div>
                         <textarea id="artContent" rows="12" placeholder="Текст статті..."></textarea>
                     </div>
+                    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--beige);">Фото до статті</div>
+                        <button type="button" class="admin-cta ghost" onclick="addArticlePhoto()" style="padding:6px 14px;font-size:11px;">+ Фото</button>
+                    </div>
+                    <div id="artPhotosList"></div>
+                </div>
                 </div>
 
                 <!-- Режим ІНСТРУКЦІЯ -->
@@ -1726,6 +1733,68 @@ try {
 </div>
 
 <script>
+
+// ============================================
+// ФОТО В ЗВИЧАЙНИХ СТАТТЯХ
+// ============================================
+let articlePhotos = [];
+
+function renderArticlePhotos() {
+    const list = document.getElementById('artPhotosList');
+    if (!list) return;
+    
+    if (articlePhotos.length === 0) {
+        list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-mute);font-size:12px;border:1px dashed var(--line);border-radius:4px;">Без фото (опціонально)</div>';
+        return;
+    }
+    
+    list.innerHTML = articlePhotos.map((p, i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;margin-bottom:8px;">
+            <div style="width:70px;height:50px;border-radius:4px;background:center/cover url('${escapeHtml(p.url)}');border:1px solid var(--line);flex-shrink:0;"></div>
+            <input type="text" class="art-photo-caption" data-index="${i}" value="${escapeHtml(p.caption || '')}" placeholder="Підпис (опціонально)" style="flex:1;">
+            <button type="button" onclick="removeArticlePhoto(${i})" style="background:none;border:1px solid var(--line);color:var(--danger);padding:6px 8px;cursor:pointer;border-radius:3px;font-size:12px;flex-shrink:0;">✕</button>
+        </div>
+    `).join('');
+    
+    list.querySelectorAll('.art-photo-caption').forEach(input => {
+        input.addEventListener('input', function() {
+            const idx = parseInt(this.dataset.index);
+            if (articlePhotos[idx]) articlePhotos[idx].caption = this.value;
+        });
+    });
+}
+
+function addArticlePhoto() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('prefix', 'articles');
+            
+            const res = await fetch('/api/admin/upload.php', { method: 'POST', credentials: 'include', body: fd });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Помилка');
+            
+            articlePhotos.push({ url: data.url || data.path || data.file_url, caption: '' });
+            renderArticlePhotos();
+            showToast('Фото додано');
+        } catch (err) {
+            alert('Помилка: ' + err.message);
+        }
+    };
+    input.click();
+}
+
+function removeArticlePhoto(index) {
+    articlePhotos.splice(index, 1);
+    renderArticlePhotos();
+}
 
 // ============================================
 // ТИПИ СТАТЕЙ
@@ -4358,6 +4427,8 @@ async function assignRandomMaster() {
             document.getElementById('artType').value = 'article';
                 articleSteps = [];
                 toggleArticleType();
+                articlePhotos = [];
+                renderArticlePhotos();
         }
 
         function editArticle(id) {
@@ -4373,12 +4444,15 @@ async function assignRandomMaster() {
             document.getElementById('artPublished').checked = parseInt(a.is_published) === 1;
             document.getElementById('artDeleteBtn').style.display = 'inline-flex';
             
+            
             initArtImageUploader(a.image_url || '');
             document.getElementById('articleModal').classList.add('show');
             document.getElementById('artType').value = a.article_type || 'article';
                 articleSteps = a.steps ? (typeof a.steps === 'string' ? JSON.parse(a.steps) : a.steps) : [];
                 toggleArticleType();
                 if (a.article_type === 'instruction') renderInstructionSteps();
+                articlePhotos = a.photos ? (typeof a.photos === 'string' ? JSON.parse(a.photos) : a.photos) : [];
+                renderArticlePhotos();
         }
 
         function initArtImageUploader(value) {
@@ -4417,6 +4491,7 @@ async function assignRandomMaster() {
                 sort_order: parseInt(document.getElementById('artSort').value) || 0,
                 article_type: document.getElementById('artType').value,
                 steps: document.getElementById('artType').value === 'instruction' ? articleSteps : null,
+                photos: document.getElementById('artType').value === 'article' ? articlePhotos : null,
             };
             
             try {
