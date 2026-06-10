@@ -356,20 +356,51 @@ function showContacts($chatId, $messageId) {
     $city = botGetSetting('city', '');
     $googleMaps = botGetSetting('google_maps_url', '');
     $instagram = botGetSetting('social_instagram', '');
+    $lat = botGetSetting('salon_latitude', '');
+    $lng = botGetSetting('salon_longitude', '');
+    $salonName = botGetSetting('site_name', 'Unique Curls');
 
-    $text = "📍 <b>Як нас знайти</b>\n\n";
-    if ($address) $text .= "🏠 {$address}" . ($city ? ", {$city}" : '') . "\n";
-    if ($phone) $text .= "📞 {$phone}\n";
-    if ($instagram) $text .= "📸 {$instagram}\n";
-    if (empty($address) && empty($phone)) $text .= "Інформація скоро зʼявиться";
+    // Видаляємо попереднє повідомлення
+    botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
 
-    $kb = [];
-    if ($googleMaps) $kb[] = [['text' => '🗺 Відкрити на карті', 'url' => $googleMaps]];
-    $kb[] = [['text' => '← Назад', 'callback_data' => 'main_menu']];
+    $fullAddress = $address . ($city ? ", {$city}" : '');
 
-    safeBotEdit($chatId, $messageId, $text, ['inline_keyboard' => $kb]);
+    // Кнопки
+    $buttons = [];
+    
+    // Кнопка маршруту в Google Maps
+    if ($lat && $lng) {
+        $routeUrl = "https://www.google.com/maps/dir/?api=1&destination={$lat},{$lng}";
+        $buttons[] = [['text' => '🗺 Прокласти маршрут', 'url' => $routeUrl]];
+    } elseif ($googleMaps) {
+        $buttons[] = [['text' => '🗺 Відкрити на карті', 'url' => $googleMaps]];
+    }
+    
+    if ($phone) {
+        $buttons[] = [['text' => '📞 Зателефонувати', 'url' => 'tel:' . preg_replace('/[^+0-9]/', '', $phone)]];
+    }
+    if ($instagram) {
+        $igUrl = strpos($instagram, 'http') === 0 ? $instagram : "https://instagram.com/{$instagram}";
+        $buttons[] = [['text' => '📸 Instagram', 'url' => $igUrl]];
+    }
+    $buttons[] = [['text' => '← Назад', 'callback_data' => 'main_menu']];
+
+    $keyboard = ['inline_keyboard' => $buttons];
+
+    // Якщо є координати — відправляємо локацію на карті
+    if ($lat && $lng) {
+        botSendVenue($chatId, (float)$lat, (float)$lng, $salonName, $fullAddress ?: 'Салон краси', $keyboard);
+    } else {
+        // Без координат — текстом
+        $text = "📍 <b>Як нас знайти</b>\n\n";
+        if ($fullAddress) $text .= "🏠 {$fullAddress}\n";
+        if ($phone) $text .= "📞 {$phone}\n";
+        if ($instagram) $text .= "📸 {$instagram}\n";
+        if (empty($fullAddress) && empty($phone)) $text .= "Інформація скоро зʼявиться";
+        
+        botSendMessage($chatId, $text, $keyboard);
+    }
 }
-
 function showAbout($chatId, $messageId) {
     $salonName = botGetSetting('site_name', 'Unique Curls');
     $tagline = botGetSetting('hero_tagline', '');

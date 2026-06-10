@@ -8692,6 +8692,19 @@ function getStepForUnit(unit) {
                             <label>Адреса</label>
                             <input type="text" id="set-address" value="${escapeHtml(s('address'))}" placeholder="вул. Хрещатик, 1">
                         </div>
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label>Широта (Latitude)</label>
+                                <input type="text" id="set-salon_latitude" value="${s('salon_latitude')}" placeholder="48.4647">
+                            </div>
+                            <div class="form-group">
+                                <label>Довгота (Longitude)</label>
+                                <input type="text" id="set-salon_longitude" value="${s('salon_longitude')}" placeholder="35.0462">
+                            </div>
+                        </div>
+                        <div style="font-size:11px;color:var(--ink-mute);margin-top:-10px;margin-bottom:14px;line-height:1.5;">
+                            Як знайти: відкрийте <a href="https://maps.google.com" target="_blank" style="color:var(--beige);">Google Maps</a> → натисніть правою кнопкою на салон → скопіюйте координати.
+                        </div>
                         <div class="form-group">
                             <label>Посилання на Google Maps</label>
                             <input type="text" id="set-google_maps_url" value="${escapeHtml(s('google_maps_url'))}" placeholder="https://maps.google.com/...">

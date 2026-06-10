@@ -160,3 +160,25 @@ function botGetMainMenu() {
         ]
     ];
 }
+
+function botSendVenue($chatId, $lat, $lng, $title, $address, $keyboard = null) {
+    $params = [
+        'chat_id' => $chatId,
+        'latitude' => $lat,
+        'longitude' => $lng,
+        'title' => $title,
+        'address' => $address,
+    ];
+    if ($keyboard) $params['reply_markup'] = $keyboard;
+    return botApiCall('sendVenue', $params);
+}
+
+function botSendLocation($chatId, $lat, $lng, $keyboard = null) {
+    $params = [
+        'chat_id' => $chatId,
+        'latitude' => $lat,
+        'longitude' => $lng,
+    ];
+    if ($keyboard) $params['reply_markup'] = $keyboard;
+    return botApiCall('sendLocation', $params);
+}
