@@ -88,9 +88,9 @@ try {
     } else {
         // INSERT — пишемо всі поля
         $pdo->prepare("INSERT INTO masters 
-                (name, role, phone, email, bio, photo_url, 
-                 experience_years, is_active, username, password_hash, google_calendar_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        (name, role, phone, email, bio, photo_url, 
+         experience_years, is_active, username, password_hash, google_calendar_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
             ->execute([
                 $name, $role, $phone, $email, $bio, $photo_url, 
                 $experience_years, $is_active, $username, $passwordHash, 
