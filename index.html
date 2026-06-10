@@ -10532,10 +10532,15 @@ setInterval(forceDarkInputs, 800);
 </a>
 
 <script>
-// Ховаємо кнопку в адмінці
-if (document.querySelector('.admin-wrap')) {
-    document.getElementById('telegramFloat').style.display = 'none';
+// Показуємо кнопку тільки на публічній сторінці
+function updateTelegramButton() {
+    const btn = document.getElementById('telegramFloat');
+    if (!btn) return;
+    const adminVisible = document.querySelector('.admin-wrap.show');
+    btn.style.display = adminVisible ? 'none' : 'flex';
 }
+updateTelegramButton();
+setInterval(updateTelegramButton, 1000);
 </script>
 
 </body>
