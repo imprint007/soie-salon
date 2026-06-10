@@ -88,7 +88,11 @@ function handleCallback($callback) {
     botAnswerCallback($callbackId);
     
     if ($data === 'main_menu') {
-        botEditMessage($chatId, $messageId, getWelcomeText($user), botGetMainMenu());
+        $result = botEditMessage($chatId, $messageId, getWelcomeText($user), botGetMainMenu());
+        if (!$result || empty($result['ok'])) {
+            botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+            botSendMessage($chatId, getWelcomeText($user), botGetMainMenu());
+        }
         return;
     }
     
@@ -169,24 +173,24 @@ function showMastersList($chatId, $messageId) {
     $pdo = botGetDb();
     $masters = $pdo->query("SELECT id, name, role FROM masters WHERE is_active = 1")->fetchAll();
     
-    if (empty($masters)) {
-        botEditMessage($chatId, $messageId, "На жаль, майстрів поки немає 😔", [
-            'inline_keyboard' => [[['text' => '← Назад', 'callback_data' => 'main_menu']]]
-        ]);
-        return;
-    }
-    
     $keyboard = [];
-    foreach ($masters as $m) {
-        $keyboard[] = [['text' => "💇 {$m['name']} · {$m['role']}", 'callback_data' => 'ask_to_' . $m['id']]];
+    if (!empty($masters)) {
+        foreach ($masters as $m) {
+            $keyboard[] = [['text' => "💇 {$m['name']} · {$m['role']}", 'callback_data' => 'ask_to_' . $m['id']]];
+        }
+        $keyboard[] = [['text' => '📢 Запитати всіх', 'callback_data' => 'ask_all']];
     }
-    $keyboard[] = [['text' => '📢 Запитати всіх', 'callback_data' => 'ask_all']];
     $keyboard[] = [['text' => '← Назад', 'callback_data' => 'main_menu']];
     
-    botEditMessage($chatId, $messageId, 
-        "💬 <b>Оберіть майстра</b>\n\nКому хочете задати питання?",
-        ['inline_keyboard' => $keyboard]
-    );
+    $text = empty($masters) 
+        ? "На жаль, майстрів поки немає 😔" 
+        : "💬 <b>Оберіть майстра</b>\n\nКому хочете задати питання?";
+    
+    $result = botEditMessage($chatId, $messageId, $text, ['inline_keyboard' => $keyboard]);
+    if (!$result || empty($result['ok'])) {
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId, $text, ['inline_keyboard' => $keyboard]);
+    }
 }
 
 function startQuestion($chatId, $messageId, $masterId) {
@@ -201,10 +205,17 @@ function startQuestion($chatId, $messageId, $masterId) {
         $masterName = $stmt->fetchColumn() ?: 'майстру';
     }
     
-    botEditMessage($chatId, $messageId,
+    $result = botEditMessage($chatId, $messageId,
         "✏️ <b>Напишіть ваше питання</b>\n\nВаше повідомлення буде надіслано {$masterName}.\n\nПросто напишіть текст у відповідь 👇",
         ['inline_keyboard' => [[['text' => '✕ Скасувати', 'callback_data' => 'main_menu']]]]
     );
+    if (!$result || empty($result['ok'])) {
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId,
+            "✏️ <b>Напишіть ваше питання</b>\n\nВаше повідомлення буде надіслано {$masterName}.\n\nПросто напишіть текст у відповідь 👇",
+            ['inline_keyboard' => [[['text' => '✕ Скасувати', 'callback_data' => 'main_menu']]]]
+        );
+    }
 }
 
 function handleQuestionText($chatId, $text, $botUser, $masterId = null) {
@@ -216,7 +227,7 @@ function handleQuestionText($chatId, $text, $botUser, $masterId = null) {
     setUserState($chatId, '');
     
     $userName = trim(($botUser['first_name'] ?? '') . ' ' . ($botUser['last_name'] ?? ''));
-    $userLink = $botUser['telegram_username'] ? "@{$botUser['telegram_username']}" : $userName;
+    $userLink = !empty($botUser['telegram_username']) ? "@{$botUser['telegram_username']}" : $userName;
     
     $masterName = 'всім';
     $msg = "💬 <b>Питання від клієнта</b>\n\n" .
@@ -243,7 +254,6 @@ function handleQuestionText($chatId, $text, $botUser, $masterId = null) {
         }
     }
     
-    // Також в загальний чат
     $notifyToken = botGetSetting('telegram_bot_token', '');
     $notifyChatId = botGetSetting('telegram_chat_id', '');
     if ($notifyToken && $notifyChatId) {
@@ -273,6 +283,29 @@ function handleQuestionText($chatId, $text, $botUser, $masterId = null) {
 // ============================================
 // СТАТТІ
 // ============================================
+function showArticlesList($chatId, $messageId) {
+    $pdo = botGetDb();
+    $articles = $pdo->query("SELECT id, title, excerpt FROM bot_articles WHERE is_published = 1 ORDER BY sort_order, id DESC")->fetchAll();
+    
+    $keyboard = [];
+    if (!empty($articles)) {
+        foreach ($articles as $a) {
+            $keyboard[] = [['text' => "📄 {$a['title']}", 'callback_data' => 'article_' . $a['id']]];
+        }
+    }
+    $keyboard[] = [['text' => '← Назад', 'callback_data' => 'main_menu']];
+    
+    $text = empty($articles)
+        ? "📖 Статті скоро зʼявляться! Слідкуйте за оновленнями."
+        : "📖 <b>Догляд за волоссям</b>\n\nОберіть статтю:";
+    
+    $result = botEditMessage($chatId, $messageId, $text, ['inline_keyboard' => $keyboard]);
+    if (!$result || empty($result['ok'])) {
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId, $text, ['inline_keyboard' => $keyboard]);
+    }
+}
+
 function showArticle($chatId, $messageId, $articleId) {
     $pdo = botGetDb();
     $stmt = $pdo->prepare("SELECT * FROM bot_articles WHERE id = ? AND is_published = 1");
@@ -280,7 +313,8 @@ function showArticle($chatId, $messageId, $articleId) {
     $article = $stmt->fetch();
     
     if (!$article) {
-        botEditMessage($chatId, $messageId, "Стаття не знайдена 😔", [
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId, "Стаття не знайдена 😔", [
             'inline_keyboard' => [[['text' => '← До статей', 'callback_data' => 'articles']]]
         ]);
         return;
@@ -293,57 +327,51 @@ function showArticle($chatId, $messageId, $articleId) {
         ]
     ];
     
-    // Інструкція — по кроках
+    // Видаляємо попереднє повідомлення
+    botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+    
+    $webAppUrl = botGetSetting('client_bot_webapp_url', 'https://curls.servicehelp.com.ua');
+    
+    // ІНСТРУКЦІЯ — по кроках
     if ($article['article_type'] === 'instruction' && !empty($article['steps'])) {
         $steps = json_decode($article['steps'], true) ?: [];
         
-        // Видаляємо попереднє повідомлення
-        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
-        
-        // Обкладинка
         if (!empty($article['image_url'])) {
-            botSendPhoto($chatId, $article['image_url'], "📋 <b>{$article['title']}</b>\n\n{$article['excerpt']}");
+            $imgUrl = $article['image_url'];
+            if (strpos($imgUrl, 'http') !== 0) $imgUrl = $webAppUrl . $imgUrl;
+            botSendPhoto($chatId, $imgUrl, "📋 <b>{$article['title']}</b>" . ($article['excerpt'] ? "\n\n{$article['excerpt']}" : ''));
         } else {
-            botSendMessage($chatId, "📋 <b>{$article['title']}</b>\n\n{$article['excerpt']}");
+            botSendMessage($chatId, "📋 <b>{$article['title']}</b>" . ($article['excerpt'] ? "\n\n{$article['excerpt']}" : ''));
         }
         
-        // Кожен крок
+        $stepCount = count($steps);
         foreach ($steps as $i => $step) {
             $stepNum = $i + 1;
-            $stepText = "<b>Крок {$stepNum}. {$step['title']}</b>\n\n{$step['text']}";
+            $stepText = "<b>Крок {$stepNum} з {$stepCount}. {$step['title']}</b>";
+            if (!empty($step['text'])) $stepText .= "\n\n{$step['text']}";
             
             if (!empty($step['photo'])) {
                 $photoUrl = $step['photo'];
-                if (strpos($photoUrl, 'http') !== 0) {
-                    $photoUrl = botGetSetting('client_bot_webapp_url', 'https://curls.servicehelp.com.ua') . $photoUrl;
-                }
+                if (strpos($photoUrl, 'http') !== 0) $photoUrl = $webAppUrl . $photoUrl;
                 botSendPhoto($chatId, $photoUrl, $stepText);
             } else {
                 botSendMessage($chatId, $stepText);
             }
             
-            usleep(300000); // 0.3 сек між повідомленнями
+            usleep(300000);
         }
         
-        // Кнопки навігації
-        botSendMessage($chatId, "✅ <b>Готово!</b> Всього {$stepNum} кроків.", $backKeyboard);
+        botSendMessage($chatId, "✅ <b>Готово!</b> Всього {$stepCount} кроків.", $backKeyboard);
         return;
     }
     
-    // Звичайна стаття
-    // Видаляємо попереднє повідомлення
-    botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
-    
-    // Фото обкладинки
+    // ЗВИЧАЙНА СТАТТЯ
     if (!empty($article['image_url'])) {
-        $photoUrl = $article['image_url'];
-        if (strpos($photoUrl, 'http') !== 0) {
-            $photoUrl = botGetSetting('client_bot_webapp_url', 'https://curls.servicehelp.com.ua') . $photoUrl;
-        }
-        botSendPhoto($chatId, $photoUrl, "📖 <b>{$article['title']}</b>");
+        $imgUrl = $article['image_url'];
+        if (strpos($imgUrl, 'http') !== 0) $imgUrl = $webAppUrl . $imgUrl;
+        botSendPhoto($chatId, $imgUrl, "📖 <b>{$article['title']}</b>");
     }
     
-    // Текст (розбиваємо на частини якщо довгий)
     $text = $article['content'];
     if (mb_strlen($text) > 4000) {
         $parts = str_split($text, 3900);
@@ -372,6 +400,7 @@ function showContacts($chatId, $messageId) {
     if ($address) $text .= "🏠 {$address}" . ($city ? ", {$city}" : '') . "\n";
     if ($phone) $text .= "📞 {$phone}\n";
     if ($instagram) $text .= "📸 {$instagram}\n";
+    if (empty($address) && empty($phone)) $text .= "Інформація скоро зʼявиться";
     
     $keyboard = [];
     if ($googleMaps) {
@@ -379,7 +408,11 @@ function showContacts($chatId, $messageId) {
     }
     $keyboard[] = [['text' => '← Назад', 'callback_data' => 'main_menu']];
     
-    botEditMessage($chatId, $messageId, $text, ['inline_keyboard' => $keyboard]);
+    $result = botEditMessage($chatId, $messageId, $text, ['inline_keyboard' => $keyboard]);
+    if (!$result || empty($result['ok'])) {
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId, $text, ['inline_keyboard' => $keyboard]);
+    }
 }
 
 function showAbout($chatId, $messageId) {
@@ -392,9 +425,15 @@ function showAbout($chatId, $messageId) {
     if ($description) $text .= $description;
     if (empty($tagline) && empty($description)) $text .= "Ваш салон краси 💇‍♀️";
     
-    botEditMessage($chatId, $messageId, $text, [
+    $result = botEditMessage($chatId, $messageId, $text, [
         'inline_keyboard' => [[['text' => '← Назад', 'callback_data' => 'main_menu']]]
     ]);
+    if (!$result || empty($result['ok'])) {
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
+        botSendMessage($chatId, $text, [
+            'inline_keyboard' => [[['text' => '← Назад', 'callback_data' => 'main_menu']]]
+        ]);
+    }
 }
 
 // ============================================
