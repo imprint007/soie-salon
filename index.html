@@ -516,6 +516,7 @@ try {
       Витрати
     </a>
     <a onclick="setAdminSection('clients', this)"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M7 21v-1a5 5 0 0 1 10 0v1"></path><line x1="1" y1="8" x2="4" y2="8"></line><line x1="1" y1="12" x2="4" y2="12"></line><line x1="1" y1="16" x2="4" y2="16"></line></svg></span>Клієнти</a>
+    <a onclick="setAdminSection('articles', this)"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>Статті</a>
     <a onclick="setAdminSection('settings', this)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Налаштування
@@ -1591,6 +1592,80 @@ try {
         </div>
     </div>
 </div>
+
+<!-- ============ СТАТТІ ============ -->
+<div class="admin-section" id="ad-articles">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <h2 style="font-family:'Fraunces',serif;font-size:32px;color:var(--ink);margin:0;">Статті <span style="color:var(--beige);font-style:italic;">догляду</span></h2>
+        <button class="admin-cta" onclick="openArticleModal()" style="padding:10px 22px;font-size:11px;">+ Нова стаття</button>
+    </div>
+    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:20px;">Статті відображаються клієнтам в Telegram-боті в розділі «Догляд за волоссям»</div>
+    <div id="articlesList" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="padding:40px;text-align:center;color:var(--ink-mute);">Завантаження...</div>
+    </div>
+</div>
+
+    <!-- ============ МОДАЛКА СТАТТІ ============ -->
+    <div class="modal-overlay" id="articleModal" onclick="if(event.target===this) closeArticleModal()">
+        <div class="modal-card" style="max-width:700px;">
+            <div class="modal-head">
+                <h2 id="articleModalTitle">Нова стаття</h2>
+                <button class="modal-close" onclick="closeArticleModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="artId" value="">
+                
+                <div class="form-group">
+                    <label>Фото обкладинки</label>
+                    <div id="artImageUploader"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Назва статті</label>
+                    <input type="text" id="artTitle" placeholder="Наприклад: Як доглядати за кучерями після завивки">
+                </div>
+                
+                <div class="form-group">
+                    <label>Короткий опис (для списку)</label>
+                    <input type="text" id="artExcerpt" placeholder="1-2 речення що в статті">
+                </div>
+                
+                <div class="form-group">
+                    <label>Текст статті</label>
+                    <div style="font-size:11px;color:var(--ink-mute);margin-bottom:8px;line-height:1.5;">
+                        Підтримуються теги Telegram: <code>&lt;b&gt;жирний&lt;/b&gt;</code>, <code>&lt;i&gt;курсив&lt;/i&gt;</code>, <code>&lt;u&gt;підкреслений&lt;/u&gt;</code>, <code>&lt;a href="url"&gt;посилання&lt;/a&gt;</code>. Абзаци — через порожній рядок.
+                    </div>
+                    <div style="display:flex;gap:4px;margin-bottom:8px;">
+                        <button type="button" onclick="insertTag('b')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-weight:bold;">B</button>
+                        <button type="button" onclick="insertTag('i')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;font-style:italic;">I</button>
+                        <button type="button" onclick="insertTag('u')" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;border-radius:3px;font-size:12px;text-decoration:underline;">U</button>
+                        <button type="button" onclick="insertLink()" style="padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--beige);cursor:pointer;border-radius:3px;font-size:12px;">🔗</button>
+                    </div>
+                    <textarea id="artContent" rows="12" placeholder="Текст статті..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Порядок сортування</label>
+                        <input type="number" id="artSort" value="0" style="width:100px;">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="artPublished" checked>
+                            <span>Опублікована</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="artError" class="auth-error" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-cta ghost" onclick="closeArticleModal()">Скасувати</button>
+                <button class="admin-cta" onclick="saveArticle()">Зберегти</button>
+                <button class="admin-cta danger" id="artDeleteBtn" onclick="deleteArticle()" style="display:none;">Видалити</button>
+            </div>
+        </div>
+    </div>
 
 <!-- SETTINGS -->
 <div class="admin-section" id="ad-settings">
@@ -4041,6 +4116,7 @@ async function assignRandomMaster() {
             if (name === 'reports') loadReports();
             if (name === 'dashboard') loadDashboard();
             if (name === 'settings') loadSettings();
+            if (name === 'articles') loadArticles();
         }
 
     // Завантажити імʼя адміна в сайдбар
@@ -4071,6 +4147,186 @@ async function assignRandomMaster() {
   } else {
     checkSession();
   }
+
+        // ============================================
+        // СТАТТІ ДОГЛЯДУ
+        // ============================================
+        let allArticles = [];
+        let artImageUploader = null;
+
+        async function loadArticles() {
+            const list = document.getElementById('articlesList');
+            list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:12px;">Завантаження...</div>';
+            
+            try {
+                const res = await fetch('/api/admin/articles-list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                allArticles = data.data || [];
+                renderArticles();
+            } catch (err) {
+                list.innerHTML = `<div style="padding:20px;color:var(--danger);">${err.message}</div>`;
+            }
+        }
+
+        function renderArticles() {
+            const list = document.getElementById('articlesList');
+            
+            if (allArticles.length === 0) {
+                list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-mute);font-size:13px;">Поки немає статей. Натисніть «+ Нова стаття».</div>';
+                return;
+            }
+            
+            list.innerHTML = allArticles.map(a => {
+                const published = parseInt(a.is_published);
+                const img = a.image_url 
+                    ? `<div style="width:80px;height:60px;border-radius:4px;background:center/cover url('${escapeHtml(a.image_url)}');flex-shrink:0;border:1px solid var(--line);"></div>` 
+                    : `<div style="width:80px;height:60px;border-radius:4px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--line);font-size:24px;">📖</div>`;
+                
+                return `
+                    <div onclick="editArticle(${a.id})" style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg-1);border:1px solid var(--line);border-radius:6px;cursor:pointer;transition:border-color 0.15s;"
+                        onmouseover="this.style.borderColor='var(--beige)'" onmouseout="this.style.borderColor='var(--line)'">
+                        ${img}
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--ink);">${escapeHtml(a.title)}</div>
+                                ${!published ? '<span style="padding:2px 8px;border-radius:999px;font-size:9px;letter-spacing:0.1em;background:rgba(201,117,96,0.15);color:var(--danger);">ЧЕРНЕТКА</span>' : ''}
+                            </div>
+                            ${a.excerpt ? `<div style="font-size:12px;color:var(--ink-mute);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.excerpt)}</div>` : ''}
+                        </div>
+                        <div style="color:var(--ink-mute);font-size:18px;flex-shrink:0;">→</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openArticleModal() {
+            document.getElementById('articleModalTitle').textContent = 'Нова стаття';
+            document.getElementById('artId').value = '';
+            document.getElementById('artTitle').value = '';
+            document.getElementById('artExcerpt').value = '';
+            document.getElementById('artContent').value = '';
+            document.getElementById('artSort').value = '0';
+            document.getElementById('artPublished').checked = true;
+            document.getElementById('artDeleteBtn').style.display = 'none';
+            
+            initArtImageUploader('');
+            document.getElementById('articleModal').classList.add('show');
+        }
+
+        function editArticle(id) {
+            const a = allArticles.find(x => x.id == id);
+            if (!a) return;
+            
+            document.getElementById('articleModalTitle').textContent = 'Редагувати статтю';
+            document.getElementById('artId').value = a.id;
+            document.getElementById('artTitle').value = a.title || '';
+            document.getElementById('artExcerpt').value = a.excerpt || '';
+            document.getElementById('artContent').value = a.content || '';
+            document.getElementById('artSort').value = a.sort_order || 0;
+            document.getElementById('artPublished').checked = parseInt(a.is_published) === 1;
+            document.getElementById('artDeleteBtn').style.display = 'inline-flex';
+            
+            initArtImageUploader(a.image_url || '');
+            document.getElementById('articleModal').classList.add('show');
+        }
+
+        function initArtImageUploader(value) {
+            if (typeof ImageUploader === 'function') {
+                const container = document.getElementById('artImageUploader');
+                container.innerHTML = '';
+                artImageUploader = new ImageUploader(container, {
+                    uploadUrl: '/api/admin/upload.php',
+                    prefix: 'articles',
+                    value: value
+                });
+            }
+        }
+
+        function closeArticleModal() {
+            document.getElementById('articleModal').classList.remove('show');
+        }
+
+        async function saveArticle() {
+            const id = parseInt(document.getElementById('artId').value) || 0;
+            const title = document.getElementById('artTitle').value.trim();
+            const content = document.getElementById('artContent').value.trim();
+            
+            if (!title) { alert('Введіть назву'); return; }
+            if (!content) { alert('Введіть текст'); return; }
+            
+            const payload = {
+                id,
+                title,
+                image_url: artImageUploader ? artImageUploader.getValue() : '',
+                content,
+                excerpt: document.getElementById('artExcerpt').value.trim(),
+                is_published: document.getElementById('artPublished').checked ? 1 : 0,
+                sort_order: parseInt(document.getElementById('artSort').value) || 0,
+            };
+            
+            try {
+                const res = await fetch('/api/admin/article-save.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                
+                closeArticleModal();
+                loadArticles();
+                showToast('Статтю збережено');
+            } catch (err) {
+                alert('Помилка: ' + err.message);
+            }
+        }
+
+        async function deleteArticle() {
+            const id = parseInt(document.getElementById('artId').value);
+            if (!id || !confirm('Видалити статтю?')) return;
+            
+            try {
+                await fetch('/api/admin/article-delete.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                closeArticleModal();
+                loadArticles();
+                showToast('Видалено');
+            } catch (err) {
+                alert('Помилка');
+            }
+        }
+
+        // Хелпери для редактора тексту
+        function insertTag(tag) {
+            const textarea = document.getElementById('artContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selected = textarea.value.substring(start, end);
+            const replacement = `<${tag}>${selected || 'текст'}</${tag}>`;
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+            textarea.selectionStart = start + tag.length + 2;
+            textarea.selectionEnd = start + tag.length + 2 + (selected || 'текст').length;
+        }
+
+        function insertLink() {
+            const url = prompt('URL посилання:');
+            if (!url) return;
+            const textarea = document.getElementById('artContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selected = textarea.value.substring(start, end) || 'текст посилання';
+            const replacement = `<a href="${url}">${selected}</a>`;
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+        }
 
   // ============================================
   // УНИВЕРСАЛЬНЫЙ ЗАГРУЗЧИК КАРТИНОК
