@@ -9,7 +9,7 @@ try {
     // Явно перечисляем поля, password_hash НЕ отдаём
     $masters = $pdo->query("
         SELECT id, name, role, phone, email, bio, photo_url, experience_years, 
-               is_active, sort_order, username, last_login, google_calendar_id 
+               is_active, sort_order, username, last_login, google_calendar_id, telegram_chat_id 
         FROM masters 
         ORDER BY sort_order, id DESC
     ")->fetchAll();
