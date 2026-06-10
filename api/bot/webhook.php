@@ -360,15 +360,11 @@ function showContacts($chatId, $messageId) {
     $lng = botGetSetting('salon_longitude', '');
     $salonName = botGetSetting('site_name', 'Unique Curls');
 
-    // Видаляємо попереднє повідомлення
-    botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
-
     $fullAddress = $address . ($city ? ", {$city}" : '');
 
     // Кнопки
     $buttons = [];
     
-    // Кнопка маршруту в Google Maps
     if ($lat && $lng) {
         $routeUrl = "https://www.google.com/maps/dir/?api=1&destination={$lat},{$lng}";
         $buttons[] = [['text' => '🗺 Прокласти маршрут', 'url' => $routeUrl]];
@@ -376,9 +372,6 @@ function showContacts($chatId, $messageId) {
         $buttons[] = [['text' => '🗺 Відкрити на карті', 'url' => $googleMaps]];
     }
     
-    if ($phone) {
-        $buttons[] = [['text' => '📞 Зателефонувати', 'url' => 'tel:' . preg_replace('/[^+0-9]/', '', $phone)]];
-    }
     if ($instagram) {
         $igUrl = strpos($instagram, 'http') === 0 ? $instagram : "https://instagram.com/{$instagram}";
         $buttons[] = [['text' => '📸 Instagram', 'url' => $igUrl]];
@@ -387,18 +380,25 @@ function showContacts($chatId, $messageId) {
 
     $keyboard = ['inline_keyboard' => $buttons];
 
-    // Якщо є координати — відправляємо локацію на карті
+    // Текст контактів
+    $text = "📍 <b>Як нас знайти</b>\n\n";
+    if ($fullAddress) $text .= "🏠 {$fullAddress}\n";
+    if ($phone) $text .= "📞 <code>{$phone}</code> (натисніть щоб скопіювати)\n";
+    if ($instagram) $text .= "📸 Instagram\n";
+
+    // Спершу пробуємо відправити локацію
     if ($lat && $lng) {
-        botSendVenue($chatId, (float)$lat, (float)$lng, $salonName, $fullAddress ?: 'Салон краси', $keyboard);
-    } else {
-        // Без координат — текстом
-        $text = "📍 <b>Як нас знайти</b>\n\n";
-        if ($fullAddress) $text .= "🏠 {$fullAddress}\n";
-        if ($phone) $text .= "📞 {$phone}\n";
-        if ($instagram) $text .= "📸 {$instagram}\n";
-        if (empty($fullAddress) && empty($phone)) $text .= "Інформація скоро зʼявиться";
+        botApiCall('deleteMessage', ['chat_id' => $chatId, 'message_id' => $messageId]);
         
+        // Відправляємо локацію
+        botSendLocation($chatId, (float)$lat, (float)$lng);
+        usleep(200000);
+        
+        // Потім текст з кнопками
         botSendMessage($chatId, $text, $keyboard);
+    } else {
+        // Без координат — просто редагуємо повідомлення
+        safeBotEdit($chatId, $messageId, $text, $keyboard);
     }
 }
 function showAbout($chatId, $messageId) {
