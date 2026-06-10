@@ -43,6 +43,7 @@ if (!empty($password)) {
 
 // Якщо порожнє — зберігаємо як NULL
 $googleCalendarIdToSave = !empty($googleCalendarId) ? $googleCalendarId : null;
+$telegramChatId = !empty($input['telegram_chat_id']) ? trim($input['telegram_chat_id']) : null;
 
 $pdo = getDb();
 
@@ -63,26 +64,26 @@ try {
         // UPDATE — пароль обновляем только если он передан
         if ($passwordHash !== null) {
             $pdo->prepare("UPDATE masters SET 
-                    name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
-                    experience_years=?, is_active=?, username=?, password_hash=?, 
-                    google_calendar_id=? 
-                WHERE id=?")
-                ->execute([
-                    $name, $role, $phone, $email, $bio, $photo_url, 
-                    $experience_years, $is_active, $username, $passwordHash, 
-                    $googleCalendarIdToSave, $id
-                ]);
+                name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
+                experience_years=?, is_active=?, username=?, password_hash=?, 
+                google_calendar_id=?, telegram_chat_id=? 
+            WHERE id=?")
+            ->execute([
+                $name, $role, $phone, $email, $bio, $photo_url, 
+                $experience_years, $is_active, $username, $passwordHash, 
+                $googleCalendarIdToSave, $telegramChatId, $id
+            ]);
         } else {
             $pdo->prepare("UPDATE masters SET 
-                    name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
-                    experience_years=?, is_active=?, username=?, 
-                    google_calendar_id=? 
-                WHERE id=?")
-                ->execute([
-                    $name, $role, $phone, $email, $bio, $photo_url, 
-                    $experience_years, $is_active, $username, 
-                    $googleCalendarIdToSave, $id
-                ]);
+                name=?, role=?, phone=?, email=?, bio=?, photo_url=?, 
+                experience_years=?, is_active=?, username=?, 
+                google_calendar_id=?, telegram_chat_id=? 
+            WHERE id=?")
+            ->execute([
+                $name, $role, $phone, $email, $bio, $photo_url, 
+                $experience_years, $is_active, $username, 
+                $googleCalendarIdToSave, $telegramChatId, $id
+            ]);
         }
     } else {
         // INSERT — пишемо всі поля
@@ -93,7 +94,7 @@ try {
             ->execute([
                 $name, $role, $phone, $email, $bio, $photo_url, 
                 $experience_years, $is_active, $username, $passwordHash, 
-                $googleCalendarIdToSave
+                $googleCalendarIdToSave, $telegramChatId
             ]);
         $id = (int)$pdo->lastInsertId();
     }
