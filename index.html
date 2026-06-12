@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0e0d0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Unique Curls">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title> Unique Curls — Салон краси</title>
@@ -10545,6 +10551,67 @@ function updateTelegramButton() {
 }
 updateTelegramButton();
 setInterval(updateTelegramButton, 1000);
+
+// ============================================
+// PWA — ВСТАНОВЛЕННЯ ДОДАТКУ
+// ============================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Не показуємо в адмінці
+    if (document.querySelector('.admin-wrap.show')) return;
+    
+    // Показуємо банер через 3 секунди
+    setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner() {
+    if (!deferredPrompt) return;
+    
+    // Перевіряємо чи не закривали раніше
+    if (localStorage.getItem('pwa_dismissed')) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'installBanner';
+    banner.innerHTML = `
+        <div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:420px;padding:18px 20px;background:rgba(26,25,23,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(224,201,168,0.2);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.35);z-index:9500;display:flex;align-items:center;gap:14px;animation:slideUp 0.4s ease;">
+            <div style="width:44px;height:44px;border-radius:10px;background:var(--beige,#e0c9a8);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0e0d0c" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-family:'Fraunces',serif;font-size:15px;color:var(--ink,#ede6d9);">Встановити додаток</div>
+                <div style="font-size:11px;color:var(--ink-mute,#9e968a);margin-top:2px;">Швидкий доступ з головного екрану</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button onclick="dismissInstall()" style="padding:8px 12px;background:transparent;border:1px solid rgba(224,201,168,0.2);color:var(--ink-mute,#9e968a);font-size:11px;cursor:pointer;border-radius:8px;">Ні</button>
+                <button onclick="installPWA()" style="padding:8px 16px;background:var(--beige,#e0c9a8);border:none;color:#0e0d0c;font-size:11px;font-weight:600;cursor:pointer;border-radius:8px;">Так</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(banner);
+}
+
+function installPWA() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+        deferredPrompt = null;
+        document.getElementById('installBanner')?.remove();
+    });
+}
+
+function dismissInstall() {
+    document.getElementById('installBanner')?.remove();
+    localStorage.setItem('pwa_dismissed', '1');
+    deferredPrompt = null;
+}
 </script>
 
 </body>
