@@ -1,0 +1,9 @@
+# Блокуємо виконання PHP та інших скриптів у папці uploads
+<FilesMatch "\.(php|phtml|phar|pl|py|jsp|asp|sh|cgi)$">
+    Require all denied
+</FilesMatch>
+
+# Дозволяємо тільки картинки
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+    Require all granted
+</FilesMatch>
